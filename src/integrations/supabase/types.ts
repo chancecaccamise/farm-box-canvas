@@ -166,6 +166,102 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_products: {
+        Row: {
+          created_at: string
+          id: string
+          is_featured: boolean
+          partner_id: string
+          product_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_featured?: boolean
+          partner_id: string
+          product_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_featured?: boolean
+          partner_id?: string
+          product_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_products_partner_id_fkey"
+            columns: ["partner_id"]
+            isOneToOne: false
+            referencedRelation: "partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_products_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partners: {
+        Row: {
+          bio: string | null
+          category: string
+          created_at: string
+          description: string | null
+          header_image_url: string | null
+          id: string
+          image_url: string | null
+          is_active: boolean
+          location: string | null
+          name: string
+          partnership_duration: string | null
+          rating: number | null
+          slug: string
+          specialties: string[] | null
+          story: string | null
+          updated_at: string
+        }
+        Insert: {
+          bio?: string | null
+          category: string
+          created_at?: string
+          description?: string | null
+          header_image_url?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          location?: string | null
+          name: string
+          partnership_duration?: string | null
+          rating?: number | null
+          slug: string
+          specialties?: string[] | null
+          story?: string | null
+          updated_at?: string
+        }
+        Update: {
+          bio?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          header_image_url?: string | null
+          id?: string
+          image_url?: string | null
+          is_active?: boolean
+          location?: string | null
+          name?: string
+          partnership_duration?: string | null
+          rating?: number | null
+          slug?: string
+          specialties?: string[] | null
+          story?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       products: {
         Row: {
           category: string

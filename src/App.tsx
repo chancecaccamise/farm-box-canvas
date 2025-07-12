@@ -29,6 +29,8 @@ import Delivery from "./pages/Delivery";
 import OrderSummary from "./pages/OrderSummary";
 import Confirmation from "./pages/Confirmation";
 import HowFarmBagsWork from "./pages/HowFarmBagsWork";
+import PartnerCategory from "./pages/PartnerCategory";
+import PartnerProfile from "./pages/PartnerProfile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -62,6 +64,10 @@ const AppRoutes = () => {
         <Route path="/faqs" element={<FAQs />} />
         <Route path="/sustainability" element={<Sustainability />} />
         <Route path="/support-local" element={<SupportLocal />} />
+        <Route path="/partners/restaurants" element={<PartnerCategory category="restaurants" />} />
+        <Route path="/partners/bakery" element={<PartnerCategory category="bakery" />} />
+        <Route path="/partners/fisherman" element={<PartnerCategory category="fisherman" />} />
+        <Route path="/partners/:slug" element={<PartnerProfile />} />
         <Route path="/how-farm-bags-work" element={<HowFarmBagsWork />} />
         <Route path="/gift-cards" element={<GiftCards />} />
         
