@@ -18,6 +18,10 @@ import {
   Calendar,
   Palette
 } from "lucide-react";
+import weddingBouquet from "@/assets/wedding-bouquet.jpg";
+import babyShowerFlowers from "@/assets/baby-shower-flowers.jpg";
+import birthdayFlowers from "@/assets/birthday-flowers.jpg";
+import seasonalBouquet from "@/assets/seasonal-bouquet.jpg";
 
 const AnasFlowers = () => {
   const [formData, setFormData] = useState({
@@ -48,28 +52,28 @@ const AnasFlowers = () => {
       icon: <Heart className="w-6 h-6 text-rose-500" />,
       description: "Romantic arrangements for your special day",
       features: ["Bridal bouquets", "Ceremony arrangements", "Reception centerpieces", "Boutonnieres"],
-      image: "💒"
+      image: weddingBouquet
     },
     {
       title: "Baby Showers", 
       icon: <Baby className="w-6 h-6 text-blue-500" />,
       description: "Soft, delicate arrangements to celebrate new life",
       features: ["Pastel color palettes", "Gentle flower choices", "Table arrangements", "Welcome displays"],
-      image: "👶"
+      image: babyShowerFlowers
     },
     {
       title: "Birthday Arrangements",
       icon: <Cake className="w-6 h-6 text-yellow-500" />,
       description: "Vibrant, joyful arrangements for celebrating another year",
       features: ["Bright color schemes", "Seasonal flowers", "Custom arrangements", "Party centerpieces"],
-      image: "🎂"
+      image: birthdayFlowers
     },
     {
       title: "Seasonal Bouquets",
       icon: <Leaf className="w-6 h-6 text-green-500" />,
       description: "Fresh arrangements that capture the beauty of each season",
       features: ["Spring tulips", "Summer sunflowers", "Fall chrysanthemums", "Winter evergreens"],
-      image: "🌸"
+      image: seasonalBouquet
     }
   ];
 
@@ -125,8 +129,12 @@ const AnasFlowers = () => {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {portfolioSections.map((section, index) => (
               <Card key={index} className="text-center overflow-hidden hover:scale-105 transition-all duration-300">
-                <div className="aspect-square bg-gradient-to-br from-accent/20 to-accent/10 flex items-center justify-center text-6xl">
-                  {section.image}
+                <div className="aspect-square overflow-hidden">
+                  <img 
+                    src={section.image} 
+                    alt={section.title}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
                 <CardHeader>
                   <div className="flex items-center justify-center space-x-2 mb-2">
