@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { PreviousOrders } from "@/components/PreviousOrders";
 import { ProductGrid } from "@/components/ProductGrid";
 import { BagSummary } from "@/components/BagSummary";
+import { BagItemsList } from "@/components/BagItemsList";
 
 interface OrderItem {
   id: string;
@@ -201,22 +202,20 @@ function MyBag() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="container mx-auto px-4 py-8">
-          <div className="max-w-6xl mx-auto">
-            <div className="animate-pulse space-y-8">
-              <div className="space-y-4">
-                <div className="h-8 bg-muted rounded w-1/4"></div>
-                <div className="h-4 bg-muted rounded w-1/3"></div>
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="animate-pulse space-y-8">
+            <div className="space-y-4">
+              <div className="h-8 bg-muted rounded w-1/4"></div>
+              <div className="h-4 bg-muted rounded w-1/3"></div>
+            </div>
+            <div className="grid lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-32 bg-muted rounded"></div>
+                ))}
               </div>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div className="lg:col-span-2 space-y-4">
-                  {[1, 2, 3].map((i) => (
-                    <div key={i} className="h-32 bg-muted rounded"></div>
-                  ))}
-                </div>
-                <div className="space-y-4">
-                  <div className="h-64 bg-muted rounded"></div>
-                </div>
+              <div className="space-y-4">
+                <div className="h-64 bg-muted rounded"></div>
               </div>
             </div>
           </div>
@@ -227,71 +226,82 @@ function MyBag() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto space-y-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">My Bag</h1>
-            <p className="text-muted-foreground">
-              {isSubscription 
-                ? "Review and manage your weekly box contents" 
-                : "Build your custom order"
-              }
-            </p>
-          </div>
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="grid lg:grid-cols-3 gap-8">
+          {/* Left Side - Bag Items */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className="flex items-center space-x-3">
+              <ShoppingCart className="w-8 h-8 text-primary" />
+              <div>
+                <h1 className="text-3xl font-bold">My Bag</h1>
+                <p className="text-muted-foreground">
+                  {isSubscription 
+                    ? `${Object.values(bagItems).reduce((sum, quantity) => sum + quantity, 0)} items for this week's delivery`
+                    : "Build your custom order"
+                  }
+                </p>
+              </div>
+            </div>
 
-          {/* Subscription Status Banner for One-time Users */}
-          {!isSubscription && Object.keys(bagItems).length === 0 && (
-            <Card className="border-primary/20 bg-primary/5">
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-3">
-                  <AlertCircle className="h-5 w-5 text-primary" />
-                  <div>
-                    <h3 className="font-medium text-foreground">Ready to order again?</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Add products below to create your next order
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {/* Previous Orders Section */}
-          {isSubscription && (
-            <PreviousOrders onReorder={handleReorder} />
-          )}
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Main Content */}
-            <div className="lg:col-span-2 space-y-8">
-              {/* Current Bag Items */}
-              {Object.keys(bagItems).length > 0 && (
-                <div className="space-y-4">
-                  <h2 className="text-xl font-semibold text-foreground">Current Bag</h2>
-                  <div className="bg-muted/30 p-4 rounded-lg">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <ShoppingCart className="h-4 w-4" />
-                      {Object.values(bagItems).reduce((sum, quantity) => sum + quantity, 0)} items in your bag
+            {/* Subscription Status Banner for One-time Users */}
+            {!isSubscription && Object.keys(bagItems).length === 0 && (
+              <Card className="border-primary/20 bg-primary/5">
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-3">
+                    <AlertCircle className="h-5 w-5 text-primary" />
+                    <div>
+                      <h3 className="font-medium text-foreground">Ready to order again?</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Add products below to create your next order
+                      </p>
                     </div>
                   </div>
-                </div>
-              )}
+                </CardContent>
+              </Card>
+            )}
 
-              {/* Product Selection */}
+            {/* Previous Orders Section */}
+            {isSubscription && (
+              <PreviousOrders onReorder={handleReorder} />
+            )}
+
+            {/* Current Bag Items Display */}
+            {Object.keys(bagItems).length > 0 && (
+              <div className="space-y-4">
+                <h2 className="text-xl font-semibold">Items in Your Bag</h2>
+                <BagItemsList bagItems={bagItems} onUpdateQuantity={updateBagQuantity} />
+              </div>
+            )}
+
+            {/* Product Selection Grid */}
+            <div className="space-y-4">
+              <h2 className="text-xl font-semibold">
+                {Object.keys(bagItems).length > 0 ? "Add More Products" : "Available Products"}
+              </h2>
               <ProductGrid 
                 bagItems={bagItems} 
                 onUpdateQuantity={updateBagQuantity} 
               />
             </div>
 
-            {/* Sidebar */}
-            <div className="space-y-6">
-              <BagSummary 
-                bagItems={bagItems}
-                isSubscription={isSubscription}
-                onConfirmOrder={handleConfirmOrder}
-              />
-            </div>
+            {Object.keys(bagItems).length === 0 && !isSubscription && (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <ShoppingCart className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+                  <h3 className="text-xl font-semibold mb-2">Your bag is empty</h3>
+                  <p className="text-muted-foreground mb-6">Add some fresh items to get started</p>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+
+          {/* Right Side - Summary */}
+          <div className="space-y-6">
+            <BagSummary 
+              bagItems={bagItems}
+              isSubscription={isSubscription}
+              onConfirmOrder={handleConfirmOrder}
+            />
           </div>
         </div>
       </div>
