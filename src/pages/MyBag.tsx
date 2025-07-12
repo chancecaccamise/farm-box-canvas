@@ -6,7 +6,7 @@ import { ShoppingCart, AlertCircle, Package } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { CountdownTimer } from "@/components/CountdownTimer";
 import { BagHistory } from "@/components/BagHistory";
 import { WeeklyBagSummary } from "@/components/WeeklyBagSummary";
@@ -14,6 +14,7 @@ import { ProductGrid } from "@/components/ProductGrid";
 import { EmptyBagState } from "@/components/EmptyBagState";
 import { BagItemCard } from "@/components/BagItemCard";
 import { ProductCard } from "@/components/ProductCard";
+import { SubscriptionManager } from "@/components/SubscriptionManager";
 
 interface WeeklyBag {
   id: string;
@@ -49,6 +50,7 @@ function MyBag() {
   const [loading, setLoading] = useState(true);
   const [isLocked, setIsLocked] = useState(false);
   const [hasActiveSubscription, setHasActiveSubscription] = useState<boolean | null>(null);
+  const [subscription, setSubscription] = useState<any>(null);
 
   useEffect(() => {
     if (user) {
@@ -59,21 +61,22 @@ function MyBag() {
   const checkSubscriptionAndInitialize = async () => {
     try {
       // Check if user has an active subscription
-      const { data: subscription, error: subError } = await supabase
+      const { data: subscriptionData, error: subError } = await supabase
         .from("user_subscriptions")
-        .select("id, status")
+        .select("*")
         .eq("user_id", user?.id)
-        .eq("status", "active")
         .single();
 
       if (subError && subError.code !== "PGRST116") {
         throw subError;
       }
 
-      const hasSubscription = !!subscription;
-      setHasActiveSubscription(hasSubscription);
+      const hasSubscription = !!subscriptionData;
+      const isActiveSubscription = subscriptionData?.status === 'active';
+      setSubscription(subscriptionData);
+      setHasActiveSubscription(isActiveSubscription);
 
-      if (hasSubscription) {
+      if (isActiveSubscription) {
         await initializeCurrentWeekBag();
       }
     } catch (error) {
@@ -370,8 +373,10 @@ function MyBag() {
                       <ShoppingCart className="w-4 h-4 mr-2" />
                       Purchase Your First Box
                     </Button>
-                    <Button variant="outline" size="lg" className="px-8">
-                      Learn More About Our Boxes
+                    <Button variant="outline" size="lg" className="px-8" asChild>
+                      <Link to="/how-farm-bags-work">
+                        Learn More About Our Boxes
+                      </Link>
                     </Button>
                   </div>
 
@@ -473,6 +478,12 @@ function MyBag() {
                 onConfirmBag={confirmBag}
                 isLocked={isLocked}
                 loading={loading}
+              />
+              
+              {/* Subscription Management */}
+              <SubscriptionManager 
+                subscription={subscription}
+                onSubscriptionUpdate={checkSubscriptionAndInitialize}
               />
             </div>
           </div>

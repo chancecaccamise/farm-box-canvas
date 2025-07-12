@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -13,13 +14,16 @@ import {
   ShoppingBag, 
   Calendar,
   LogOut,
-  Settings
+  Settings,
+  Menu,
+  X
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
 
 const Navbar = () => {
   const { user, signOut } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <nav className="bg-background border-b shadow-soft sticky top-0 z-50">
@@ -88,8 +92,140 @@ const Navbar = () => {
             </Link>
           </div>
 
-          {/* Right Side */}
-          <div className="flex items-center space-x-4">
+          {/* Mobile Menu Button */}
+          <div className="lg:hidden">
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="w-80">
+                <div className="flex flex-col space-y-6 pt-6">
+                  {/* User Section */}
+                  {user && (
+                    <div className="flex items-center space-x-3 pb-4 border-b">
+                      <div className="w-10 h-10 bg-gradient-fresh rounded-full flex items-center justify-center">
+                        <User className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <p className="font-medium">Hello, {user.email?.split('@')[0]}</p>
+                        <p className="text-sm text-muted-foreground">Subscriber</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Navigation Links */}
+                  <div className="space-y-3">
+                    {user && (
+                      <>
+                        <Button variant="ghost" className="w-full justify-start" asChild>
+                          <Link to="/my-plan" onClick={() => setMobileMenuOpen(false)}>
+                            <Calendar className="w-4 h-4 mr-3" />
+                            My Plan
+                          </Link>
+                        </Button>
+                        <Button variant="ghost" className="w-full justify-start" asChild>
+                          <Link to="/my-bag" onClick={() => setMobileMenuOpen(false)}>
+                            <ShoppingBag className="w-4 h-4 mr-3" />
+                            My Bag
+                          </Link>
+                        </Button>
+                      </>
+                    )}
+
+                    <div className="pt-2">
+                      <p className="text-sm font-medium text-muted-foreground mb-3">About Us</p>
+                      <div className="space-y-1 pl-4">
+                        <Button variant="ghost" size="sm" className="w-full justify-start" asChild>
+                          <Link to="/how-we-grow" onClick={() => setMobileMenuOpen(false)}>
+                            How We Grow
+                          </Link>
+                        </Button>
+                        <Button variant="ghost" size="sm" className="w-full justify-start" asChild>
+                          <Link to="/how-farm-bags-work" onClick={() => setMobileMenuOpen(false)}>
+                            How Farm Bags Work
+                          </Link>
+                        </Button>
+                        <Button variant="ghost" size="sm" className="w-full justify-start" asChild>
+                          <Link to="/meet-farmers" onClick={() => setMobileMenuOpen(false)}>
+                            Meet the Farmers
+                          </Link>
+                        </Button>
+                      </div>
+                    </div>
+
+                    <Button variant="ghost" className="w-full justify-start" asChild>
+                      <Link to="/faqs" onClick={() => setMobileMenuOpen(false)}>
+                        FAQs
+                      </Link>
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start" asChild>
+                      <Link to="/gift-cards" onClick={() => setMobileMenuOpen(false)}>
+                        Gift Cards
+                      </Link>
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start" asChild>
+                      <Link to="/sustainability" onClick={() => setMobileMenuOpen(false)}>
+                        Sustainability
+                      </Link>
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start" asChild>
+                      <Link to="/support-local" onClick={() => setMobileMenuOpen(false)}>
+                        Support Local
+                      </Link>
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start" asChild>
+                      <Link to="/anas-flowers" onClick={() => setMobileMenuOpen(false)}>
+                        Ana's Flowers
+                      </Link>
+                    </Button>
+                  </div>
+
+                  {/* Auth Section */}
+                  <div className="pt-4 border-t space-y-3">
+                    {user ? (
+                      <>
+                        <Button variant="ghost" className="w-full justify-start" asChild>
+                          <Link to="/account" onClick={() => setMobileMenuOpen(false)}>
+                            <Settings className="w-4 h-4 mr-3" />
+                            Account Settings
+                          </Link>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start text-destructive"
+                          onClick={() => {
+                            signOut();
+                            setMobileMenuOpen(false);
+                          }}
+                        >
+                          <LogOut className="w-4 h-4 mr-3" />
+                          Sign Out
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button variant="ghost" className="w-full" asChild>
+                          <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
+                            Login
+                          </Link>
+                        </Button>
+                        <Button className="w-full" asChild>
+                          <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
+                            Sign Up
+                          </Link>
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
+
+          {/* Right Side - Desktop */}
+          <div className="hidden lg:flex items-center space-x-4">
             {user ? (
               /* Account Dropdown for authenticated users */
               <DropdownMenu>

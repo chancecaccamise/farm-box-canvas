@@ -1,15 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { MapPin, ArrowLeft } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/components/AuthProvider";
 
 const ZipCode = () => {
   const [zipCode, setZipCode] = useState("");
   const [isValid, setIsValid] = useState(false);
   const navigate = useNavigate();
+  const { user } = useAuth();
+
+  // Redirect authenticated users to their bag
+  useEffect(() => {
+    if (user) {
+      navigate('/my-bag');
+    }
+  }, [user, navigate]);
 
   const handleZipChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, "");

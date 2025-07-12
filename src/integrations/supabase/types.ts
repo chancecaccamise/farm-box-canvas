@@ -168,25 +168,40 @@ export type Database = {
       }
       user_subscriptions: {
         Row: {
+          auto_resume_date: string | null
+          cancellation_reason: string | null
+          cancelled_at: string | null
           created_at: string
           id: string
-          status: string
+          pause_reason: string | null
+          paused_at: string | null
+          status: Database["public"]["Enums"]["subscription_status"]
           subscription_type: string
           updated_at: string
           user_id: string
         }
         Insert: {
+          auto_resume_date?: string | null
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
           created_at?: string
           id?: string
-          status?: string
+          pause_reason?: string | null
+          paused_at?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"]
           subscription_type?: string
           updated_at?: string
           user_id: string
         }
         Update: {
+          auto_resume_date?: string | null
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
           created_at?: string
           id?: string
-          status?: string
+          pause_reason?: string | null
+          paused_at?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"]
           subscription_type?: string
           updated_at?: string
           user_id?: string
@@ -298,7 +313,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      subscription_status: "active" | "paused" | "cancelled" | "suspended"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -425,6 +440,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      subscription_status: ["active", "paused", "cancelled", "suspended"],
+    },
   },
 } as const

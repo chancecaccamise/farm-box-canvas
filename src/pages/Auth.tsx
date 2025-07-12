@@ -64,7 +64,7 @@ const Auth = () => {
             variant: "destructive",
           });
         } else {
-          navigate('/zip-code');
+          navigate('/my-bag');
         }
       }
     } catch (error) {
