@@ -435,81 +435,94 @@ function MyBag() {
                     </Badge>
                   </div>
                   
-                  <div className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
                     {bagItems.map((item) => (
-                      <Card key={item.id} className="overflow-hidden">
-                        <CardContent className="p-6">
-                          <div className="flex items-start justify-between">
-                            <div className="flex items-center gap-4 flex-1">
-                              <div className="w-20 h-20 bg-muted rounded-lg overflow-hidden">
-                                {item.products.image ? (
-                                  <img
-                                    src={item.products.image}
-                                    alt={item.products.name}
-                                    className="w-full h-full object-cover"
-                                  />
-                                ) : (
-                                  <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                                    No Image
-                                  </div>
-                                )}
+                      <Card key={item.id} className="overflow-hidden hover-scale">
+                        <div className="aspect-square relative overflow-hidden">
+                          {item.products.image ? (
+                            <img
+                              src={item.products.image}
+                              alt={item.products.name}
+                              className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                            />
+                          ) : (
+                            <div className="w-full h-full bg-gradient-to-br from-muted to-muted/60 flex items-center justify-center">
+                              <div className="text-center">
+                                <div className="text-4xl mb-2">📦</div>
+                                <span className="text-sm text-muted-foreground">No Image</span>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Quantity Badge */}
+                          <Badge className="absolute top-3 right-3 bg-primary/90 backdrop-blur-sm">
+                            {item.quantity}x
+                          </Badge>
+
+                          {/* Category Badge */}
+                          <Badge 
+                            variant="secondary" 
+                            className={`absolute top-3 left-3 ${getCategoryColor(item.products.category)} backdrop-blur-sm`}
+                          >
+                            {item.products.category}
+                          </Badge>
+                        </div>
+                        
+                        <CardContent className="p-4">
+                          <div className="space-y-3">
+                            {/* Product Info */}
+                            <div>
+                              <h3 className="font-semibold text-lg line-clamp-1">{item.products.name}</h3>
+                              <p className="text-sm text-muted-foreground">Fresh & Local</p>
+                            </div>
+
+                            {/* Price */}
+                            <div className="flex items-center justify-between">
+                              <div className="text-right">
+                                <p className="text-sm text-muted-foreground">
+                                  ${item.price_at_time.toFixed(2)} each
+                                </p>
+                                <p className="font-semibold text-lg">
+                                  ${(item.price_at_time * item.quantity).toFixed(2)}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Controls */}
+                            <div className="flex items-center justify-between pt-2">
+                              <div className="flex items-center space-x-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => updateItemQuantity(item.product_id, item.quantity - 1)}
+                                  disabled={currentWeekBag?.is_confirmed || isLocked}
+                                  className="h-8 w-8 p-0"
+                                >
+                                  <Minus className="w-4 h-4" />
+                                </Button>
+                                <span className="text-lg font-medium w-8 text-center">
+                                  {item.quantity}
+                                </span>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => updateItemQuantity(item.product_id, item.quantity + 1)}
+                                  disabled={currentWeekBag?.is_confirmed || isLocked}
+                                  className="h-8 w-8 p-0"
+                                >
+                                  <Plus className="w-4 h-4" />
+                                </Button>
                               </div>
                               
-                              <div className="flex-1">
-                                <div className="flex items-start justify-between mb-2">
-                                  <div>
-                                    <h3 className="font-semibold text-lg">{item.products.name}</h3>
-                                    <p className="text-sm text-muted-foreground">Fresh & Local</p>
-                                  </div>
-                                  <Badge className={getCategoryColor(item.products.category)}>
-                                    {item.products.category}
-                                  </Badge>
-                                </div>
-
-                                <div className="flex items-center justify-between mt-4">
-                                  <div className="flex items-center space-x-3">
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => updateItemQuantity(item.product_id, item.quantity - 1)}
-                                      disabled={currentWeekBag?.is_confirmed || isLocked}
-                                    >
-                                      <Minus className="w-4 h-4" />
-                                    </Button>
-                                    <span className="text-lg font-medium w-8 text-center">
-                                      {item.quantity}
-                                    </span>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => updateItemQuantity(item.product_id, item.quantity + 1)}
-                                      disabled={currentWeekBag?.is_confirmed || isLocked}
-                                    >
-                                      <Plus className="w-4 h-4" />
-                                    </Button>
-                                  </div>
-
-                                  <div className="flex items-center space-x-4">
-                                    <div className="text-right">
-                                      <p className="text-sm text-muted-foreground">
-                                        ${item.price_at_time.toFixed(2)} each
-                                      </p>
-                                      <p className="font-semibold">
-                                        ${(item.price_at_time * item.quantity).toFixed(2)}
-                                      </p>
-                                    </div>
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => updateItemQuantity(item.product_id, 0)}
-                                      disabled={currentWeekBag?.is_confirmed || isLocked}
-                                      className="text-destructive hover:text-destructive"
-                                    >
-                                      <Trash2 className="w-4 h-4" />
-                                    </Button>
-                                  </div>
-                                </div>
-                              </div>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => updateItemQuantity(item.product_id, 0)}
+                                disabled={currentWeekBag?.is_confirmed || isLocked}
+                                className="text-destructive hover:text-destructive h-8 w-8 p-0"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
                             </div>
                           </div>
                         </CardContent>
