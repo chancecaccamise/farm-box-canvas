@@ -84,6 +84,10 @@ const Navbar = () => {
               Support Local
             </Link>
 
+            <Link to="/fresh-catch" className="text-foreground hover:text-primary transition-colors">
+              Fresh Catch
+            </Link>
+
             <Link to="/anas-flowers" className="text-foreground hover:text-primary transition-colors">
               Ana's Flowers
             </Link>
@@ -165,6 +169,11 @@ const Navbar = () => {
                     <Button variant="ghost" className="w-full justify-start" asChild>
                       <Link to="/support-local" onClick={() => setMobileMenuOpen(false)}>
                         Support Local
+                      </Link>
+                    </Button>
+                    <Button variant="ghost" className="w-full justify-start" asChild>
+                      <Link to="/fresh-catch" onClick={() => setMobileMenuOpen(false)}>
+                        Fresh Catch
                       </Link>
                     </Button>
                     <Button variant="ghost" className="w-full justify-start" asChild>
