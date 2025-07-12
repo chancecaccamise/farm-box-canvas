@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Plus, Minus, Filter, ShoppingCart } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useCheckout } from "@/contexts/CheckoutContext";
 import bellPeppersImg from "@/assets/bell-peppers.jpg";
 import leafyGreensImg from "@/assets/leafy-greens.jpg";
 import tomatoesImg from "@/assets/tomatoes.jpg";
@@ -20,10 +21,15 @@ interface Product {
 }
 
 const ProductSelection = () => {
+  const { checkoutState, updateSelectedItems } = useCheckout();
   const [selectedCategory, setSelectedCategory] = useState<Category>("all");
-  const [selectedItems, setSelectedItems] = useState<Record<string, number>>({});
+  const [selectedItems, setSelectedItems] = useState<Record<string, number>>(checkoutState.selectedItems);
   const maxItems = 15; // Medium box default
   const navigate = useNavigate();
+
+  useEffect(() => {
+    updateSelectedItems(selectedItems);
+  }, [selectedItems, updateSelectedItems]);
 
   const products: Product[] = [
     {

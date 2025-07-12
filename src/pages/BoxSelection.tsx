@@ -1,17 +1,24 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Package, Repeat, ShoppingBag, CheckCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useCheckout } from "@/contexts/CheckoutContext";
 
 type BoxType = "one-time" | "subscription";
 type BoxSize = "small" | "medium" | "large";
 
 const BoxSelection = () => {
-  const [boxType, setBoxType] = useState<BoxType>("subscription");
-  const [boxSize, setBoxSize] = useState<BoxSize>("medium");
+  const { checkoutState, updateBoxType, updateBoxSize } = useCheckout();
+  const [boxType, setBoxType] = useState<BoxType>(checkoutState.boxType);
+  const [boxSize, setBoxSize] = useState<BoxSize>(checkoutState.boxSize);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    updateBoxType(boxType);
+    updateBoxSize(boxSize);
+  }, [boxType, boxSize, updateBoxType, updateBoxSize]);
 
   const boxSizes = [
     {
