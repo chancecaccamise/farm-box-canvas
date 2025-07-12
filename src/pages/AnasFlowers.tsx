@@ -23,6 +23,7 @@ import babyShowerFlowers from "@/assets/baby-shower-flowers.jpg";
 import birthdayFlowers from "@/assets/birthday-flowers.jpg";
 import seasonalBouquet from "@/assets/seasonal-bouquet.jpg";
 import anaPortrait from "@/assets/ana-portrait.jpg";
+import anaFlowersHero from "@/assets/ana-flowers-hero.jpg";
 
 const AnasFlowers = () => {
   const [formData, setFormData] = useState({
@@ -102,17 +103,18 @@ const AnasFlowers = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="bg-gradient-hero text-white py-20">
-        <div className="max-w-6xl mx-auto px-4 text-center">
-          <div className="w-20 h-20 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <Flower className="w-10 h-10" />
-          </div>
-          <h1 className="text-5xl font-bold mb-6">Ana's Flowers</h1>
-          <p className="text-xl mb-8 max-w-3xl mx-auto opacity-90">
+      <section 
+        className="relative py-32 bg-cover bg-center"
+        style={{ backgroundImage: `url(${anaFlowersHero})` }}
+      >
+        <div className="absolute inset-0 bg-black/40"></div>
+        <div className="relative z-10 max-w-6xl mx-auto px-4 text-center text-white">
+          <h1 className="text-5xl font-bold mb-6 animate-fade-in">Ana's Flowers</h1>
+          <p className="text-xl mb-8 max-w-3xl mx-auto opacity-90 animate-fade-in">
             Creating beautiful, custom floral arrangements for life's most special moments. 
             From intimate bouquets to grand celebrations, every arrangement tells your unique story.
           </p>
-          <Button variant="organic" size="xl">
+          <Button variant="organic" size="xl" className="animate-scale-in hover-scale">
             <Flower className="w-5 h-5 mr-2" />
             Request Custom Bouquet
           </Button>
