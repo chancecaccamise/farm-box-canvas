@@ -46,6 +46,48 @@ export type Database = {
           },
         ]
       }
+      delivery_addresses: {
+        Row: {
+          apartment: string | null
+          city: string
+          created_at: string
+          delivery_instructions: string | null
+          id: string
+          is_primary: boolean
+          state: string
+          street_address: string
+          updated_at: string
+          user_id: string
+          zip_code: string
+        }
+        Insert: {
+          apartment?: string | null
+          city: string
+          created_at?: string
+          delivery_instructions?: string | null
+          id?: string
+          is_primary?: boolean
+          state: string
+          street_address: string
+          updated_at?: string
+          user_id: string
+          zip_code: string
+        }
+        Update: {
+          apartment?: string | null
+          city?: string
+          created_at?: string
+          delivery_instructions?: string | null
+          id?: string
+          is_primary?: boolean
+          state?: string
+          street_address?: string
+          updated_at?: string
+          user_id?: string
+          zip_code?: string
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           created_at: string
@@ -163,6 +205,45 @@ export type Database = {
           price?: number
           tags?: string[] | null
           updated_at?: string
+        }
+        Relationships: []
+      }
+      user_preferences: {
+        Row: {
+          boxes_per_week: number
+          created_at: string
+          gluten_free: boolean
+          id: string
+          local_only: boolean
+          no_fish: boolean
+          organic: boolean
+          updated_at: string
+          user_id: string
+          vegetarian: boolean
+        }
+        Insert: {
+          boxes_per_week?: number
+          created_at?: string
+          gluten_free?: boolean
+          id?: string
+          local_only?: boolean
+          no_fish?: boolean
+          organic?: boolean
+          updated_at?: string
+          user_id: string
+          vegetarian?: boolean
+        }
+        Update: {
+          boxes_per_week?: number
+          created_at?: string
+          gluten_free?: boolean
+          id?: string
+          local_only?: boolean
+          no_fish?: boolean
+          organic?: boolean
+          updated_at?: string
+          user_id?: string
+          vegetarian?: boolean
         }
         Relationships: []
       }
