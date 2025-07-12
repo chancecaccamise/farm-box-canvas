@@ -9,7 +9,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { 
   ChevronDown, 
-  Gift, 
   User, 
   ShoppingBag, 
   Calendar,
@@ -53,7 +52,7 @@ const Navbar = () => {
                   <Link to="/how-we-grow">How We Grow</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/our-mission">Our Mission</Link>
+                  <Link to="/how-farm-bags-work">How Farm Bags Work</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/meet-farmers">Meet the Farmers</Link>
@@ -84,12 +83,6 @@ const Navbar = () => {
 
           {/* Right Side */}
           <div className="flex items-center space-x-4">
-            {/* Rewards */}
-            <Button variant="ghost" size="sm" className="flex items-center space-x-1">
-              <Gift className="w-4 h-4" />
-              <span className="hidden sm:inline">Rewards</span>
-              <Badge variant="secondary" className="ml-1">12</Badge>
-            </Button>
 
             {/* Account Dropdown */}
             <DropdownMenu>

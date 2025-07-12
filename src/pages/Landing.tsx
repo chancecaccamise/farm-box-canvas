@@ -113,6 +113,127 @@ const Landing = () => {
         </div>
       </section>
 
+      {/* Email Collection Section */}
+      <section className="py-20 px-4">
+        <div className="max-w-4xl mx-auto">
+          <div className="bg-gradient-to-br from-accent/20 to-accent/10 rounded-2xl p-12 text-center">
+            <h2 className="text-4xl font-bold mb-4">Stay Fresh with Weekly Updates</h2>
+            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+              Get first access to seasonal harvests, exclusive recipes, and farm stories delivered to your inbox every week.
+            </p>
+            
+            <div className="max-w-md mx-auto">
+              <div className="flex gap-3">
+                <input
+                  type="email"
+                  placeholder="Enter your email address"
+                  className="flex-1 px-4 py-3 rounded-lg border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                  required
+                />
+                <Button type="submit" size="lg" className="px-8">
+                  Subscribe
+                </Button>
+              </div>
+              <p className="text-sm text-muted-foreground mt-3">
+                Join 2,000+ families already enjoying fresh updates. Unsubscribe anytime.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Customer Testimonials */}
+      <section className="py-20 px-4 bg-secondary/50">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl font-bold text-center mb-4">What Our Customers Say</h2>
+          <p className="text-xl text-muted-foreground text-center mb-16">
+            Real stories from families who love their weekly farm boxes
+          </p>
+          
+          <div className="grid md:grid-cols-3 gap-8">
+            {[
+              {
+                name: "Sarah Johnson",
+                location: "Berkeley, CA",
+                quote: "The quality is incredible! My kids actually ask for more vegetables now. The seasonal variety keeps our meals exciting.",
+                rating: 5
+              },
+              {
+                name: "Mike Chen",
+                location: "Oakland, CA", 
+                quote: "Supporting local farmers while getting the freshest produce? It's a win-win. The convenience is unmatched.",
+                rating: 5
+              },
+              {
+                name: "Elena Rodriguez",
+                location: "San Francisco, CA",
+                quote: "I love knowing exactly where my food comes from. The farmer stories in each box make it feel so personal.",
+                rating: 5
+              }
+            ].map((testimonial, index) => (
+              <Card key={index} className="text-center">
+                <CardContent className="p-6">
+                  <div className="flex justify-center mb-4">
+                    {[...Array(testimonial.rating)].map((_, i) => (
+                      <span key={i} className="text-accent text-lg">★</span>
+                    ))}
+                  </div>
+                  <p className="text-muted-foreground mb-4 italic">"{testimonial.quote}"</p>
+                  <div>
+                    <p className="font-semibold">{testimonial.name}</p>
+                    <p className="text-sm text-muted-foreground">{testimonial.location}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Farm Partnerships */}
+      <section className="py-20 px-4">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-4xl font-bold mb-6">Supporting Local Farms</h2>
+              <p className="text-lg text-muted-foreground mb-6">
+                We partner with over 20 local farms within 150 miles of your home. Every box supports 
+                sustainable agriculture and keeps farming families thriving in our community.
+              </p>
+              
+              <div className="grid grid-cols-2 gap-6 mb-8">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-primary mb-2">20+</div>
+                  <div className="text-sm text-muted-foreground">Partner Farms</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-primary mb-2">150</div>
+                  <div className="text-sm text-muted-foreground">Mile Radius</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-primary mb-2">90%</div>
+                  <div className="text-sm text-muted-foreground">Organic Certified</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-primary mb-2">52</div>
+                  <div className="text-sm text-muted-foreground">Weeks Fresh</div>
+                </div>
+              </div>
+              
+              <Button asChild variant="outline" size="lg">
+                <Link to="/meet-farmers">Meet Our Farmers</Link>
+              </Button>
+            </div>
+            
+            <div className="relative">
+              <div className="aspect-square bg-gradient-to-br from-accent/30 to-accent/10 rounded-2xl flex items-center justify-center text-8xl">
+                🚜
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CTA Section */}
       <section className="py-20 px-4 bg-gradient-primary text-white">
         <div className="max-w-4xl mx-auto text-center">

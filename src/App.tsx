@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
 import Landing from "./pages/Landing";
 import MyPlan from "./pages/MyPlan";
 import MyBag from "./pages/MyBag";
@@ -23,6 +24,7 @@ import AddOns from "./pages/AddOns";
 import Delivery from "./pages/Delivery";
 import OrderSummary from "./pages/OrderSummary";
 import Confirmation from "./pages/Confirmation";
+import HowFarmBagsWork from "./pages/HowFarmBagsWork";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -47,7 +49,7 @@ const App = () => (
           <Route path="/my-plan" element={<MyPlan />} />
           <Route path="/my-bag" element={<MyBag />} />
           <Route path="/how-we-grow" element={<HowWeGrow />} />
-          <Route path="/our-mission" element={<OurMission />} />
+          <Route path="/how-farm-bags-work" element={<HowFarmBagsWork />} />
           <Route path="/meet-farmers" element={<MeetFarmers />} />
           <Route path="/faqs" element={<FAQs />} />
           <Route path="/gift-cards" element={<GiftCards />} />
@@ -56,6 +58,7 @@ const App = () => (
           <Route path="/anas-flowers" element={<AnasFlowers />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <Footer />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
