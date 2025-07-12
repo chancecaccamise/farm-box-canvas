@@ -32,7 +32,7 @@ const Navbar = () => {
           </Link>
 
           {/* Center Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden lg:flex items-center space-x-4 xl:space-x-6">
             <Link to="/my-plan" className="text-foreground hover:text-primary transition-colors">
               My Plan
             </Link>
