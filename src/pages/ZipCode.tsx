@@ -13,13 +13,6 @@ const ZipCode = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  // Redirect authenticated users to their bag
-  useEffect(() => {
-    if (user) {
-      navigate('/my-bag');
-    }
-  }, [user, navigate]);
-
   const handleZipChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, "");
     if (value.length <= 5) {
@@ -28,9 +21,16 @@ const ZipCode = () => {
     }
   };
 
+  // Skip ZIP code validation and go straight to next step if user already authenticated
   const handleContinue = () => {
     if (isValid) {
-      navigate("/account");
+      if (user) {
+        // Authenticated user goes to box selection
+        navigate("/box-selection");
+      } else {
+        // New user goes to account creation
+        navigate("/account");
+      }
     }
   };
 
@@ -100,7 +100,7 @@ const ZipCode = () => {
               className="w-full h-12 text-base"
               variant="hero"
             >
-              Continue to Account Setup
+              {user ? "Continue to Box Selection" : "Continue to Account Setup"}
             </Button>
 
             <div className="bg-secondary/50 rounded-lg p-4">
