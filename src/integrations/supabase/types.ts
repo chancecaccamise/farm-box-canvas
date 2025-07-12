@@ -88,6 +88,57 @@ export type Database = {
         }
         Relationships: []
       }
+      fresh_catch_announcements: {
+        Row: {
+          created_at: string
+          description: string | null
+          fish_name: string
+          id: string
+          image_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          fish_name: string
+          id?: string
+          image_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          fish_name?: string
+          id?: string
+          image_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      fresh_fish_alerts: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          phone_number: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          phone_number: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          phone_number?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           created_at: string
@@ -163,6 +214,45 @@ export type Database = {
           total_amount?: number
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      partner_applications: {
+        Row: {
+          business_name: string
+          business_type: string
+          created_at: string
+          email: string
+          full_name: string
+          id: string
+          message: string | null
+          phone_number: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          business_name: string
+          business_type: string
+          created_at?: string
+          email: string
+          full_name: string
+          id?: string
+          message?: string | null
+          phone_number: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          business_name?: string
+          business_type?: string
+          created_at?: string
+          email?: string
+          full_name?: string
+          id?: string
+          message?: string | null
+          phone_number?: string
+          status?: string
+          updated_at?: string
         }
         Relationships: []
       }

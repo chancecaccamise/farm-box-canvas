@@ -17,8 +17,9 @@ import OurMission from "./pages/OurMission";
 import MeetFarmers from "./pages/MeetFarmers";
 import FAQs from "./pages/FAQs";
 import GiftCards from "./pages/GiftCards";
-import Sustainability from "./pages/Sustainability";
 import SupportLocal from "./pages/SupportLocal";
+import FreshCatch from "./pages/FreshCatch";
+import BecomeAPartner from "./pages/BecomeAPartner";
 import AnasFlowers from "./pages/AnasFlowers";
 import ZipCode from "./pages/ZipCode";
 import Account from "./pages/Account";
@@ -62,8 +63,9 @@ const AppRoutes = () => {
         <Route path="/our-mission" element={<OurMission />} />
         <Route path="/meet-farmers" element={<MeetFarmers />} />
         <Route path="/faqs" element={<FAQs />} />
-        <Route path="/sustainability" element={<Sustainability />} />
         <Route path="/support-local" element={<SupportLocal />} />
+        <Route path="/fresh-catch" element={<FreshCatch />} />
+        <Route path="/become-a-partner" element={<BecomeAPartner />} />
         <Route path="/partners/restaurants" element={<PartnerCategory category="restaurants" />} />
         <Route path="/partners/bakery" element={<PartnerCategory category="bakery" />} />
         <Route path="/partners/fisherman" element={<PartnerCategory category="fisherman" />} />

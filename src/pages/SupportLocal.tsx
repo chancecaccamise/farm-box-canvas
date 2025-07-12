@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -275,9 +275,11 @@ const SupportLocal = () => {
               to quality, sustainability, and community. If you're a local farmer, baker, 
               fisherman, or artisan food producer, we'd love to hear from you.
             </p>
-            <Button size="lg">
-              <Heart className="w-4 h-4 mr-2" />
-              Apply to Partner with Us
+            <Button size="lg" asChild>
+              <Link to="/become-a-partner">
+                <Heart className="w-4 h-4 mr-2" />
+                Apply to Partner with Us
+              </Link>
             </Button>
           </CardContent>
         </Card>

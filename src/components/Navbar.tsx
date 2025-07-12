@@ -79,9 +79,6 @@ const Navbar = () => {
               Gift Cards
             </Link>
 
-            <Link to="/sustainability" className="text-foreground hover:text-primary transition-colors">
-              Sustainability
-            </Link>
 
             <Link to="/support-local" className="text-foreground hover:text-primary transition-colors">
               Support Local
@@ -163,11 +160,6 @@ const Navbar = () => {
                     <Button variant="ghost" className="w-full justify-start" asChild>
                       <Link to="/gift-cards" onClick={() => setMobileMenuOpen(false)}>
                         Gift Cards
-                      </Link>
-                    </Button>
-                    <Button variant="ghost" className="w-full justify-start" asChild>
-                      <Link to="/sustainability" onClick={() => setMobileMenuOpen(false)}>
-                        Sustainability
                       </Link>
                     </Button>
                     <Button variant="ghost" className="w-full justify-start" asChild>

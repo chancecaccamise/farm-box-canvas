@@ -60,9 +60,6 @@ const Footer = () => {
               <Link to="/meet-farmers" className="block text-primary-foreground/80 hover:text-accent transition-colors">
                 Meet the Farmers
               </Link>
-              <Link to="/sustainability" className="block text-primary-foreground/80 hover:text-accent transition-colors">
-                Sustainability
-              </Link>
               <Link to="/faqs" className="block text-primary-foreground/80 hover:text-accent transition-colors">
                 FAQs
               </Link>
