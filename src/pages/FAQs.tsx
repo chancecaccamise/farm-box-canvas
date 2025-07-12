@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { HelpCircle, Leaf, Truck, Clock, Fish, Droplets, Settings } from "lucide-react";
 
 const FAQs = () => {
-  const faqs = [
+  const generalFAQs = [
     {
       id: "1",
       question: "How do farm boxes work?",
@@ -16,16 +16,31 @@ const FAQs = () => {
       icon: <Leaf className="w-5 h-5 text-accent" />
     },
     {
-      id: "2", 
-      question: "Where is the food sourced from?",
-      answer: "All our produce comes from local farms within 100 miles of our facility. We partner with over 25 small-scale, sustainable farms that practice organic or regenerative farming methods. Each item in your box includes information about which farm it came from, so you know exactly where your food was grown.",
-      icon: <Truck className="w-5 h-5 text-accent" />
-    },
-    {
       id: "3",
       question: "Can I pause or skip a week?",
       answer: "Absolutely! You have complete control over your deliveries. You can skip any week, pause your subscription for up to 8 weeks, or cancel anytime through your account dashboard. Just make sure to make changes before Wednesday at 11:59 PM for the following week's delivery.",
       icon: <Clock className="w-5 h-5 text-accent" />
+    },
+    {
+      id: "7",
+      question: "Can I change my preferences?",
+      answer: "Yes! You can update your dietary preferences, box size, and delivery frequency anytime through your account. Changes to preferences will take effect for your next scheduled delivery. You can also customize individual weeks by adding or removing specific items.",
+      icon: <Settings className="w-5 h-5 text-accent" />
+    },
+    {
+      id: "8",
+      question: "What if I don't like something in my box?",
+      answer: "We want you to love everything in your box! If you receive something you don't enjoy, let us know and we'll credit your account. You can also rate items in your account to help us better customize future selections based on your preferences.",
+      icon: <HelpCircle className="w-5 h-5 text-accent" />
+    }
+  ];
+
+  const sourcingFAQs = [
+    {
+      id: "2",
+      question: "Where is the food sourced from?",
+      answer: "All our produce comes from local farms within 100 miles of our facility. We partner with over 25 small-scale, sustainable farms that practice organic or regenerative farming methods. Each item in your box includes information about which farm it came from, so you know exactly where your food was grown.",
+      icon: <Truck className="w-5 h-5 text-accent" />
     },
     {
       id: "4",
@@ -44,18 +59,6 @@ const FAQs = () => {
       question: "What is hydroponic farming?",
       answer: "Hydroponic farming is a method of growing plants without soil, using nutrient-rich water solutions. This allows for year-round growing, uses 90% less water than traditional farming, and produces incredibly fresh, clean produce. Several of our partner farms use hydroponic systems for leafy greens and herbs.",
       icon: <Droplets className="w-5 h-5 text-accent" />
-    },
-    {
-      id: "7",
-      question: "Can I change my preferences?",
-      answer: "Yes! You can update your dietary preferences, box size, and delivery frequency anytime through your account. Changes to preferences will take effect for your next scheduled delivery. You can also customize individual weeks by adding or removing specific items.",
-      icon: <Settings className="w-5 h-5 text-accent" />
-    },
-    {
-      id: "8",
-      question: "What if I don't like something in my box?",
-      answer: "We want you to love everything in your box! If you receive something you don't enjoy, let us know and we'll credit your account. You can also rate items in your account to help us better customize future selections based on your preferences.",
-      icon: <HelpCircle className="w-5 h-5 text-accent" />
     }
   ];
 
@@ -73,14 +76,38 @@ const FAQs = () => {
           </p>
         </div>
 
-        {/* FAQ Accordion */}
-        <Card>
+        {/* General FAQ Accordion */}
+        <Card className="mb-8">
           <CardHeader>
-            <CardTitle className="text-2xl">Common Questions</CardTitle>
+            <CardTitle className="text-2xl">General Questions</CardTitle>
           </CardHeader>
           <CardContent>
             <Accordion type="single" collapsible className="w-full">
-              {faqs.map((faq) => (
+              {generalFAQs.map((faq) => (
+                <AccordionItem key={faq.id} value={faq.id}>
+                  <AccordionTrigger className="text-left">
+                    <div className="flex items-center space-x-3">
+                      {faq.icon}
+                      <span>{faq.question}</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground leading-relaxed pl-8">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </CardContent>
+        </Card>
+
+        {/* Sourcing FAQ Accordion */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl">Sourcing & Sustainability</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Accordion type="single" collapsible className="w-full">
+              {sourcingFAQs.map((faq) => (
                 <AccordionItem key={faq.id} value={faq.id}>
                   <AccordionTrigger className="text-left">
                     <div className="flex items-center space-x-3">
