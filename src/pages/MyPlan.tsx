@@ -113,15 +113,19 @@ const MyPlan = () => {
         setDeliveryAddress(addressData);
       }
 
-      // Load subscription info
-      const { data: subData } = await supabase
+      // Load subscription info - get the most recent one
+      const { data: subData, error: subError } = await supabase
         .from('user_subscriptions')
         .select('*')
         .eq('user_id', user?.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
         .single();
       
-      if (subData) {
+      if (subData && !subError) {
         setSubscription(subData);
+      } else if (subError && subError.code !== 'PGRST116') {
+        console.error('Error loading subscription:', subError);
       }
 
       // Load recent order history
@@ -659,7 +663,7 @@ const MyPlan = () => {
           {/* Right Side - Summary & Actions */}
           <div className="space-y-6">
             {/* Plan Summary */}
-            <Card>
+            <Card className="h-fit">
               <CardHeader>
                 <CardTitle>Plan Summary</CardTitle>
               </CardHeader>
@@ -711,7 +715,7 @@ const MyPlan = () => {
             </Card>
 
             {/* Active Preferences */}
-            <Card>
+            <Card className="h-fit">
               <CardHeader>
                 <CardTitle className="text-lg">Active Preferences</CardTitle>
               </CardHeader>
@@ -757,7 +761,7 @@ const MyPlan = () => {
 
             {/* Recent Orders */}
             {orderHistory.length > 0 && (
-              <Card>
+              <Card className="h-fit">
                 <CardHeader>
                   <CardTitle className="flex items-center space-x-2">
                     <Calendar className="w-5 h-5 text-primary" />
