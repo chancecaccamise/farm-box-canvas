@@ -62,6 +62,7 @@ const AppRoutes = () => {
         <Route path="/sustainability" element={<Sustainability />} />
         <Route path="/support-local" element={<SupportLocal />} />
         <Route path="/how-farm-bags-work" element={<HowFarmBagsWork />} />
+        <Route path="/gift-cards" element={<GiftCards />} />
         
         {/* Conditional landing page */}
         <Route path="/" element={user ? <Landing /> : <UnauthenticatedLanding />} />
@@ -79,9 +80,15 @@ const AppRoutes = () => {
             <Route path="/confirmation" element={<Confirmation />} />
             <Route path="/my-plan" element={<MyPlan />} />
             <Route path="/my-bag" element={<MyBag />} />
-            <Route path="/gift-cards" element={<GiftCards />} />
           </>
-        ) : null}
+        ) : (
+          <>
+            {/* Redirect protected routes to auth */}
+            <Route path="/my-plan" element={<Auth />} />
+            <Route path="/my-bag" element={<Auth />} />
+            <Route path="/account" element={<Auth />} />
+          </>
+        )}
         
         <Route path="*" element={<NotFound />} />
       </Routes>
