@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Minus, Plus, Trash2, ShoppingCart, AlertCircle } from "lucide-react";
+import { ShoppingCart, AlertCircle, Package } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -11,6 +11,9 @@ import { CountdownTimer } from "@/components/CountdownTimer";
 import { BagHistory } from "@/components/BagHistory";
 import { WeeklyBagSummary } from "@/components/WeeklyBagSummary";
 import { ProductGrid } from "@/components/ProductGrid";
+import { EmptyBagState } from "@/components/EmptyBagState";
+import { BagItemCard } from "@/components/BagItemCard";
+import { ProductCard } from "@/components/ProductCard";
 
 interface WeeklyBag {
   id: string;
@@ -302,15 +305,11 @@ function MyBag() {
     }, {} as Record<string, number>);
   };
 
-  const getCategoryColor = (category: string) => {
-    const colors = {
-      produce: "bg-green-100 text-green-800 border-green-200",
-      protein: "bg-red-100 text-red-800 border-red-200",
-      pantry: "bg-yellow-100 text-yellow-800 border-yellow-200",
-      seafood: "bg-blue-100 text-blue-800 border-blue-200",
-      herbs: "bg-purple-100 text-purple-800 border-purple-200",
-    };
-    return colors[category.toLowerCase() as keyof typeof colors] || "bg-gray-100 text-gray-800 border-gray-200";
+  const scrollToProducts = () => {
+    const productsSection = document.getElementById('products-section');
+    if (productsSection) {
+      productsSection.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   if (loading) {
