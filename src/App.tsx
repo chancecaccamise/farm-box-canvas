@@ -7,6 +7,9 @@ import Navbar from "./components/Navbar";
 import Landing from "./pages/Landing";
 import MyPlan from "./pages/MyPlan";
 import MyBag from "./pages/MyBag";
+import HowWeGrow from "./pages/HowWeGrow";
+import OurMission from "./pages/OurMission";
+import MeetFarmers from "./pages/MeetFarmers";
 import FAQs from "./pages/FAQs";
 import GiftCards from "./pages/GiftCards";
 import Sustainability from "./pages/Sustainability";
@@ -43,6 +46,9 @@ const App = () => (
           <Route path="/confirmation" element={<Confirmation />} />
           <Route path="/my-plan" element={<MyPlan />} />
           <Route path="/my-bag" element={<MyBag />} />
+          <Route path="/how-we-grow" element={<HowWeGrow />} />
+          <Route path="/our-mission" element={<OurMission />} />
+          <Route path="/meet-farmers" element={<MeetFarmers />} />
           <Route path="/faqs" element={<FAQs />} />
           <Route path="/gift-cards" element={<GiftCards />} />
           <Route path="/sustainability" element={<Sustainability />} />
