@@ -1,9 +1,94 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, Calendar, Truck, ArrowRight, Home } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/components/AuthProvider";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const Confirmation = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const [isCreatingBag, setIsCreatingBag] = useState(true);
+
+  useEffect(() => {
+    const createBagItems = async () => {
+      if (!user) return;
+
+      try {
+        const checkoutItems = localStorage.getItem('checkoutItems');
+        const checkoutAddOns = localStorage.getItem('checkoutAddOns');
+        const bagId = localStorage.getItem('bagId');
+
+        if (!bagId || (!checkoutItems && !checkoutAddOns)) {
+          setIsCreatingBag(false);
+          return;
+        }
+
+        const items = checkoutItems ? JSON.parse(checkoutItems) : [];
+        const addOns = checkoutAddOns ? JSON.parse(checkoutAddOns) : [];
+        const allItems = [...items, ...addOns];
+
+        // Create bag items from checkout selections
+        for (const itemName of allItems) {
+          // Find product by name (this is a simplified approach)
+          const { data: product } = await supabase
+            .from('products')
+            .select('id, price')
+            .eq('name', itemName)
+            .single();
+
+          if (product) {
+            await supabase
+              .from('weekly_bag_items')
+              .upsert({
+                weekly_bag_id: bagId,
+                product_id: product.id,
+                quantity: 1,
+                price_at_time: product.price
+              });
+          }
+        }
+
+        // Update bag totals
+        const { data: bagItems } = await supabase
+          .from('weekly_bag_items')
+          .select('quantity, price_at_time')
+          .eq('weekly_bag_id', bagId);
+
+        if (bagItems) {
+          const subtotal = bagItems.reduce((sum, item) => sum + (item.quantity * item.price_at_time), 0);
+          await supabase
+            .from('weekly_bags')
+            .update({
+              subtotal,
+              total_amount: subtotal + 4.99 // delivery fee
+            })
+            .eq('id', bagId);
+        }
+
+        // Clean up localStorage
+        localStorage.removeItem('checkoutItems');
+        localStorage.removeItem('checkoutAddOns');
+        localStorage.removeItem('bagId');
+
+      } catch (error) {
+        console.error('Error creating bag items:', error);
+        toast({
+          title: "Warning",
+          description: "Some items couldn't be added to your bag. You can add them manually.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsCreatingBag(false);
+      }
+    };
+
+    createBagItems();
+  }, [user, toast]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/30 flex items-center justify-center px-4">
       <div className="max-w-2xl mx-auto text-center">
@@ -90,20 +175,24 @@ const Confirmation = () => {
 
         {/* CTA Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          <Button variant="hero" size="lg" asChild>
-            <Link to="/">
-              <Home className="w-4 h-4 mr-2" />
-              Return to Home
-            </Link>
+          <Button variant="hero" size="lg" onClick={() => navigate('/my-bag')}>
+            <Home className="w-4 h-4 mr-2" />
+            Manage Your Bag
           </Button>
           
           <Button variant="outline" size="lg" asChild>
-            <Link to="/product-selection">
-              Customize Next Box
+            <Link to="/">
+              Return to Home
               <ArrowRight className="w-4 h-4 ml-2" />
             </Link>
           </Button>
         </div>
+
+        {isCreatingBag && (
+          <div className="text-sm text-muted-foreground mt-4">
+            Setting up your weekly bag...
+          </div>
+        )}
 
         <p className="text-sm text-muted-foreground mt-8">
           Questions? Contact our team at hello@farmbox.com or (555) 123-4567

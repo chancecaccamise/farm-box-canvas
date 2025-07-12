@@ -4,9 +4,16 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, Package, Calendar, MapPin, CheckCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/components/AuthProvider";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 
 const OrderSummary = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
 
   // Mock order data - in a real app this would come from state/context
   const orderDetails = {
@@ -35,8 +42,64 @@ const OrderSummary = () => {
     ]
   };
 
-  const handlePlaceOrder = () => {
-    navigate("/confirmation");
+  const handlePlaceOrder = async () => {
+    if (!user) return;
+    
+    setIsPlacingOrder(true);
+    
+    try {
+      // Create subscription
+      const { error: subError } = await supabase
+        .from('user_subscriptions')
+        .insert({
+          user_id: user.id,
+          subscription_type: 'weekly',
+          status: 'active'
+        });
+
+      if (subError) throw subError;
+
+      // Create initial weekly bag
+      const { data: bagId, error: bagError } = await supabase
+        .rpc('get_or_create_current_week_bag', { user_uuid: user.id });
+
+      if (bagError) throw bagError;
+
+      // Create order record
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          user_id: user.id,
+          order_type: 'subscription',
+          status: 'confirmed',
+          total_amount: 0 // Will be calculated later
+        })
+        .select()
+        .single();
+
+      if (orderError) throw orderError;
+
+      // Store selected items in context for confirmation page to create bag items
+      localStorage.setItem('checkoutItems', JSON.stringify(orderDetails.selectedItems));
+      localStorage.setItem('checkoutAddOns', JSON.stringify(orderDetails.addOns));
+      localStorage.setItem('bagId', bagId);
+
+      toast({
+        title: "Order Placed!",
+        description: "Your subscription has been created successfully.",
+      });
+
+      navigate("/confirmation");
+    } catch (error) {
+      console.error('Error placing order:', error);
+      toast({
+        title: "Error",
+        description: "Failed to place order. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsPlacingOrder(false);
+    }
   };
 
   return (
@@ -191,8 +254,9 @@ const OrderSummary = () => {
                   variant="hero"
                   size="lg"
                   className="w-full"
+                  disabled={isPlacingOrder}
                 >
-                  Place Order
+                  {isPlacingOrder ? "Creating Subscription..." : "Place Order"}
                 </Button>
 
                 <div className="text-center">

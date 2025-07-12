@@ -6,6 +6,7 @@ import { Minus, Plus, Trash2, ShoppingCart, AlertCircle } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 import { CountdownTimer } from "@/components/CountdownTimer";
 import { BagHistory } from "@/components/BagHistory";
 import { WeeklyBagSummary } from "@/components/WeeklyBagSummary";
@@ -39,6 +40,7 @@ interface WeeklyBagItem {
 function MyBag() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [currentWeekBag, setCurrentWeekBag] = useState<WeeklyBag | null>(null);
   const [bagItems, setBagItems] = useState<WeeklyBagItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -365,7 +367,7 @@ function MyBag() {
                   </div>
 
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <Button size="lg" className="px-8">
+                    <Button size="lg" className="px-8" onClick={() => navigate('/zip-code')}>
                       <ShoppingCart className="w-4 h-4 mr-2" />
                       Purchase Your First Box
                     </Button>
