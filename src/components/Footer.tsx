@@ -29,13 +29,13 @@ const Footer = () => {
           <div className="lg:col-span-1">
             <Link to="/" className="flex items-center space-x-2 mb-6">
               <div className="w-10 h-10 bg-accent rounded-full flex items-center justify-center">
-                <span className="text-white font-bold">🌱</span>
+                <span className="text-white font-bold">BB</span>
               </div>
-              <span className="text-2xl font-bold">FarmBox</span>
+              <span className="text-2xl font-bold">Billy's Botanicals</span>
             </Link>
             <p className="text-primary-foreground/80 mb-6 leading-relaxed">
-              Fresh, local, and sustainably grown produce delivered to your door. 
-              Supporting local farmers and bringing you the finest seasonal harvest.
+              Family-owned since 2018. Fresh, hydroponic produce grown with love and 
+              delivered weekly to your doorstep. Supporting sustainable agriculture in our community.
             </p>
             <div className="flex space-x-4">
               <Button variant="ghost" size="sm" className="text-primary-foreground hover:text-accent hover:bg-primary-foreground/10">
@@ -75,17 +75,17 @@ const Footer = () => {
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
                 <Phone className="w-5 h-5 text-accent" />
-                <span className="text-primary-foreground/80">(555) 123-FARM</span>
+                <span className="text-primary-foreground/80">(555) 789-GROW</span>
               </div>
               <div className="flex items-center space-x-3">
                 <Mail className="w-5 h-5 text-accent" />
-                <span className="text-primary-foreground/80">hello@farmbox.local</span>
+                <span className="text-primary-foreground/80">hello@billysbotanicals.com</span>
               </div>
               <div className="flex items-start space-x-3">
                 <MapPin className="w-5 h-5 text-accent mt-1" />
                 <span className="text-primary-foreground/80">
-                  123 Farm Road<br />
-                  Greenfield Valley, CA 90210
+                  456 Greenhouse Lane<br />
+                  Botanical Valley, CA 95420
                 </span>
               </div>
             </div>
@@ -93,9 +93,9 @@ const Footer = () => {
 
           {/* Newsletter Signup */}
           <div>
-            <h3 className="text-lg font-semibold mb-6">Stay Fresh</h3>
+            <h3 className="text-lg font-semibold mb-6">Join Billy's Botanical Family</h3>
             <p className="text-primary-foreground/80 mb-4">
-              Get weekly updates on fresh harvests, seasonal recipes, and farm news.
+              Get weekly farm updates, Billy's growing tips, and first access to seasonal harvests.
             </p>
             <form onSubmit={handleNewsletterSubmit} className="space-y-3">
               <Input
@@ -118,7 +118,7 @@ const Footer = () => {
         {/* Bottom Section */}
         <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
           <p className="text-primary-foreground/60 text-sm">
-            © 2024 FarmBox. All rights reserved. Fresh produce, fresh ideas.
+            © 2024 Billy's Botanicals. All rights reserved. | Family-owned since 2018
           </p>
           <div className="flex space-x-6 text-sm">
             <Link to="/privacy" className="text-primary-foreground/60 hover:text-accent transition-colors">

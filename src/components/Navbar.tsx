@@ -25,9 +25,9 @@ const Navbar = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-gradient-fresh rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-sm">🌱</span>
+              <span className="text-white font-bold text-sm">BB</span>
             </div>
-            <span className="text-xl font-bold text-primary">FarmBox</span>
+            <span className="text-xl font-bold text-primary">Billy's Botanicals</span>
           </Link>
 
           {/* Center Navigation */}
@@ -88,7 +88,7 @@ const Navbar = () => {
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center space-x-2 text-foreground hover:text-primary transition-colors">
                 <User className="w-5 h-5" />
-                <span className="hidden sm:inline">Hello, Ana</span>
+                <span className="hidden sm:inline">Hello, Billy</span>
                 <ChevronDown className="w-4 h-4" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">

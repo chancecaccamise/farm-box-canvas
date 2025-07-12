@@ -10,14 +10,14 @@ const HowFarmBagsWork = () => {
       {/* Hero Section */}
       <section className="relative py-20 px-4 bg-gradient-primary text-white">
         <div className="max-w-6xl mx-auto text-center">
-          <h1 className="text-5xl font-bold mb-6">How Farm Bags Work</h1>
+          <h1 className="text-5xl font-bold mb-6">How Billy's Boxes Work</h1>
           <p className="text-xl mb-8 max-w-3xl mx-auto opacity-90">
-            From farm selection to your doorstep, discover how we bring the freshest seasonal produce 
-            directly to your kitchen every week.
+            From Billy's hydroponic greenhouse to your doorstep, discover how we bring the freshest produce 
+            directly to your kitchen every week with love and care.
           </p>
           <div className="flex justify-center">
             <Badge variant="secondary" className="text-lg px-6 py-2">
-              🌱 Fresh • Local • Sustainable
+              🌱 Fresh • Hydroponic • Family-Owned Since 2018
             </Badge>
           </div>
         </div>
@@ -26,45 +26,45 @@ const HowFarmBagsWork = () => {
       {/* Step-by-Step Process */}
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-4">Your Farm Box Journey</h2>
+          <h2 className="text-4xl font-bold text-center mb-4">Your Billy's Box Journey</h2>
           <p className="text-xl text-muted-foreground text-center mb-16 max-w-2xl mx-auto">
-            Follow your fresh produce from local farms to your table in five simple steps
+            Follow your fresh produce from Billy's greenhouse to your table in five simple steps
           </p>
           
           <div className="grid lg:grid-cols-5 gap-8">
             {[
               {
                 step: "01",
-                title: "Farm Selection",
-                description: "We partner with certified local farms that practice sustainable agriculture",
+                title: "Hydroponic Growing",
+                description: "Billy personally tends to our sustainable hydroponic greenhouse year-round",
                 icon: <Package className="w-8 h-8" />,
                 color: "bg-gradient-fresh"
               },
               {
                 step: "02", 
-                title: "Fresh Harvest",
-                description: "Produce is harvested at peak ripeness just days before delivery",
+                title: "Peak Harvest",
+                description: "Produce is harvested at perfect ripeness, often the same day as delivery",
                 icon: <CheckCircle className="w-8 h-8" />,
                 color: "bg-gradient-fresh"
               },
               {
                 step: "03",
-                title: "Quality Check",
-                description: "Every item is inspected for freshness, quality, and organic standards",
+                title: "Billy's Quality Check",
+                description: "Billy personally inspects every item for freshness and quality standards",
                 icon: <Shield className="w-8 h-8" />,
                 color: "bg-gradient-fresh"
               },
               {
                 step: "04",
-                title: "Custom Packing",
-                description: "Your personalized box is carefully packed with your selected items",
+                title: "Loving Care Packing",
+                description: "Your box is hand-packed by Billy's team with care and personal notes",
                 icon: <Settings className="w-8 h-8" />,
                 color: "bg-gradient-fresh"
               },
               {
                 step: "05",
-                title: "Doorstep Delivery",
-                description: "Fresh produce arrives at your door on your chosen delivery day",
+                title: "Fresh Delivery",
+                description: "Your Billy's box arrives fresh at your door with a smile",
                 icon: <Truck className="w-8 h-8" />,
                 color: "bg-gradient-fresh"
               }
@@ -85,9 +85,9 @@ const HowFarmBagsWork = () => {
       {/* Customization Options */}
       <section className="py-20 px-4 bg-secondary/50">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-4">Customize Your Perfect Box</h2>
+          <h2 className="text-4xl font-bold text-center mb-4">Customize Your Billy's Box</h2>
           <p className="text-xl text-muted-foreground text-center mb-16">
-            Tailor your farm box to match your family's preferences and dietary needs
+            Tailor your Billy's box to match your family's preferences and dietary needs
           </p>
           
           <div className="grid md:grid-cols-3 gap-8">
@@ -156,10 +156,10 @@ const HowFarmBagsWork = () => {
         <div className="max-w-6xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-4xl font-bold mb-6">Flexible Scheduling</h2>
+              <h2 className="text-4xl font-bold mb-6">Flexible Family Schedule</h2>
               <p className="text-lg text-muted-foreground mb-8">
-                Manage your subscription with complete flexibility. Skip weeks when you're traveling, 
-                pause for vacations, or adjust your delivery schedule anytime.
+                Billy understands family life! Skip weeks when you're traveling, 
+                pause for vacations, or adjust your delivery schedule anytime - no hassle.
               </p>
               
               <div className="space-y-6">
@@ -230,10 +230,10 @@ const HowFarmBagsWork = () => {
       {/* Quality Assurance */}
       <section className="py-20 px-4 bg-gradient-primary text-white">
         <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-4xl font-bold mb-6">Quality Guarantee</h2>
+          <h2 className="text-4xl font-bold mb-6">Billy's Promise</h2>
           <p className="text-xl mb-12 opacity-90 max-w-3xl mx-auto">
-            We're committed to delivering the highest quality produce. If you're not completely satisfied 
-            with any item, we'll make it right.
+            Billy personally stands behind every box. If you're not completely satisfied 
+            with any item, Billy will make it right - that's the Billy's Botanicals guarantee.
           </p>
           
           <div className="grid md:grid-cols-3 gap-8">
@@ -241,16 +241,16 @@ const HowFarmBagsWork = () => {
               <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Shield className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Freshness Guaranteed</h3>
-              <p className="opacity-90">Every item is guaranteed fresh or we'll replace it for free</p>
+              <h3 className="text-xl font-semibold mb-3">Billy's Freshness Promise</h3>
+              <p className="opacity-90">Every item is guaranteed fresh or Billy will replace it personally</p>
             </div>
             
             <div className="text-center">
               <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="w-8 h-8 text-white" />
               </div>
-              <h3 className="text-xl font-semibold mb-3">Organic Certified</h3>
-              <p className="opacity-90">All produce meets strict organic certification standards</p>
+              <h3 className="text-xl font-semibold mb-3">Pesticide-Free Growing</h3>
+              <p className="opacity-90">100% pesticide-free hydroponic growing in Billy's greenhouse</p>
             </div>
             
             <div className="text-center">
@@ -264,7 +264,7 @@ const HowFarmBagsWork = () => {
           
           <div className="mt-12">
             <Button asChild variant="organic" size="xl">
-              <Link to="/zip-code">Start Your Farm Box Today</Link>
+              <Link to="/zip-code">Start Your Billy's Box Today</Link>
             </Button>
           </div>
         </div>

@@ -8,39 +8,39 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Fresh, organic color palette */
-    --background: 120 20% 98%;
-    --foreground: 120 15% 15%;
+    /* Billy's Botanicals - Green & Orange color palette */
+    --background: 120 30% 98%;
+    --foreground: 120 20% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 120 15% 15%;
+    --card-foreground: 120 20% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 120 15% 15%;
+    --popover-foreground: 120 20% 15%;
 
-    --primary: 120 40% 25%;
+    --primary: 120 60% 25%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 120 20% 95%;
-    --secondary-foreground: 120 15% 25%;
+    --secondary: 120 25% 95%;
+    --secondary-foreground: 120 20% 25%;
 
-    --muted: 120 15% 96%;
-    --muted-foreground: 120 10% 45%;
+    --muted: 120 20% 96%;
+    --muted-foreground: 120 15% 45%;
 
-    --accent: 75 60% 50%;
+    --accent: 25 85% 55%;
     --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 120 15% 90%;
-    --input: 120 15% 92%;
-    --ring: 120 40% 25%;
+    --border: 120 20% 90%;
+    --input: 120 20% 92%;
+    --ring: 120 60% 25%;
 
-    /* Fresh gradient colors */
-    --gradient-primary: linear-gradient(135deg, hsl(120 40% 25%), hsl(120 50% 35%));
-    --gradient-fresh: linear-gradient(135deg, hsl(75 60% 50%), hsl(90 50% 60%));
-    --gradient-hero: linear-gradient(135deg, hsl(120 30% 20%), hsl(120 40% 30%));
+    /* Billy's Botanicals gradient colors */
+    --gradient-primary: linear-gradient(135deg, hsl(120 60% 25%), hsl(120 50% 35%));
+    --gradient-fresh: linear-gradient(135deg, hsl(120 60% 25%), hsl(25 85% 55%));
+    --gradient-hero: linear-gradient(135deg, hsl(120 45% 20%), hsl(120 60% 25%));
     
     /* Organic shadows */
     --shadow-soft: 0 4px 20px hsl(120 15% 15% / 0.08);
