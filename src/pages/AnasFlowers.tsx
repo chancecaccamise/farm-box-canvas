@@ -22,6 +22,7 @@ import weddingBouquet from "@/assets/wedding-bouquet.jpg";
 import babyShowerFlowers from "@/assets/baby-shower-flowers.jpg";
 import birthdayFlowers from "@/assets/birthday-flowers.jpg";
 import seasonalBouquet from "@/assets/seasonal-bouquet.jpg";
+import anaPortrait from "@/assets/ana-portrait.jpg";
 
 const AnasFlowers = () => {
   const [formData, setFormData] = useState({
@@ -315,8 +316,12 @@ const AnasFlowers = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <div className="w-24 h-24 bg-gradient-fresh rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Flower className="w-12 h-12 text-white" />
+                  <div className="w-32 h-32 mx-auto mb-4 overflow-hidden rounded-full">
+                    <img 
+                      src={anaPortrait} 
+                      alt="Ana - Professional Florist"
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                   <p className="text-muted-foreground leading-relaxed">
                     With over 15 years of experience in floral design, Ana combines classical training 
