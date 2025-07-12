@@ -193,12 +193,109 @@ export type Database = {
         }
         Relationships: []
       }
+      weekly_bag_items: {
+        Row: {
+          created_at: string
+          id: string
+          price_at_time: number
+          product_id: string
+          quantity: number
+          updated_at: string
+          weekly_bag_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          price_at_time: number
+          product_id: string
+          quantity?: number
+          updated_at?: string
+          weekly_bag_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          price_at_time?: number
+          product_id?: string
+          quantity?: number
+          updated_at?: string
+          weekly_bag_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "weekly_bag_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "weekly_bag_items_weekly_bag_id_fkey"
+            columns: ["weekly_bag_id"]
+            isOneToOne: false
+            referencedRelation: "weekly_bags"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      weekly_bags: {
+        Row: {
+          confirmed_at: string | null
+          created_at: string
+          cutoff_time: string
+          delivery_fee: number | null
+          id: string
+          is_confirmed: boolean
+          subtotal: number | null
+          total_amount: number | null
+          updated_at: string
+          user_id: string
+          week_end_date: string
+          week_start_date: string
+        }
+        Insert: {
+          confirmed_at?: string | null
+          created_at?: string
+          cutoff_time: string
+          delivery_fee?: number | null
+          id?: string
+          is_confirmed?: boolean
+          subtotal?: number | null
+          total_amount?: number | null
+          updated_at?: string
+          user_id: string
+          week_end_date: string
+          week_start_date: string
+        }
+        Update: {
+          confirmed_at?: string | null
+          created_at?: string
+          cutoff_time?: string
+          delivery_fee?: number | null
+          id?: string
+          is_confirmed?: boolean
+          subtotal?: number | null
+          total_amount?: number | null
+          updated_at?: string
+          user_id?: string
+          week_end_date?: string
+          week_start_date?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_next_cutoff_time: {
+        Args: { input_date?: string }
+        Returns: string
+      }
+      get_or_create_current_week_bag: {
+        Args: { user_uuid: string }
+        Returns: string
+      }
     }
     Enums: {
       [_ in never]: never
