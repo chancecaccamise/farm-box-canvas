@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Minus, Plus, Trash2, ShoppingCart } from "lucide-react";
+import { Minus, Plus, Trash2, ShoppingCart, AlertCircle } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -43,12 +43,41 @@ function MyBag() {
   const [bagItems, setBagItems] = useState<WeeklyBagItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [isLocked, setIsLocked] = useState(false);
+  const [hasActiveSubscription, setHasActiveSubscription] = useState<boolean | null>(null);
 
   useEffect(() => {
     if (user) {
-      initializeCurrentWeekBag();
+      checkSubscriptionAndInitialize();
     }
   }, [user]);
+
+  const checkSubscriptionAndInitialize = async () => {
+    try {
+      // Check if user has an active subscription
+      const { data: subscription, error: subError } = await supabase
+        .from("user_subscriptions")
+        .select("id, status")
+        .eq("user_id", user?.id)
+        .eq("status", "active")
+        .single();
+
+      if (subError && subError.code !== "PGRST116") {
+        throw subError;
+      }
+
+      const hasSubscription = !!subscription;
+      setHasActiveSubscription(hasSubscription);
+
+      if (hasSubscription) {
+        await initializeCurrentWeekBag();
+      }
+    } catch (error) {
+      console.error("Error checking subscription:", error);
+      setHasActiveSubscription(false);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (currentWeekBag) {
@@ -64,7 +93,10 @@ function MyBag() {
       const { data: bagIdData, error: bagError } = await supabase
         .rpc('get_or_create_current_week_bag', { user_uuid: user?.id });
 
-      if (bagError) throw bagError;
+      if (bagError) {
+        console.error("Database function error:", bagError);
+        throw bagError;
+      }
 
       // Fetch the bag details
       const { data: bagData, error: fetchError } = await supabase
@@ -84,8 +116,6 @@ function MyBag() {
         description: "Failed to load your bag. Please refresh the page.",
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -298,6 +328,71 @@ function MyBag() {
                 <div className="h-64 bg-muted rounded"></div>
               </div>
             </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show subscription required message if user doesn't have an active subscription
+  if (hasActiveSubscription === false) {
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="max-w-4xl mx-auto px-4 py-16">
+          <div className="text-center space-y-8">
+            <div>
+              <h1 className="text-4xl font-bold text-foreground mb-4">My Bag</h1>
+              <p className="text-muted-foreground">
+                Customize your weekly farm box delivery
+              </p>
+            </div>
+
+            <Card className="border-dashed border-2 border-muted-foreground/20">
+              <CardContent className="pt-12 pb-12">
+                <div className="text-center space-y-6">
+                  <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center">
+                    <ShoppingCart className="w-12 h-12 text-muted-foreground" />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <h2 className="text-2xl font-semibold text-foreground">
+                      Start Your Farm Box Journey
+                    </h2>
+                    <p className="text-muted-foreground max-w-md mx-auto">
+                      Purchase your first farm box to start customizing your weekly delivery 
+                      of fresh, local produce and artisanal goods.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <Button size="lg" className="px-8">
+                      <ShoppingCart className="w-4 h-4 mr-2" />
+                      Purchase Your First Box
+                    </Button>
+                    <Button variant="outline" size="lg" className="px-8">
+                      Learn More About Our Boxes
+                    </Button>
+                  </div>
+
+                  <div className="bg-muted/50 p-4 rounded-lg max-w-md mx-auto">
+                    <div className="flex items-start gap-3">
+                      <AlertCircle className="w-5 h-5 text-primary mt-0.5" />
+                      <div className="text-left">
+                        <p className="text-sm font-medium text-foreground">
+                          What you'll get:
+                        </p>
+                        <ul className="text-sm text-muted-foreground mt-1 space-y-1">
+                          <li>• Fresh, locally-sourced produce</li>
+                          <li>• Artisanal pantry items</li>
+                          <li>• Weekly customization options</li>
+                          <li>• Flexible delivery schedule</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
