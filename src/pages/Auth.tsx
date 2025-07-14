@@ -1,30 +1,35 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/components/AuthProvider';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { useAuth } from '@/components/AuthProvider';
-import { useNavigate, Link } from 'react-router-dom';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { Leaf, ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Leaf } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
-const Auth = () => {
+export default function Auth() {
   const [isSignUp, setIsSignUp] = useState(false);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [smsNotifications, setSmsNotifications] = useState(false);
+  const [emailNewsletter, setEmailNewsletter] = useState(false);
   const [loading, setLoading] = useState(false);
-  
-  const { signIn, signUp, user } = useAuth();
+  const { user, signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
   // Redirect if already authenticated
-  if (user) {
-    navigate('/');
-    return null;
-  }
+  useEffect(() => {
+    if (user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,45 +37,57 @@ const Auth = () => {
 
     try {
       if (isSignUp) {
-        if (password !== confirmPassword) {
+        if (!firstName.trim() || !lastName.trim()) {
           toast({
-            title: "Passwords don't match",
-            description: "Please make sure your passwords match.",
+            title: "Error",
+            description: "First name and last name are required",
             variant: "destructive",
           });
-          setLoading(false);
           return;
         }
 
-        const { error } = await signUp(email, password);
+        if (password !== confirmPassword) {
+          toast({
+            title: "Error",
+            description: "Passwords don't match",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        const { error } = await signUp(email, password, {
+          first_name: firstName,
+          last_name: lastName,
+          sms_notifications: smsNotifications,
+          email_newsletter: emailNewsletter
+        });
+        
         if (error) {
           toast({
-            title: "Sign up failed",
+            title: "Sign Up Error",
             description: error.message,
             variant: "destructive",
           });
         } else {
           toast({
-            title: "Check your email!",
-            description: "We sent you a confirmation link.",
+            title: "Success",
+            description: "Account created successfully! Please check your email for verification.",
           });
         }
       } else {
         const { error } = await signIn(email, password);
         if (error) {
           toast({
-            title: "Sign in failed",
+            title: "Sign In Error",
             description: error.message,
             variant: "destructive",
           });
-        } else {
-          navigate('/my-bag');
         }
       }
     } catch (error) {
       toast({
-        title: "An error occurred",
-        description: "Please try again.",
+        title: "Error",
+        description: "An unexpected error occurred",
         variant: "destructive",
       });
     } finally {
@@ -78,7 +95,9 @@ const Auth = () => {
     }
   };
 
-  const isFormValid = email && password && (!isSignUp || password === confirmPassword);
+  if (user) {
+    return null; // Will redirect
+  }
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -112,6 +131,35 @@ const Auth = () => {
           
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {isSignUp && (
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="firstName">First Name *</Label>
+                      <Input
+                        id="firstName"
+                        type="text"
+                        placeholder="First name"
+                        value={firstName}
+                        onChange={(e) => setFirstName(e.target.value)}
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="lastName">Last Name *</Label>
+                      <Input
+                        id="lastName"
+                        type="text"
+                        placeholder="Last name"
+                        value={lastName}
+                        onChange={(e) => setLastName(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
+              
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -135,33 +183,61 @@ const Auth = () => {
                   required
                 />
               </div>
-              
+
               {isSignUp && (
-                <div className="space-y-2">
-                  <Label htmlFor="confirm-password">Confirm Password</Label>
-                  <Input
-                    id="confirm-password"
-                    type="password"
-                    placeholder="Confirm your password"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                  />
-                </div>
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">Confirm Password</Label>
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="Confirm your password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-4 pt-4 border-t">
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-medium">Marketing Preferences (Optional)</h3>
+                      
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="smsNotifications"
+                          checked={smsNotifications}
+                          onCheckedChange={(checked) => setSmsNotifications(checked === true)}
+                        />
+                        <Label htmlFor="smsNotifications" className="text-sm">
+                          I'd like to receive text notifications about weekly farm boxes and fresh fish
+                        </Label>
+                      </div>
+                      
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="emailNewsletter"
+                          checked={emailNewsletter}
+                          onCheckedChange={(checked) => setEmailNewsletter(checked === true)}
+                        />
+                        <Label htmlFor="emailNewsletter" className="text-sm">
+                          Sign me up for Billy's Botanicals email newsletter
+                        </Label>
+                      </div>
+                    </div>
+                  </div>
+                </>
               )}
               
               <Button 
                 type="submit" 
                 className="w-full" 
-                disabled={!isFormValid || loading}
+                disabled={loading}
               >
                 {loading ? 'Please wait...' : (isSignUp ? 'Create Account' : 'Sign In')}
               </Button>
             </form>
             
-            <Separator className="my-6" />
-            
-            <div className="text-center">
+            <div className="mt-6 text-center">
               <p className="text-sm text-muted-foreground">
                 {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
                 <button
@@ -178,6 +254,4 @@ const Auth = () => {
       </div>
     </div>
   );
-};
-
-export default Auth;
+}

@@ -22,8 +22,18 @@ import { Link } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
 
 const Navbar = () => {
-  const { user, signOut } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const getDisplayName = () => {
+    if (profile?.first_name) {
+      return `Hello, ${profile.first_name}`;
+    }
+    if (user?.email) {
+      return `Hello, ${user.email.split('@')[0]}`;
+    }
+    return 'Account';
+  };
 
   return (
     <nav className="bg-background border-b shadow-soft sticky top-0 z-50">
@@ -110,7 +120,7 @@ const Navbar = () => {
                         <User className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <p className="font-medium">Hello, {user.email?.split('@')[0]}</p>
+                        <p className="font-medium">{getDisplayName()}</p>
                         <p className="text-sm text-muted-foreground">Subscriber</p>
                       </div>
                     </div>
@@ -232,7 +242,7 @@ const Navbar = () => {
               <DropdownMenu>
                 <DropdownMenuTrigger className="flex items-center space-x-2 text-foreground hover:text-primary transition-colors">
                   <User className="w-5 h-5" />
-                  <span className="hidden sm:inline">Hello, {user.email?.split('@')[0]}</span>
+                  <span className="hidden sm:inline">{getDisplayName()}</span>
                   <ChevronDown className="w-4 h-4" />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">

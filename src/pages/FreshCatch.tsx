@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from '@/components/AuthProvider';
 import { Fish, Phone, User } from "lucide-react";
 
 interface FreshCatchAnnouncement {
@@ -13,28 +14,49 @@ interface FreshCatchAnnouncement {
   fish_name: string;
   description: string | null;
   image_url: string | null;
+  fisherman_name: string | null;
   created_at: string;
 }
 
 const FreshCatch = () => {
   const [announcements, setAnnouncements] = useState<FreshCatchAnnouncement[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [alertsSubmitting, setAlertsSubmitting] = useState(false);
+  const { user } = useAuth();
   const { toast } = useToast();
 
   // Admin form state
   const [fishName, setFishName] = useState("");
   const [description, setDescription] = useState("");
   const [imageUrl, setImageUrl] = useState("");
+  const [fishermanName, setFishermanName] = useState("");
 
   // SMS alerts form state
   const [name, setName] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
 
+  const checkAdminStatus = async () => {
+    if (!user) return;
+    
+    try {
+      const { data } = await supabase.rpc('has_role', {
+        _user_id: user.id,
+        _role: 'admin'
+      });
+      setIsAdmin(data || false);
+    } catch (error) {
+      console.error('Error checking admin status:', error);
+    }
+  };
+
   useEffect(() => {
     fetchAnnouncements();
-  }, []);
+    if (user) {
+      checkAdminStatus();
+    }
+  }, [user]);
 
   const fetchAnnouncements = async () => {
     try {
@@ -69,6 +91,7 @@ const FreshCatch = () => {
           fish_name: fishName,
           description: description || null,
           image_url: imageUrl || null,
+          fisherman_name: fishermanName || null,
         });
 
       if (error) throw error;
@@ -81,6 +104,7 @@ const FreshCatch = () => {
       setFishName("");
       setDescription("");
       setImageUrl("");
+      setFishermanName("");
       fetchAnnouncements();
     } catch (error) {
       console.error("Error posting announcement:", error);
@@ -149,55 +173,66 @@ const FreshCatch = () => {
           </p>
         </div>
 
-        {/* Admin Form (Simple version for development) */}
-        <Card className="mb-12 max-w-2xl mx-auto">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Fish className="h-5 w-5" />
-              Post New Catch
-            </CardTitle>
-            <CardDescription>
-              Add a new fresh catch announcement
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSubmitAnnouncement} className="space-y-4">
-              <div>
-                <Label htmlFor="fishName">Fish Name</Label>
-                <Input
-                  id="fishName"
-                  value={fishName}
-                  onChange={(e) => setFishName(e.target.value)}
-                  placeholder="e.g., Red Snapper"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="description">Description (Optional)</Label>
-                <Textarea
-                  id="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Fresh from the Savannah coast..."
-                  rows={3}
-                />
-              </div>
-              <div>
-                <Label htmlFor="imageUrl">Image URL (Optional)</Label>
-                <Input
-                  id="imageUrl"
-                  value={imageUrl}
-                  onChange={(e) => setImageUrl(e.target.value)}
-                  placeholder="https://example.com/fish-image.jpg"
-                  type="url"
-                />
-              </div>
-              <Button type="submit" disabled={submitting} className="w-full">
-                {submitting ? "Posting..." : "Post Announcement"}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+        {/* Admin Form - Only show to admins */}
+        {isAdmin && (
+          <Card className="mb-12 max-w-2xl mx-auto">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Fish className="h-5 w-5" />
+                Post New Catch
+              </CardTitle>
+              <CardDescription>
+                Add a new fresh catch announcement
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmitAnnouncement} className="space-y-4">
+                <div>
+                  <Label htmlFor="fishName">Fish Name</Label>
+                  <Input
+                    id="fishName"
+                    value={fishName}
+                    onChange={(e) => setFishName(e.target.value)}
+                    placeholder="e.g., Red Snapper"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="fishermanName">Fisherman Name</Label>
+                  <Input
+                    id="fishermanName"
+                    value={fishermanName}
+                    onChange={(e) => setFishermanName(e.target.value)}
+                    placeholder="e.g., Joe from South Shore Fish Co."
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="description">Description (Optional)</Label>
+                  <Textarea
+                    id="description"
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Fresh from the Savannah coast..."
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="imageUrl">Image URL (Optional)</Label>
+                  <Input
+                    id="imageUrl"
+                    value={imageUrl}
+                    onChange={(e) => setImageUrl(e.target.value)}
+                    placeholder="https://example.com/fish-image.jpg"
+                    type="url"
+                  />
+                </div>
+                <Button type="submit" disabled={submitting} className="w-full">
+                  {submitting ? "Posting..." : "Post Announcement"}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Announcements Feed */}
         <div className="mb-16">

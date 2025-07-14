@@ -93,6 +93,7 @@ export type Database = {
           created_at: string
           description: string | null
           fish_name: string
+          fisherman_name: string | null
           id: string
           image_url: string | null
           updated_at: string
@@ -101,6 +102,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           fish_name: string
+          fisherman_name?: string | null
           id?: string
           image_url?: string | null
           updated_at?: string
@@ -109,6 +111,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           fish_name?: string
+          fisherman_name?: string | null
           id?: string
           image_url?: string | null
           updated_at?: string
@@ -394,6 +397,39 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          created_at: string
+          email_newsletter: boolean
+          first_name: string | null
+          id: string
+          last_name: string | null
+          sms_notifications: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_newsletter?: boolean
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          sms_notifications?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          email_newsletter?: boolean
+          first_name?: string | null
+          id?: string
+          last_name?: string | null
+          sms_notifications?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_preferences: {
         Row: {
           boxes_per_week: number
@@ -430,6 +466,27 @@ export type Database = {
           updated_at?: string
           user_id?: string
           vegetarian?: boolean
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
         }
         Relationships: []
       }
@@ -578,8 +635,16 @@ export type Database = {
         Args: { user_uuid: string }
         Returns: string
       }
+      has_role: {
+        Args: {
+          _user_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: boolean
+      }
     }
     Enums: {
+      app_role: "admin" | "user"
       subscription_status: "active" | "paused" | "cancelled" | "suspended"
     }
     CompositeTypes: {
@@ -708,6 +773,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "user"],
       subscription_status: ["active", "paused", "cancelled", "suspended"],
     },
   },
