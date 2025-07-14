@@ -41,9 +41,11 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-fresh rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-sm">BB</span>
-            </div>
+            <img 
+              src="/lovable-uploads/billys-botanicals-logo.png" 
+              alt="Billy's Botanicals Logo" 
+              className="w-8 h-8 object-contain"
+            />
             <span className="text-xl font-bold text-primary">Billy's Botanicals</span>
           </Link>
 
@@ -223,7 +225,7 @@ const Navbar = () => {
                           </Link>
                         </Button>
                         <Button className="w-full" asChild>
-                          <Link to="/auth" onClick={() => setMobileMenuOpen(false)}>
+                          <Link to="/auth?signup=true" onClick={() => setMobileMenuOpen(false)}>
                             Sign Up
                           </Link>
                         </Button>
@@ -280,7 +282,7 @@ const Navbar = () => {
                   <Link to="/auth">Login</Link>
                 </Button>
                 <Button asChild>
-                  <Link to="/auth">Sign Up</Link>
+                  <Link to="/auth?signup=true">Sign Up</Link>
                 </Button>
               </div>
             )}

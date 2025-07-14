@@ -1,56 +1,25 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Calendar, Heart } from "lucide-react";
+import farmersMarketImage from "@/assets/farmers-market-couple.jpg";
 
 const MeetFarmers = () => {
   const teamMembers = [
     {
-      name: "Sarah Chen",
-      title: "Farm Manager & Hydroponic Specialist",
-      image: "https://images.unsplash.com/photo-1494790108755-2616c333fb2c?w=300&h=300&fit=crop&crop=face",
-      bio: "Sarah has over 15 years of experience in sustainable agriculture and pioneered our hydroponic growing systems. She holds a Master's degree in Agricultural Engineering and is passionate about water-efficient farming.",
-      funFact: "Sarah can identify over 200 plant varieties by sight and loves hiking in her free time.",
-      experience: "15 years"
-    },
-    {
-      name: "Miguel Rodriguez",
-      title: "Head Grower",
+      name: "Billy Thompson",
+      title: "Co-Founder & Head Farmer",
       image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face",
-      bio: "Miguel comes from a family of farmers spanning three generations. He specializes in leafy greens and herbs, ensuring every plant receives the perfect balance of nutrients and care.",
-      funFact: "Miguel speaks four languages and plays guitar for the farm team during lunch breaks.",
-      experience: "12 years"
+      bio: "Billy co-founded Billy's Botanicals with a vision to bring fresh, sustainably grown produce directly to families. With 18 years in sustainable agriculture, he oversees all growing operations and maintains our commitment to organic practices.",
+      funFact: "Billy can predict the weather by observing plant behavior and has never owned a TV, preferring to spend evenings reading about new farming techniques.",
+      experience: "18 years"
     },
     {
-      name: "Emma Thompson",
-      title: "Sustainability Coordinator",
-      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=300&h=300&fit=crop&crop=face",
-      bio: "Emma oversees all our environmental initiatives, from composting programs to renewable energy systems. She has a background in environmental science and is dedicated to minimizing our carbon footprint.",
-      funFact: "Emma has a collection of over 50 heirloom seed varieties and maintains a pollinator garden at home.",
-      experience: "8 years"
-    },
-    {
-      name: "David Kim",
-      title: "Quality Control Manager",
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face",
-      bio: "David ensures every piece of produce meets our high standards before it goes into your box. His attention to detail and commitment to quality has made him an invaluable part of our team.",
-      funFact: "David is a certified sommelier and loves pairing our fresh produce with wines in his spare time.",
-      experience: "10 years"
-    },
-    {
-      name: "Ana Gutierrez",
-      title: "Community Outreach & Flower Specialist",
-      image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=300&h=300&fit=crop&crop=face",
-      bio: "Ana manages our community partnerships and runs Ana's Flowers, our floral division. She has a natural talent for creating beautiful arrangements and connecting with our customers.",
-      funFact: "Ana has won three local floral design competitions and volunteers at the community garden every weekend.",
-      experience: "6 years"
-    },
-    {
-      name: "James Wilson",
-      title: "Harvest Coordinator",
-      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=300&h=300&fit=crop&crop=face",
-      bio: "James coordinates our daily harvest operations, ensuring optimal timing for peak flavor and nutrition. His background in logistics helps us maintain the freshest possible produce for our customers.",
-      funFact: "James is an amateur photographer who captures stunning sunrise photos during early morning harvests.",
-      experience: "7 years"
+      name: "Maria Thompson",
+      title: "Co-Founder & Community Manager",
+      image: "https://images.unsplash.com/photo-1494790108755-2616c333fb2c?w=300&h=300&fit=crop&crop=face",
+      bio: "Maria handles all customer relationships and community partnerships for Billy's Botanicals. Her background in nutrition and her passion for connecting people with their food sources makes her the heart of our customer experience.",
+      funFact: "Maria speaks three languages fluently and personally writes thank-you notes to every new subscriber. She also maintains a recipe blog featuring our seasonal produce.",
+      experience: "15 years"
     }
   ];
 
@@ -60,8 +29,8 @@ const MeetFarmers = () => {
       <div className="relative h-[60vh] bg-gradient-fresh overflow-hidden">
         <div className="absolute inset-0 bg-black/20"></div>
         <img 
-          src="https://images.unsplash.com/photo-1582562124811-c09040d0a901?w=1200&h=600&fit=crop" 
-          alt="Farm team working together" 
+          src={farmersMarketImage} 
+          alt="Billy and Maria Thompson at their farmers market stand" 
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 flex items-center justify-center">
@@ -70,8 +39,7 @@ const MeetFarmers = () => {
               Meet the Heart Behind Your Food
             </h1>
             <p className="text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed">
-              Our team is made up of passionate farmers, growers, and experts in sustainable 
-              agriculture. Get to know the faces behind the produce that goes into your farm boxes.
+              Our team is made up of <span className="text-accent font-semibold">passionate farmers</span>, growers, and experts in <span className="text-accent font-semibold">sustainable agriculture</span>. Get to know the faces behind the produce that goes into your <span className="text-accent font-semibold">farm boxes</span>.
             </p>
           </div>
         </div>
@@ -81,7 +49,9 @@ const MeetFarmers = () => {
         {/* Introduction Section */}
         <section className="mb-20">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">Our Team</h2>
+            <h2 className="text-4xl font-bold mb-4 relative">
+              <span className="bg-accent/10 px-4 py-2 rounded-lg">Our Team</span>
+            </h2>
             <h3 className="text-2xl text-muted-foreground mb-8">Dedicated to Fresh, Sustainable Produce</h3>
           </div>
           
@@ -96,11 +66,11 @@ const MeetFarmers = () => {
           {/* Team Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
             <div className="text-center">
-              <div className="text-3xl font-bold text-accent mb-2">15+</div>
+              <div className="text-3xl font-bold text-accent mb-2">16+</div>
               <div className="text-muted-foreground">Years Average Experience</div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-accent mb-2">6</div>
+              <div className="text-3xl font-bold text-accent mb-2">2</div>
               <div className="text-muted-foreground">Core Team Members</div>
             </div>
             <div className="text-center">
@@ -166,8 +136,7 @@ const MeetFarmers = () => {
               </p>
               
               <p className="text-lg leading-relaxed">
-                What unites us is our commitment to hydroponic farming and sustainable 
-                practices. We believe this innovative approach to agriculture represents 
+                What unites us is our commitment to hydroponic farming and <span className="text-accent font-semibold">sustainable practices</span>. We believe this innovative approach to agriculture represents 
                 the future of farming – efficient, environmentally friendly, and capable 
                 of producing the highest quality food year-round.
               </p>
@@ -178,7 +147,7 @@ const MeetFarmers = () => {
                   a natural fit for me. There's something amazing about watching plants 
                   thrive in our perfectly controlled environment."
                 </blockquote>
-                <cite className="text-muted-foreground">— Sarah Chen, Farm Manager</cite>
+                <cite className="text-muted-foreground">— Billy Thompson, Co-Founder</cite>
               </div>
             </div>
             
