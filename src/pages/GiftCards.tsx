@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Gift, Heart, Star, Leaf } from "lucide-react";
+import billysLogo from "@/assets/billysBotanicals-Logo-v1.png";
 
 const GiftCards = () => {
   const [formData, setFormData] = useState({
@@ -153,42 +154,46 @@ const GiftCards = () => {
           <div className="space-y-6">
             {/* Gift Card Preview */}
             <Card>
-              <CardHeader>
-                <CardTitle>Gift Card Preview</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-gradient-primary rounded-lg p-6 text-white">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center space-x-2">
-                      <Leaf className="w-6 h-6" />
-                      <span className="font-bold text-lg">FarmBox</span>
-                    </div>
-                    <Gift className="w-6 h-6" />
-                  </div>
-                  
-                  <div className="mb-6">
-                    <h3 className="text-2xl font-bold mb-2">
-                      {formData.amount && formData.amount !== "custom" ? `$${formData.amount}` : "$50"} Gift Card
-                    </h3>
-                    <p className="text-white/80">Farm Fresh Ingredients Delivered</p>
-                  </div>
+  <CardHeader>
+    <CardTitle>Gift Card Preview</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <div className="bg-gradient-primary rounded-lg p-6 text-white">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center space-x-2">
+          <img 
+            src={billysLogo} 
+            alt="Billy's Botanicals Logo"
+            className="h-8 w-auto object-contain bg-white rounded-sm p-1"
+          />
+          <span className="font-bold text-lg">Billy&apos;s Botanicals</span>
+        </div>
+        <Gift className="w-6 h-6" />
+      </div>
+      
+      <div className="mb-6">
+        <h3 className="text-2xl font-bold mb-2">
+          {formData.amount && formData.amount !== "custom" ? `$${formData.amount}` : "$50"} Gift Card
+        </h3>
+        <p className="text-white/80">Farm Fresh Ingredients Delivered</p>
+      </div>
 
-                  <div className="space-y-2 text-sm">
-                    <p>
-                      <strong>To:</strong> {formData.recipientName || "Recipient Name"}
-                    </p>
-                    <p>
-                      <strong>From:</strong> {formData.senderName || "Your Name"}
-                    </p>
-                    {formData.message && (
-                      <div className="mt-4 p-3 bg-white/10 rounded text-sm">
-                        "{formData.message}"
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+      <div className="space-y-2 text-sm">
+        <p>
+          <strong>To:</strong> {formData.recipientName || "Recipient Name"}
+        </p>
+        <p>
+          <strong>From:</strong> {formData.senderName || "Your Name"}
+        </p>
+        {formData.message && (
+          <div className="mt-4 p-3 bg-white/10 rounded text-sm">
+            "{formData.message}"
+          </div>
+        )}
+      </div>
+    </div>
+  </CardContent>
+</Card>
 
             {/* Gift Card Benefits */}
             <Card>

@@ -5,23 +5,23 @@ import farmersMarketImage from "@/assets/farmers-market-couple.jpg";
 
 const MeetFarmers = () => {
   const teamMembers = [
-    {
-      name: "Billy Thompson",
-      title: "Co-Founder & Head Farmer",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face",
-      bio: "Billy co-founded Billy's Botanicals with a vision to bring fresh, sustainably grown produce directly to families. With 18 years in sustainable agriculture, he oversees all growing operations and maintains our commitment to organic practices.",
-      funFact: "Billy can predict the weather by observing plant behavior and has never owned a TV, preferring to spend evenings reading about new farming techniques.",
-      experience: "18 years"
-    },
-    {
-      name: "Maria Thompson",
-      title: "Co-Founder & Community Manager",
-      image: "https://images.unsplash.com/photo-1494790108755-2616c333fb2c?w=300&h=300&fit=crop&crop=face",
-      bio: "Maria handles all customer relationships and community partnerships for Billy's Botanicals. Her background in nutrition and her passion for connecting people with their food sources makes her the heart of our customer experience.",
-      funFact: "Maria speaks three languages fluently and personally writes thank-you notes to every new subscriber. She also maintains a recipe blog featuring our seasonal produce.",
-      experience: "15 years"
-    }
-  ];
+  {
+    name: "Billy",
+    title: "Co-Founder & Head Grower",
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face",
+    bio: "Billy co-founded Billy's Botanicals and can be found every weekend working the farmers market stand at Forsyth Park. With a deep passion for sustainable growing, he leads all the planting, harvesting, and behind-the-scenes operations that keep the farm thriving.",
+    funFact: "Billy knows nearly every regular customer by name and starts each market day with a cup of black coffee and a weather check — he swears he can feel the rain before it hits.",
+    experience: "18 years"
+  },
+  {
+    name: "Ana",
+    title: "Co-Founder & Floral Artist",
+    image: "https://images.unsplash.com/photo-1494790108755-2616c333fb2c?w=300&h=300&fit=crop&crop=face",
+    bio: "Ana is the creative heart of Billy's Botanicals and co-runs the stand with Billy at Forsyth Park. In addition to farming, she operates her own flower business, designing custom bouquets for weddings, events, and local deliveries — always using fresh, seasonal blooms.",
+    funFact: "Ana has a signature flower for every month of the year and once built an entire wedding arch using only wildflowers and reclaimed driftwood.",
+    experience: "15 years"
+  }
+];
 
   return (
     <div className="min-h-screen bg-background">
@@ -84,7 +84,7 @@ const MeetFarmers = () => {
           </div>
 
           {/* Team Members Grid */}
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid gap-8 justify-center sm:grid-cols-1 md:grid-cols-2">
             {teamMembers.map((member, index) => (
               <Card key={index} className="hover-scale">
                 <CardContent className="p-6">

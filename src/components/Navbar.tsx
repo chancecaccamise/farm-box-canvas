@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import billysLogo from "@/assets/billysBotanicals-Logo-v1.png";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { 
   DropdownMenu, 
@@ -40,14 +41,13 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <img 
-              src="/lovable-uploads/billys-botanicals-logo.png" 
-              alt="Billy's Botanicals Logo" 
-              className="w-8 h-8 object-contain"
-            />
-            <span className="text-xl font-bold text-primary">Billy's Botanicals</span>
-          </Link>
+         <Link to="/" className="flex items-center">
+  <img 
+    src={billysLogo} 
+    alt="Billy's Botanicals Logo" 
+    className="h-20 w-auto object-contain" // ~80px height
+  />
+</Link>
 
           {/* Center Navigation */}
           <div className="hidden lg:flex items-center space-x-4 xl:space-x-6">
