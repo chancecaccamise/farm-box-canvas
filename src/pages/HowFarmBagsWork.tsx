@@ -26,7 +26,7 @@ const HowFarmBagsWork = () => {
       {/* Step-by-Step Process */}
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-4">Your Billy's Box Journey</h2>
+          <h2 className="text-4xl font-bold text-center mb-4">Your Farm Bag Journey</h2>
           <p className="text-xl text-muted-foreground text-center mb-16 max-w-2xl mx-auto">
             Follow your fresh produce from Billy's greenhouse to your table in five simple steps
           </p>
@@ -85,7 +85,7 @@ const HowFarmBagsWork = () => {
       {/* Customization Options */}
       <section className="py-20 px-4 bg-secondary/50">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-4">Customize Your Billy's Box</h2>
+          <h2 className="text-4xl font-bold text-center mb-4">Customize Your Farm Bag</h2>
           <p className="text-xl text-muted-foreground text-center mb-16">
             Tailor your Billy's box to match your family's preferences and dietary needs
           </p>
@@ -264,7 +264,7 @@ const HowFarmBagsWork = () => {
           
           <div className="mt-12">
             <Button asChild variant="organic" size="xl">
-              <Link to="/zip-code">Start Your Billy's Box Today</Link>
+              <Link to="/zip-code">Start Your Farm Bag Today</Link>
             </Button>
           </div>
         </div>
