@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Download, Search, Calendar } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { OrderInsights } from './OrderInsights';
 
 interface OrderWithDetails {
   id: string;
@@ -157,10 +158,13 @@ export const AdminOrders = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Order Management</h2>
-        <Button onClick={exportOrders}>
-          <Download className="h-4 w-4 mr-2" />
-          Export Orders
-        </Button>
+        <div className="flex gap-2">
+          <OrderInsights />
+          <Button onClick={exportOrders}>
+            <Download className="h-4 w-4 mr-2" />
+            Export Orders
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
