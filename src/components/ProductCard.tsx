@@ -43,7 +43,18 @@ export function ProductCard({ product, quantity, onUpdateQuantity, isLocked }: P
     return `/src/assets/${image}`;
   };
 
-  const imageSrc = getImageSrc(product.image);
+  const getCategoryFallback = (category: string) => {
+    const fallbacks = {
+      produce: 'https://images.unsplash.com/photo-1540420773420-3366772f4999?w=400&h=400&fit=crop',
+      herbs: 'https://images.unsplash.com/photo-1618160702438-9b02ab6515c9?w=400&h=400&fit=crop',
+      seafood: 'https://images.unsplash.com/photo-1544943910-4c1dc44aab44?w=400&h=400&fit=crop',
+      pantry: 'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=400&h=400&fit=crop',
+      protein: 'https://images.unsplash.com/photo-1606756790138-261d2b21cd02?w=400&h=400&fit=crop'
+    };
+    return fallbacks[category.toLowerCase() as keyof typeof fallbacks] || fallbacks.produce;
+  };
+
+  const imageSrc = getImageSrc(product.image) || getCategoryFallback(product.category);
 
   return (
     <Card className="overflow-hidden group hover:shadow-medium transition-all duration-300">
@@ -54,11 +65,15 @@ export function ProductCard({ product, quantity, onUpdateQuantity, isLocked }: P
             alt={product.name}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             onError={(e) => {
-              // Fallback to placeholder if image fails to load
+              // Fallback to category-specific image if image fails to load
               const target = e.target as HTMLImageElement;
-              target.style.display = 'none';
-              const fallback = target.nextElementSibling as HTMLElement;
-              if (fallback) fallback.style.display = 'flex';
+              if (target.src !== getCategoryFallback(product.category)) {
+                target.src = getCategoryFallback(product.category);
+              } else {
+                target.style.display = 'none';
+                const fallback = target.nextElementSibling as HTMLElement;
+                if (fallback) fallback.style.display = 'flex';
+              }
             }}
           />
         ) : null}
