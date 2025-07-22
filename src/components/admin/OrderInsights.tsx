@@ -40,23 +40,21 @@ export const OrderInsights = () => {
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - dateRange);
 
-      // Fetch orders data
+      // Fetch orders data - now the primary source of truth
       const { data: orders, error: ordersError } = await supabase
         .from('orders')
-        .select('*')
+        .select(`
+          *,
+          order_items(
+            quantity,
+            price,
+            products(name)
+          )
+        `)
         .gte('order_date', startDate.toISOString())
         .lte('order_date', endDate.toISOString());
 
       if (ordersError) throw ordersError;
-
-      // Fetch weekly bags data
-      const { data: weeklyBags, error: bagsError } = await supabase
-        .from('weekly_bags')
-        .select('*')
-        .gte('created_at', startDate.toISOString())
-        .lte('created_at', endDate.toISOString());
-
-      if (bagsError) throw bagsError;
 
       // Fetch subscriptions
       const { data: subscriptions, error: subsError } = await supabase
@@ -66,18 +64,18 @@ export const OrderInsights = () => {
 
       if (subsError) throw subsError;
 
-      // Calculate KPIs
-      const totalRevenue = [...(orders || []), ...(weeklyBags || [])]
-        .reduce((sum, item) => sum + (Number(item.total_amount) || 0), 0);
+      // Calculate KPIs - using orders as primary source
+      const totalRevenue = (orders || [])
+        .reduce((sum, order) => sum + (Number(order.total_amount) || 0), 0);
 
-      const totalOrders = (orders?.length || 0) + (weeklyBags?.length || 0);
+      const totalOrders = orders?.length || 0;
       const activeSubscriptions = subscriptions?.length || 0;
       const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
       // Calculate daily orders
       const dailyOrdersMap = new Map();
-      [...(orders || []), ...(weeklyBags || [])].forEach(order => {
-        const date = new Date('order_date' in order ? order.order_date : order.created_at).toISOString().split('T')[0];
+      (orders || []).forEach(order => {
+        const date = new Date(order.order_date).toISOString().split('T')[0];
         dailyOrdersMap.set(date, (dailyOrdersMap.get(date) || 0) + 1);
       });
 
@@ -85,11 +83,12 @@ export const OrderInsights = () => {
         .map(([date, orders]) => ({ date, orders }))
         .sort((a, b) => a.date.localeCompare(b.date));
 
-      // Calculate revenue by box size
+      // Calculate revenue by box size from orders
       const revenueByBoxMap = new Map();
-      weeklyBags?.forEach(bag => {
-        const boxSize = bag.box_size || 'Unknown';
-        revenueByBoxMap.set(boxSize, (revenueByBoxMap.get(boxSize) || 0) + (Number(bag.total_amount) || 0));
+      (orders || []).forEach(order => {
+        // Try to get box_size from the order, fallback to 'Standard' if not available
+        const boxSize = (order as any).box_size || 'Standard';
+        revenueByBoxMap.set(boxSize, (revenueByBoxMap.get(boxSize) || 0) + (Number(order.total_amount) || 0));
       });
 
       const revenueByBoxSize = Array.from(revenueByBoxMap.entries())
@@ -110,8 +109,8 @@ export const OrderInsights = () => {
       const sixMonthsAgo = new Date();
       sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-      [...(orders || []), ...(weeklyBags || [])].forEach(order => {
-        const orderDate = new Date('order_date' in order ? order.order_date : order.created_at);
+      (orders || []).forEach(order => {
+        const orderDate = new Date(order.order_date);
         if (orderDate >= sixMonthsAgo) {
           const month = orderDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
           const existing = monthlyGrowthMap.get(month) || { revenue: 0, orders: 0 };

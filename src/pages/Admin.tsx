@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Package, ShoppingBag, Users, Fish, Flower } from 'lucide-react';
 import { AdminProducts } from '@/components/admin/AdminProducts';
 import { AdminBoxTemplates } from '@/components/admin/AdminBoxTemplates';
-import { AdminOrders } from '@/components/admin/AdminOrders';
+import { EnhancedOrderManagement } from '@/components/admin/EnhancedOrderManagement';
 import { AdminFreshCatch } from '@/components/admin/AdminFreshCatch';
 import { AdminBouquetRequests } from '@/components/admin/AdminBouquetRequests';
 import { AdminFreshFishAlerts } from '@/components/admin/AdminFreshFishAlerts';
@@ -103,7 +103,7 @@ const Admin = () => {
           </TabsContent>
 
           <TabsContent value="orders">
-            <AdminOrders />
+            <EnhancedOrderManagement />
           </TabsContent>
 
           <TabsContent value="fresh-catch">
