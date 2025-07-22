@@ -77,7 +77,7 @@ export const OrderInsights = () => {
       // Calculate daily orders
       const dailyOrdersMap = new Map();
       [...(orders || []), ...(weeklyBags || [])].forEach(order => {
-        const date = new Date(order.order_date || order.created_at).toISOString().split('T')[0];
+        const date = new Date('order_date' in order ? order.order_date : order.created_at).toISOString().split('T')[0];
         dailyOrdersMap.set(date, (dailyOrdersMap.get(date) || 0) + 1);
       });
 
@@ -111,7 +111,7 @@ export const OrderInsights = () => {
       sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
       [...(orders || []), ...(weeklyBags || [])].forEach(order => {
-        const orderDate = new Date(order.order_date || order.created_at);
+        const orderDate = new Date('order_date' in order ? order.order_date : order.created_at);
         if (orderDate >= sixMonthsAgo) {
           const month = orderDate.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
           const existing = monthlyGrowthMap.get(month) || { revenue: 0, orders: 0 };
