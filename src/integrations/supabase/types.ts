@@ -88,6 +88,75 @@ export type Database = {
         }
         Relationships: []
       }
+      driver_assignments: {
+        Row: {
+          created_at: string | null
+          current_lat: number | null
+          current_lng: number | null
+          current_stop_index: number | null
+          driver_user_id: string
+          end_lat: number | null
+          end_lng: number | null
+          id: string
+          route_batch_id: string
+          start_lat: number | null
+          start_lng: number | null
+          total_distance_km: number | null
+          total_duration_min: number | null
+          updated_at: string | null
+          vehicle_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          current_lat?: number | null
+          current_lng?: number | null
+          current_stop_index?: number | null
+          driver_user_id: string
+          end_lat?: number | null
+          end_lng?: number | null
+          id?: string
+          route_batch_id: string
+          start_lat?: number | null
+          start_lng?: number | null
+          total_distance_km?: number | null
+          total_duration_min?: number | null
+          updated_at?: string | null
+          vehicle_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          current_lat?: number | null
+          current_lng?: number | null
+          current_stop_index?: number | null
+          driver_user_id?: string
+          end_lat?: number | null
+          end_lng?: number | null
+          id?: string
+          route_batch_id?: string
+          start_lat?: number | null
+          start_lng?: number | null
+          total_distance_km?: number | null
+          total_duration_min?: number | null
+          updated_at?: string | null
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_assignments_route_batch_id_fkey"
+            columns: ["route_batch_id"]
+            isOneToOne: false
+            referencedRelation: "route_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_assignments_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       fresh_catch_announcements: {
         Row: {
           created_at: string
@@ -402,8 +471,11 @@ export type Database = {
           created_at: string
           email_newsletter: boolean
           first_name: string | null
+          home_base_address: string | null
           id: string
           last_name: string | null
+          phone: string | null
+          role: Database["public"]["Enums"]["user_role"] | null
           sms_notifications: boolean
           updated_at: string
           user_id: string
@@ -412,8 +484,11 @@ export type Database = {
           created_at?: string
           email_newsletter?: boolean
           first_name?: string | null
+          home_base_address?: string | null
           id?: string
           last_name?: string | null
+          phone?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
           sms_notifications?: boolean
           updated_at?: string
           user_id: string
@@ -422,13 +497,165 @@ export type Database = {
           created_at?: string
           email_newsletter?: boolean
           first_name?: string | null
+          home_base_address?: string | null
           id?: string
           last_name?: string | null
+          phone?: string | null
+          role?: Database["public"]["Enums"]["user_role"] | null
           sms_notifications?: boolean
           updated_at?: string
           user_id?: string
         }
         Relationships: []
+      }
+      route_batches: {
+        Row: {
+          batch_name: string
+          created_at: string | null
+          dispatcher_user_id: string
+          id: string
+          optimization_settings_json: Json | null
+          optimization_status:
+            | Database["public"]["Enums"]["optimization_status"]
+            | null
+          scheduled_date: string
+          updated_at: string | null
+        }
+        Insert: {
+          batch_name: string
+          created_at?: string | null
+          dispatcher_user_id: string
+          id?: string
+          optimization_settings_json?: Json | null
+          optimization_status?:
+            | Database["public"]["Enums"]["optimization_status"]
+            | null
+          scheduled_date: string
+          updated_at?: string | null
+        }
+        Update: {
+          batch_name?: string
+          created_at?: string | null
+          dispatcher_user_id?: string
+          id?: string
+          optimization_settings_json?: Json | null
+          optimization_status?:
+            | Database["public"]["Enums"]["optimization_status"]
+            | null
+          scheduled_date?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      stop_assignments: {
+        Row: {
+          created_at: string | null
+          driver_assignment_id: string
+          id: string
+          sequence_index: number
+          stop_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          driver_assignment_id: string
+          id?: string
+          sequence_index: number
+          stop_id: string
+        }
+        Update: {
+          created_at?: string | null
+          driver_assignment_id?: string
+          id?: string
+          sequence_index?: number
+          stop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stop_assignments_driver_assignment_id_fkey"
+            columns: ["driver_assignment_id"]
+            isOneToOne: false
+            referencedRelation: "driver_assignments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stop_assignments_stop_id_fkey"
+            columns: ["stop_id"]
+            isOneToOne: false
+            referencedRelation: "stops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stops: {
+        Row: {
+          address_geocoded_lat: number | null
+          address_geocoded_lng: number | null
+          address_raw: string
+          completed_at: string | null
+          created_at: string | null
+          customer_name: string
+          driver_notes: string | null
+          id: string
+          load_units: number | null
+          notes: string | null
+          order_sequence: number | null
+          proof_photo_url: string | null
+          route_batch_id: string
+          service_time_minutes: number | null
+          status: Database["public"]["Enums"]["stop_status"] | null
+          time_window_end: string | null
+          time_window_start: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address_geocoded_lat?: number | null
+          address_geocoded_lng?: number | null
+          address_raw: string
+          completed_at?: string | null
+          created_at?: string | null
+          customer_name: string
+          driver_notes?: string | null
+          id?: string
+          load_units?: number | null
+          notes?: string | null
+          order_sequence?: number | null
+          proof_photo_url?: string | null
+          route_batch_id: string
+          service_time_minutes?: number | null
+          status?: Database["public"]["Enums"]["stop_status"] | null
+          time_window_end?: string | null
+          time_window_start?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address_geocoded_lat?: number | null
+          address_geocoded_lng?: number | null
+          address_raw?: string
+          completed_at?: string | null
+          created_at?: string | null
+          customer_name?: string
+          driver_notes?: string | null
+          id?: string
+          load_units?: number | null
+          notes?: string | null
+          order_sequence?: number | null
+          proof_photo_url?: string | null
+          route_batch_id?: string
+          service_time_minutes?: number | null
+          status?: Database["public"]["Enums"]["stop_status"] | null
+          time_window_end?: string | null
+          time_window_start?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stops_route_batch_id_fkey"
+            columns: ["route_batch_id"]
+            isOneToOne: false
+            referencedRelation: "route_batches"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_preferences: {
         Row: {
@@ -529,6 +756,33 @@ export type Database = {
           subscription_type?: string
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      vehicles: {
+        Row: {
+          capacity_units: number | null
+          created_at: string | null
+          driver_user_id: string | null
+          id: string
+          name: string
+          updated_at: string | null
+        }
+        Insert: {
+          capacity_units?: number | null
+          created_at?: string | null
+          driver_user_id?: string | null
+          id?: string
+          name: string
+          updated_at?: string | null
+        }
+        Update: {
+          capacity_units?: number | null
+          created_at?: string | null
+          driver_user_id?: string | null
+          id?: string
+          name?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -645,7 +899,10 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      optimization_status: "pending" | "optimized" | "error"
+      stop_status: "pending" | "in_progress" | "done" | "skipped"
       subscription_status: "active" | "paused" | "cancelled" | "suspended"
+      user_role: "dispatcher" | "driver"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -774,7 +1031,10 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      optimization_status: ["pending", "optimized", "error"],
+      stop_status: ["pending", "in_progress", "done", "skipped"],
       subscription_status: ["active", "paused", "cancelled", "suspended"],
+      user_role: ["dispatcher", "driver"],
     },
   },
 } as const
