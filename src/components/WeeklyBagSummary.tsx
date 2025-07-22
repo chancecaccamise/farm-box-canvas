@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { ShoppingCart, Lock, Calendar, Tag, Truck, Clock } from "lucide-react";
+import { ShoppingCart, Lock, Calendar, Tag, Truck, Clock, CheckCircle } from "lucide-react";
 
 interface WeeklyBagSummaryProps {
   weeklyBag: {
@@ -77,23 +77,31 @@ export function WeeklyBagSummary({
   };
 
   const getCheckoutButtonText = () => {
+    if (weeklyBag?.is_confirmed) {
+      return "Bag Confirmed";
+    }
+    
     if (hasActiveSubscription) {
-      return addonsTotal > 0 ? "Checkout Add-Ons" : "Your Box is Ready";
+      return addonsTotal > 0 ? "Checkout Add-Ons" : "Confirm Your Bag";
     } else {
       return "Checkout Entire Order";
     }
   };
 
   const shouldShowCheckoutButton = () => {
+    if (weeklyBag?.is_confirmed) {
+      return false; // Don't show checkout for confirmed bags
+    }
+    
     if (hasActiveSubscription) {
-      return addonsTotal > 0; // Only show checkout if there are add-ons to pay for
+      return true; // Always show for subscribers (they can confirm even without add-ons)
     } else {
       return itemCount > 0; // Show checkout if there are any items
     }
   };
 
-  // Determine if editing should be disabled - only when cutoff has passed
-  const isEditingDisabled = isLocked;
+  // Determine if editing should be disabled - when cutoff has passed OR bag is confirmed
+  const isEditingDisabled = isLocked || weeklyBag?.is_confirmed;
 
   if (loading) {
     return (
@@ -133,6 +141,9 @@ export function WeeklyBagSummary({
           <CardTitle className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5" />
             {hasActiveSubscription ? "This Week's Summary" : "Order Summary"}
+            {weeklyBag?.is_confirmed && (
+              <CheckCircle className="h-4 w-4 text-green-600 ml-auto" />
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -181,7 +192,7 @@ export function WeeklyBagSummary({
             </div>
           </div>
 
-          {/* Promo Code Section - only show if not locked and there's something to checkout */}
+          {/* Promo Code Section - only show if not locked/confirmed and there's something to checkout */}
           {!isEditingDisabled && shouldShowCheckoutButton() && (
             <>
               <Separator />
@@ -225,8 +236,20 @@ export function WeeklyBagSummary({
             </div>
           </div>
 
-          {/* Editing Status Info */}
-          {isEditingDisabled && (
+          {/* Status Info */}
+          {weeklyBag?.is_confirmed && (
+            <div className="bg-green-50 border border-green-200 p-3 rounded-lg">
+              <div className="flex items-center gap-2 text-sm font-medium text-green-800 mb-1">
+                <CheckCircle className="h-4 w-4" />
+                Bag Confirmed
+              </div>
+              <div className="text-xs text-green-700">
+                Your bag is confirmed and ready for delivery.
+              </div>
+            </div>
+          )}
+
+          {isEditingDisabled && !weeklyBag?.is_confirmed && (
             <div className="bg-destructive/10 border border-destructive/20 p-3 rounded-lg">
               <div className="flex items-center gap-2 text-sm font-medium text-destructive mb-1">
                 <Clock className="h-4 w-4" />
@@ -239,7 +262,12 @@ export function WeeklyBagSummary({
           )}
 
           {/* Checkout Button */}
-          {isEditingDisabled ? (
+          {weeklyBag?.is_confirmed ? (
+            <Button className="w-full" disabled variant="default">
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Bag Confirmed
+            </Button>
+          ) : isEditingDisabled ? (
             <Button className="w-full" disabled variant="destructive">
               <Lock className="h-4 w-4 mr-2" />
               Cutoff Passed
@@ -252,11 +280,6 @@ export function WeeklyBagSummary({
               <Calendar className="h-4 w-4 mr-2" />
               {getCheckoutButtonText()}
             </Button>
-          ) : hasActiveSubscription && addonsTotal === 0 ? (
-            <Button className="w-full" disabled variant="outline">
-              <ShoppingCart className="h-4 w-4 mr-2" />
-              Your Box is Ready for Delivery
-            </Button>
           ) : (
             <Button className="w-full" disabled variant="outline">
               <ShoppingCart className="h-4 w-4 mr-2" />
@@ -265,10 +288,10 @@ export function WeeklyBagSummary({
           )}
 
           {/* Additional Info */}
-          {!isEditingDisabled && (
+          {!isEditingDisabled && !weeklyBag?.is_confirmed && (
             <p className="text-xs text-center text-muted-foreground">
               {hasActiveSubscription 
-                ? "Your subscription box will be delivered automatically. You can add extras until the cutoff time."
+                ? "Your subscription box will be delivered automatically. You can add extras and confirm until the cutoff time."
                 : "You can modify your selections until the cutoff time"
               }
             </p>

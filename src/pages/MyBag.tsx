@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, AlertCircle, Package, Calendar } from "lucide-react";
+import { ShoppingCart, AlertCircle, Package, Calendar, RefreshCw, CheckCircle } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -14,6 +15,7 @@ import { BagItemCard } from "@/components/BagItemCard";
 import { ReadOnlyBagItem } from "@/components/ReadOnlyBagItem";
 import { AddOnsGrid } from "@/components/AddOnsGrid";
 import { SubscriptionManager } from "@/components/SubscriptionManager";
+import { UnconfirmBagDialog } from "@/components/UnconfirmBagDialog";
 
 interface WeeklyBag {
   id: string;
@@ -55,6 +57,8 @@ function MyBag() {
   const [isLocked, setIsLocked] = useState(false);
   const [hasActiveSubscription, setHasActiveSubscription] = useState<boolean | null>(null);
   const [subscription, setSubscription] = useState<any>(null);
+  const [showUnconfirmDialog, setShowUnconfirmDialog] = useState(false);
+  const [unconfirmLoading, setUnconfirmLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -187,12 +191,69 @@ function MyBag() {
     setIsLocked(now > cutoff);
   };
 
+  const canUnconfirmBag = () => {
+    if (!currentWeekBag) return false;
+    const now = new Date();
+    const cutoff = new Date(currentWeekBag.cutoff_time);
+    return currentWeekBag.is_confirmed && now <= cutoff;
+  };
+
+  const handleUnconfirmBag = async () => {
+    if (!currentWeekBag) return;
+    
+    setUnconfirmLoading(true);
+    try {
+      // Update the weekly bag to unconfirmed status
+      const { error: updateError } = await supabase
+        .from("weekly_bags")
+        .update({ 
+          is_confirmed: false, 
+          confirmed_at: null 
+        })
+        .eq("id", currentWeekBag.id);
+
+      if (updateError) throw updateError;
+
+      // Repopulate with latest template items (this preserves add-ons)
+      const { error: populateError } = await supabase
+        .rpc('populate_weekly_bag_from_template', {
+          bag_id: currentWeekBag.id,
+          box_size_name: currentWeekBag.box_size,
+          week_start: currentWeekBag.week_start_date
+        });
+
+      if (populateError) {
+        console.error("Error repopulating bag:", populateError);
+        // Continue anyway - the unconfirm still worked
+      }
+
+      // Refresh the bag data
+      await initializeCurrentWeekBag();
+
+      toast({
+        title: "Bag Unconfirmed",
+        description: "Your bag has been unconfirmed and updated with the latest box contents. You can now make changes.",
+      });
+    } catch (error) {
+      console.error("Error unconfirming bag:", error);
+      toast({
+        title: "Error",
+        description: "Failed to unconfirm your bag. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setUnconfirmLoading(false);
+    }
+  };
+
   const updateItemQuantity = async (productId: string, newQuantity: number) => {
-    // Only prevent editing if cutoff time has passed - remove is_confirmed check
-    if (!currentWeekBag || isLocked) {
+    // Only prevent editing if cutoff time has passed OR bag is confirmed
+    if (!currentWeekBag || isLocked || currentWeekBag.is_confirmed) {
       toast({
         title: "Cannot Modify",
-        description: "The cutoff time has passed and your bag can no longer be modified.",
+        description: currentWeekBag?.is_confirmed 
+          ? "Your bag is confirmed. Please unconfirm it first to make changes."
+          : "The cutoff time has passed and your bag can no longer be modified.",
         variant: "destructive",
       });
       return;
@@ -445,15 +506,45 @@ function MyBag() {
             <div className="lg:col-span-2 space-y-8">
               {/* This Week's Box Section */}
               <div className="space-y-6">
-                <div className="flex items-center gap-3">
-                  <Package className="w-6 h-6 text-primary" />
-                  <div>
-                    <h2 className="text-2xl font-semibold">
-                      Your Box for the Week of {formatWeekDate()}
-                    </h2>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {currentWeekBag?.box_size ? currentWeekBag.box_size.charAt(0).toUpperCase() + currentWeekBag.box_size.slice(1) : ''} Box - Curated by our team
-                    </p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Package className="w-6 h-6 text-primary" />
+                    <div>
+                      <h2 className="text-2xl font-semibold">
+                        Your Box for the Week of {formatWeekDate()}
+                      </h2>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {currentWeekBag?.box_size ? currentWeekBag.box_size.charAt(0).toUpperCase() + currentWeekBag.box_size.slice(1) : ''} Box - Curated by our team
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Bag Status & Unconfirm Button */}
+                  <div className="flex items-center gap-3">
+                    {currentWeekBag?.is_confirmed ? (
+                      <div className="flex items-center gap-2">
+                        <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">
+                          <CheckCircle className="w-3 h-3 mr-1" />
+                          Confirmed
+                        </Badge>
+                        {canUnconfirmBag() && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setShowUnconfirmDialog(true)}
+                            disabled={unconfirmLoading}
+                            className="text-primary border-primary hover:bg-primary/10"
+                          >
+                            <RefreshCw className="w-4 h-4 mr-2" />
+                            Unconfirm
+                          </Button>
+                        )}
+                      </div>
+                    ) : (
+                      <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
+                        Open for Changes
+                      </Badge>
+                    )}
                   </div>
                 </div>
                 
@@ -471,10 +562,11 @@ function MyBag() {
                   <div className="text-center py-8 text-muted-foreground bg-muted/30 rounded-lg">
                     <Package className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
                     <p>Your box contents will be available once curated for this week.</p>
+                    <p className="text-sm mt-2">Contents are based on the {currentWeekBag?.box_size} box template from our admin team.</p>
                   </div>
                 )}
 
-                {/* Status Message - Updated to show cutoff info */}
+                {/* Status Message - Updated to show confirmation and cutoff info */}
                 <div className="bg-primary/5 border border-primary/20 p-4 rounded-lg">
                   <div className="flex items-start gap-3">
                     <Calendar className="w-5 h-5 text-primary mt-0.5" />
@@ -482,12 +574,16 @@ function MyBag() {
                       {hasActiveSubscription ? (
                         <div>
                           <p className="text-sm font-medium text-foreground">
-                            Your box will be delivered automatically
+                            {currentWeekBag?.is_confirmed ? "Your confirmed box will be delivered automatically" : "Your box will be delivered automatically"}
                           </p>
                           <p className="text-xs text-muted-foreground mt-1">
-                            {isLocked 
-                              ? "Cutoff time has passed. No more changes allowed for this week."
-                              : "You can add extras until the cutoff time. Check out only if you've added extras."
+                            {currentWeekBag?.is_confirmed
+                              ? canUnconfirmBag() 
+                                ? "You can still unconfirm to make changes until the cutoff time."
+                                : "Your bag is locked for delivery. Changes will apply to next week."
+                              : isLocked 
+                                ? "Cutoff time has passed. No more changes allowed for this week."
+                                : "You can add extras and confirm your bag until the cutoff time."
                             }
                           </p>
                         </div>
@@ -497,9 +593,13 @@ function MyBag() {
                             One-time purchase
                           </p>
                           <p className="text-xs text-muted-foreground mt-1">
-                            {isLocked 
-                              ? "Cutoff time has passed. No more changes allowed."
-                              : "Complete checkout to receive your box and any add-ons."
+                            {currentWeekBag?.is_confirmed
+                              ? canUnconfirmBag()
+                                ? "Your bag is confirmed. You can still unconfirm to make changes."
+                                : "Your bag is locked for delivery."
+                              : isLocked 
+                                ? "Cutoff time has passed. No more changes allowed."
+                                : "Complete checkout to receive your box and any add-ons."
                             }
                           </p>
                         </div>
@@ -525,7 +625,7 @@ function MyBag() {
                           key={item.id}
                           item={item}
                           onUpdateQuantity={updateItemQuantity}
-                          isLocked={isLocked} // Only lock based on cutoff time
+                          isLocked={isLocked || currentWeekBag?.is_confirmed || false}
                         />
                       ))}
                     </div>
@@ -537,7 +637,7 @@ function MyBag() {
               <AddOnsGrid 
                 bagItems={getCurrentBagProducts()} 
                 onUpdateQuantity={updateItemQuantity}
-                isLocked={isLocked} // Only lock based on cutoff time
+                isLocked={isLocked || currentWeekBag?.is_confirmed || false}
               />
             </div>
 
@@ -561,6 +661,15 @@ function MyBag() {
           </div>
         </div>
       </div>
+
+      {/* Unconfirm Dialog */}
+      <UnconfirmBagDialog
+        isOpen={showUnconfirmDialog}
+        onClose={() => setShowUnconfirmDialog(false)}
+        onConfirm={handleUnconfirmBag}
+        loading={unconfirmLoading}
+        boxSize={currentWeekBag?.box_size || 'medium'}
+      />
     </div>
   );
 }
