@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, AlertCircle, Package } from "lucide-react";
+import { ShoppingCart, AlertCircle, Package, Calendar } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -10,10 +10,10 @@ import { useNavigate, Link } from "react-router-dom";
 import { CountdownTimer } from "@/components/CountdownTimer";
 import { BagHistory } from "@/components/BagHistory";
 import { WeeklyBagSummary } from "@/components/WeeklyBagSummary";
-import { ProductGrid } from "@/components/ProductGrid";
 import { EmptyBagState } from "@/components/EmptyBagState";
 import { BagItemCard } from "@/components/BagItemCard";
-import { ProductCard } from "@/components/ProductCard";
+import { ReadOnlyBagItem } from "@/components/ReadOnlyBagItem";
+import { AddOnsGrid } from "@/components/AddOnsGrid";
 import { SubscriptionManager } from "@/components/SubscriptionManager";
 
 interface WeeklyBag {
@@ -343,16 +343,6 @@ function MyBag() {
     }
   };
 
-  const getCurrentBagProducts = () => {
-    // Only include add-ons in the product grid (box items are predetermined)
-    return bagItems
-      .filter(item => item.item_type === 'addon')
-      .reduce((acc, item) => {
-        acc[item.product_id] = item.quantity;
-        return acc;
-      }, {} as Record<string, number>);
-  };
-
   const getBoxItems = () => {
     return bagItems.filter(item => item.item_type === 'box_item');
   };
@@ -361,11 +351,27 @@ function MyBag() {
     return bagItems.filter(item => item.item_type === 'addon');
   };
 
-  const scrollToProducts = () => {
-    const productsSection = document.getElementById('products-section');
-    if (productsSection) {
-      productsSection.scrollIntoView({ behavior: 'smooth' });
-    }
+  const getCurrentBagProducts = () => {
+    return bagItems
+      .filter(item => item.item_type === 'addon')
+      .reduce((acc, item) => {
+        acc[item.product_id] = item.quantity;
+        return acc;
+      }, {} as Record<string, number>);
+  };
+
+  const formatWeekDate = () => {
+    if (!currentWeekBag?.week_start_date) return "";
+    const startDate = new Date(currentWeekBag.week_start_date);
+    const endDate = new Date(currentWeekBag.week_end_date);
+    
+    return `${startDate.toLocaleDateString('en-US', { 
+      month: 'long', 
+      day: 'numeric' 
+    })} - ${endDate.toLocaleDateString('en-US', { 
+      month: 'long', 
+      day: 'numeric' 
+    })}`;
   };
 
   if (loading) {
@@ -391,7 +397,6 @@ function MyBag() {
     );
   }
 
-  // Show subscription required message if user doesn't have an active subscription
   if (hasActiveSubscription === false) {
     return (
       <div className="min-h-screen bg-background">
@@ -479,84 +484,98 @@ function MyBag() {
           )}
 
           <div className="grid lg:grid-cols-3 gap-8">
-            {/* Left Side - Bag Items & Products */}
+            {/* Left Side - Bag Items & Add-ons */}
             <div className="lg:col-span-2 space-y-8">
-              {/* Current Week's Box */}
+              {/* This Week's Box Section */}
               <div className="space-y-6">
                 <div className="flex items-center gap-3">
                   <Package className="w-6 h-6 text-primary" />
-                  <h2 className="text-2xl font-semibold">
-                    This Week's {currentWeekBag?.box_size ? currentWeekBag.box_size.charAt(0).toUpperCase() + currentWeekBag.box_size.slice(1) : ''} Box
-                  </h2>
-                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
-                    {getBoxItems().length} item{getBoxItems().length !== 1 ? 's' : ''}
-                  </Badge>
+                  <div>
+                    <h2 className="text-2xl font-semibold">
+                      Your Box for the Week of {formatWeekDate()}
+                    </h2>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {currentWeekBag?.box_size ? currentWeekBag.box_size.charAt(0).toUpperCase() + currentWeekBag.box_size.slice(1) : ''} Box - Curated by our team
+                    </p>
+                  </div>
                 </div>
-                <p className="text-muted-foreground">
-                  These items are curated by our team and included in your subscription.
-                </p>
                 
                 {getBoxItems().length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {getBoxItems().map((item) => (
-                      <BagItemCard 
+                      <ReadOnlyBagItem 
                         key={item.id}
                         item={item}
-                        onUpdateQuantity={() => {}} // Box items can't be modified
-                        isLocked={true} // Always locked for box items
+                        partnerName="Billy's Farm" // TODO: Add partner lookup
                       />
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    Your box contents will be available once curated for this week.
+                  <div className="text-center py-8 text-muted-foreground bg-muted/30 rounded-lg">
+                    <Package className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                    <p>Your box contents will be available once curated for this week.</p>
+                  </div>
+                )}
+
+                {/* Subscription Status Message */}
+                <div className="bg-primary/5 border border-primary/20 p-4 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <Calendar className="w-5 h-5 text-primary mt-0.5" />
+                    <div>
+                      {hasActiveSubscription ? (
+                        <div>
+                          <p className="text-sm font-medium text-foreground">
+                            Your box will be delivered automatically
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            You only need to check out if you've added any extras below.
+                          </p>
+                        </div>
+                      ) : (
+                        <div>
+                          <p className="text-sm font-medium text-foreground">
+                            One-time purchase
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            Complete checkout to receive your box and any add-ons.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Your Add-ons Section */}
+                {getAddonItems().length > 0 && (
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-3">
+                      <ShoppingCart className="w-6 h-6 text-primary" />
+                      <h3 className="text-xl font-semibold">Your Add-ons</h3>
+                      <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+                        {getAddonItems().length} item{getAddonItems().length !== 1 ? 's' : ''}
+                      </Badge>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {getAddonItems().map((item) => (
+                        <BagItemCard 
+                          key={item.id}
+                          item={item}
+                          onUpdateQuantity={updateItemQuantity}
+                          isLocked={currentWeekBag?.is_confirmed || isLocked}
+                        />
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
 
-              {/* Add-ons Section */}
-              <div className="space-y-6">
-                <div className="flex items-center gap-3">
-                  <ShoppingCart className="w-6 h-6 text-primary" />
-                  <h2 className="text-2xl font-semibold">Your Add-ons</h2>
-                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
-                    {getAddonItems().length} item{getAddonItems().length !== 1 ? 's' : ''}
-                  </Badge>
-                </div>
-                <p className="text-muted-foreground">
-                  Extra items you've added to supplement your weekly box.
-                </p>
-                
-                {getAddonItems().length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {getAddonItems().map((item) => (
-                      <BagItemCard 
-                        key={item.id}
-                        item={item}
-                        onUpdateQuantity={updateItemQuantity}
-                        isLocked={currentWeekBag?.is_confirmed || isLocked}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <EmptyBagState onStartShopping={scrollToProducts} />
-                )}
-              </div>
-
-              {/* Available Products */}
-              <div id="products-section">
-                <div className="space-y-4">
-                  <h2 className="text-2xl font-semibold">Browse Add-ons</h2>
-                  <p className="text-muted-foreground">
-                    Supplement your weekly box with these additional products.
-                  </p>
-                  <ProductGrid 
-                    bagItems={getCurrentBagProducts()} 
-                    onUpdateQuantity={updateItemQuantity}
-                    isLocked={currentWeekBag?.is_confirmed || isLocked}
-                  />
-                </div>
-              </div>
+              {/* Browse Add-ons Section */}
+              <AddOnsGrid 
+                bagItems={getCurrentBagProducts()} 
+                onUpdateQuantity={updateItemQuantity}
+                isLocked={currentWeekBag?.is_confirmed || isLocked}
+              />
 
               {/* Bag History */}
               <BagHistory
@@ -573,6 +592,7 @@ function MyBag() {
                 onConfirmBag={confirmBag}
                 isLocked={isLocked}
                 loading={loading}
+                hasActiveSubscription={hasActiveSubscription}
               />
               
               {/* Subscription Management */}

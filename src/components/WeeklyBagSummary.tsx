@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -13,11 +14,14 @@ interface WeeklyBagSummaryProps {
     total_amount: number;
     is_confirmed: boolean;
     cutoff_time: string;
+    box_price: number;
+    addons_total: number;
   } | null;
   itemCount: number;
   onConfirmBag: () => void;
   isLocked: boolean;
   loading: boolean;
+  hasActiveSubscription?: boolean;
 }
 
 export function WeeklyBagSummary({ 
@@ -25,21 +29,24 @@ export function WeeklyBagSummary({
   itemCount, 
   onConfirmBag, 
   isLocked, 
-  loading 
+  loading,
+  hasActiveSubscription = false
 }: WeeklyBagSummaryProps) {
   const [promoCode, setPromoCode] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
 
-  const subtotal = weeklyBag?.subtotal || 0;
+  const boxPrice = weeklyBag?.box_price || 0;
+  const addonsTotal = weeklyBag?.addons_total || 0;
   const deliveryFee = weeklyBag?.delivery_fee || 4.99;
-  const total = weeklyBag?.total_amount || (subtotal + deliveryFee);
+  const subtotal = boxPrice + addonsTotal;
+  const total = subtotal + deliveryFee;
 
   const formatDeliveryDate = () => {
     if (!weeklyBag?.cutoff_time) return "TBD";
     
     const cutoff = new Date(weeklyBag.cutoff_time);
     const deliveryDate = new Date(cutoff);
-    deliveryDate.setDate(deliveryDate.getDate() + 3); // Deliver 3 days after cutoff
+    deliveryDate.setDate(deliveryDate.getDate() + 3);
     
     return deliveryDate.toLocaleDateString('en-US', { 
       weekday: 'long', 
@@ -49,9 +56,32 @@ export function WeeklyBagSummary({
   };
 
   const handlePromoCode = () => {
-    // Placeholder functionality
     if (promoCode.toLowerCase() === "welcome10") {
       setPromoApplied(true);
+    }
+  };
+
+  const getCheckoutButtonText = () => {
+    if (hasActiveSubscription) {
+      return addonsTotal > 0 ? "Checkout Add-Ons" : "No Add-Ons to Checkout";
+    } else {
+      return "Checkout Entire Order";
+    }
+  };
+
+  const getCheckoutAmount = () => {
+    if (hasActiveSubscription) {
+      return addonsTotal + deliveryFee;
+    } else {
+      return total;
+    }
+  };
+
+  const shouldShowCheckoutButton = () => {
+    if (hasActiveSubscription) {
+      return addonsTotal > 0;
+    } else {
+      return itemCount > 0;
     }
   };
 
@@ -88,12 +118,11 @@ export function WeeklyBagSummary({
 
   return (
     <div className="space-y-6">
-      {/* Main Summary Card */}
       <Card className="sticky top-6">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <ShoppingCart className="h-5 w-5" />
-            This Week's Bag
+            {hasActiveSubscription ? "This Week's Summary" : "Order Summary"}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -107,14 +136,28 @@ export function WeeklyBagSummary({
 
           {/* Pricing Breakdown */}
           <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span>Subtotal</span>
-              <span>${subtotal.toFixed(2)}</span>
-            </div>
+            {!hasActiveSubscription && (
+              <div className="flex items-center justify-between text-sm">
+                <span>Box contents</span>
+                <span>${boxPrice.toFixed(2)}</span>
+              </div>
+            )}
+            {addonsTotal > 0 && (
+              <div className="flex items-center justify-between text-sm">
+                <span>Add-ons</span>
+                <span>${addonsTotal.toFixed(2)}</span>
+              </div>
+            )}
             <div className="flex items-center justify-between text-sm">
               <span>Delivery fee</span>
               <span>{deliveryFee === 0 ? "Free" : `$${deliveryFee.toFixed(2)}`}</span>
             </div>
+            {hasActiveSubscription && (
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <span>Box contents (subscription)</span>
+                <span>Included</span>
+              </div>
+            )}
             {promoApplied && (
               <div className="flex items-center justify-between text-sm text-green-600">
                 <span>Discount (WELCOME10)</span>
@@ -123,13 +166,13 @@ export function WeeklyBagSummary({
             )}
             <Separator />
             <div className="flex items-center justify-between font-semibold">
-              <span>Total</span>
-              <span>${(promoApplied ? Math.max(0, total - 5) : total).toFixed(2)}</span>
+              <span>Total to pay</span>
+              <span>${(promoApplied ? Math.max(0, getCheckoutAmount() - 5) : getCheckoutAmount()).toFixed(2)}</span>
             </div>
           </div>
 
           {/* Promo Code Section */}
-          {!weeklyBag?.is_confirmed && !isLocked && (
+          {!weeklyBag?.is_confirmed && !isLocked && shouldShowCheckoutButton() && (
             <>
               <Separator />
               <div className="space-y-2">
@@ -172,7 +215,7 @@ export function WeeklyBagSummary({
             </div>
           </div>
 
-          {/* Confirm Button */}
+          {/* Checkout Button */}
           {weeklyBag?.is_confirmed ? (
             <Button className="w-full" disabled>
               <Lock className="h-4 w-4 mr-2" />
@@ -183,21 +226,28 @@ export function WeeklyBagSummary({
               <Lock className="h-4 w-4 mr-2" />
               Cutoff Passed
             </Button>
-          ) : (
+          ) : shouldShowCheckoutButton() ? (
             <Button
               className="w-full"
               onClick={onConfirmBag}
-              disabled={itemCount === 0}
             >
               <Calendar className="h-4 w-4 mr-2" />
-              Confirm My Bag
+              {getCheckoutButtonText()}
+            </Button>
+          ) : (
+            <Button className="w-full" disabled variant="outline">
+              <ShoppingCart className="h-4 w-4 mr-2" />
+              {hasActiveSubscription ? "No Add-Ons Selected" : "Add Items to Continue"}
             </Button>
           )}
 
-          {/* Cutoff Info */}
+          {/* Additional Info */}
           {!weeklyBag?.is_confirmed && !isLocked && (
             <p className="text-xs text-center text-muted-foreground">
-              You can modify your selections until the cutoff time
+              {hasActiveSubscription 
+                ? "Your subscription box will be delivered automatically"
+                : "You can modify your selections until the cutoff time"
+              }
             </p>
           )}
         </CardContent>
