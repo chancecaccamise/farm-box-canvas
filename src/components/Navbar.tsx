@@ -18,13 +18,14 @@ import {
   LogOut,
   Settings,
   Menu,
-  X
+  X,
+  Shield
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
 
 const Navbar = () => {
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, isAdmin, signOut } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const getDisplayName = () => {
@@ -182,6 +183,14 @@ const Navbar = () => {
                             Account Settings
                           </Link>
                         </Button>
+                        {isAdmin && (
+                          <Button variant="ghost" className="w-full justify-start" asChild>
+                            <Link to="/admin" onClick={() => setMobileMenuOpen(false)}>
+                              <Shield className="w-4 h-4 mr-3" />
+                              Admin Dashboard
+                            </Link>
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           className="w-full justify-start text-destructive"
@@ -238,6 +247,14 @@ const Navbar = () => {
                         <span>Account Settings</span>
                       </Link>
                     </DropdownMenuItem>
+                    {isAdmin && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin" className="flex items-center space-x-2">
+                          <Shield className="w-4 h-4" />
+                          <span>Admin Dashboard</span>
+                        </Link>
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuItem 
                       className="flex items-center space-x-2 text-destructive cursor-pointer"
                       onClick={() => signOut()}
