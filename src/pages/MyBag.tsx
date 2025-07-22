@@ -8,7 +8,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate, Link } from "react-router-dom";
 import { CountdownTimer } from "@/components/CountdownTimer";
-import { BagHistory } from "@/components/BagHistory";
 import { WeeklyBagSummary } from "@/components/WeeklyBagSummary";
 import { EmptyBagState } from "@/components/EmptyBagState";
 import { BagItemCard } from "@/components/BagItemCard";
@@ -285,62 +284,14 @@ function MyBag() {
     }
   };
 
-  const confirmBag = async () => {
-    if (!currentWeekBag || bagItems.length === 0) {
-      toast({
-        title: "Empty Bag",
-        description: "Add items to your bag before confirming.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      await supabase
-        .from("weekly_bags")
-        .update({
-          is_confirmed: true,
-          confirmed_at: new Date().toISOString()
-        })
-        .eq("id", currentWeekBag.id);
-
-      setCurrentWeekBag(prev => prev ? {
-        ...prev,
-        is_confirmed: true,
-        confirmed_at: new Date().toISOString()
-      } : null);
-
-      toast({
-        title: "Bag Confirmed!",
-        description: "Your bag has been confirmed for this week's delivery.",
-      });
-    } catch (error) {
-      console.error("Error confirming bag:", error);
-      toast({
-        title: "Error",
-        description: "Failed to confirm bag. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleReorderFromHistory = async (historyItems: any[]) => {
-    if (!currentWeekBag || currentWeekBag.is_confirmed || isLocked) {
-      toast({
-        title: "Cannot Reorder",
-        description: "Your current bag is locked and cannot be modified.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      for (const item of historyItems) {
-        await updateItemQuantity(item.product_id, item.quantity);
+  const handleCheckout = () => {
+    navigate('/checkout', {
+      state: {
+        weeklyBag: currentWeekBag,
+        bagItems: bagItems,
+        hasActiveSubscription: hasActiveSubscription
       }
-    } catch (error) {
-      console.error("Error reordering from history:", error);
-    }
+    });
   };
 
   const getBoxItems = () => {
@@ -576,12 +527,6 @@ function MyBag() {
                 onUpdateQuantity={updateItemQuantity}
                 isLocked={currentWeekBag?.is_confirmed || isLocked}
               />
-
-              {/* Bag History */}
-              <BagHistory
-                onReorderBag={handleReorderFromHistory}
-                isCurrentWeekLocked={isLocked || currentWeekBag?.is_confirmed || false}
-              />
             </div>
 
             {/* Right Side - Summary */}
@@ -589,7 +534,7 @@ function MyBag() {
               <WeeklyBagSummary
                 weeklyBag={currentWeekBag}
                 itemCount={bagItems.length}
-                onConfirmBag={confirmBag}
+                onCheckout={handleCheckout}
                 isLocked={isLocked}
                 loading={loading}
                 hasActiveSubscription={hasActiveSubscription}

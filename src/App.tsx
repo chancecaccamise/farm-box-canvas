@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,6 +13,7 @@ import UnauthenticatedLanding from "./pages/UnauthenticatedLanding";
 import Auth from "./pages/Auth";
 import MyPlan from "./pages/MyPlan";
 import MyBag from "./pages/MyBag";
+import Checkout from "./pages/Checkout";
 import HowWeGrow from "./pages/HowWeGrow";
 import OurMission from "./pages/OurMission";
 import MeetFarmers from "./pages/MeetFarmers";
@@ -88,12 +90,14 @@ const AppRoutes = () => {
             <Route path="/confirmation" element={<Confirmation />} />
             <Route path="/my-plan" element={<MyPlan />} />
             <Route path="/my-bag" element={<MyBag />} />
+            <Route path="/checkout" element={<Checkout />} />
           </>
         ) : (
           <>
             {/* Redirect protected routes to auth */}
             <Route path="/my-plan" element={<Auth />} />
             <Route path="/my-bag" element={<Auth />} />
+            <Route path="/checkout" element={<Auth />} />
             <Route path="/account" element={<Auth />} />
           </>
         )}

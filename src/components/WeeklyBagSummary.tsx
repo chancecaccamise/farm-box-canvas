@@ -18,7 +18,7 @@ interface WeeklyBagSummaryProps {
     addons_total: number;
   } | null;
   itemCount: number;
-  onConfirmBag: () => void;
+  onCheckout: () => void;
   isLocked: boolean;
   loading: boolean;
   hasActiveSubscription?: boolean;
@@ -27,7 +27,7 @@ interface WeeklyBagSummaryProps {
 export function WeeklyBagSummary({ 
   weeklyBag, 
   itemCount, 
-  onConfirmBag, 
+  onCheckout, 
   isLocked, 
   loading,
   hasActiveSubscription = false
@@ -37,9 +37,24 @@ export function WeeklyBagSummary({
 
   const boxPrice = weeklyBag?.box_price || 0;
   const addonsTotal = weeklyBag?.addons_total || 0;
-  const deliveryFee = weeklyBag?.delivery_fee || 4.99;
+  
+  // Updated delivery fee logic
+  const deliveryFee = hasActiveSubscription ? 0 : 4.99;
+  
   const subtotal = boxPrice + addonsTotal;
-  const total = subtotal + deliveryFee;
+  
+  // Updated total calculation
+  const getTotal = () => {
+    if (hasActiveSubscription) {
+      // For subscribers, only charge for add-ons (no delivery fee)
+      return addonsTotal;
+    } else {
+      // For one-time customers, charge for everything including delivery
+      return subtotal + deliveryFee;
+    }
+  };
+
+  const total = getTotal();
 
   const formatDeliveryDate = () => {
     if (!weeklyBag?.cutoff_time) return "TBD";
@@ -66,14 +81,6 @@ export function WeeklyBagSummary({
       return addonsTotal > 0 ? "Checkout Add-Ons" : "No Add-Ons to Checkout";
     } else {
       return "Checkout Entire Order";
-    }
-  };
-
-  const getCheckoutAmount = () => {
-    if (hasActiveSubscription) {
-      return addonsTotal + deliveryFee;
-    } else {
-      return total;
     }
   };
 
@@ -150,7 +157,7 @@ export function WeeklyBagSummary({
             )}
             <div className="flex items-center justify-between text-sm">
               <span>Delivery fee</span>
-              <span>{deliveryFee === 0 ? "Free" : `$${deliveryFee.toFixed(2)}`}</span>
+              <span>{hasActiveSubscription ? "Free" : `$${deliveryFee.toFixed(2)}`}</span>
             </div>
             {hasActiveSubscription && (
               <div className="flex items-center justify-between text-sm text-muted-foreground">
@@ -167,7 +174,7 @@ export function WeeklyBagSummary({
             <Separator />
             <div className="flex items-center justify-between font-semibold">
               <span>Total to pay</span>
-              <span>${(promoApplied ? Math.max(0, getCheckoutAmount() - 5) : getCheckoutAmount()).toFixed(2)}</span>
+              <span>${(promoApplied ? Math.max(0, total - 5) : total).toFixed(2)}</span>
             </div>
           </div>
 
@@ -229,7 +236,7 @@ export function WeeklyBagSummary({
           ) : shouldShowCheckoutButton() ? (
             <Button
               className="w-full"
-              onClick={onConfirmBag}
+              onClick={onCheckout}
             >
               <Calendar className="h-4 w-4 mr-2" />
               {getCheckoutButtonText()}
