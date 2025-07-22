@@ -1,68 +1,67 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { ArrowLeft, Star, Gift } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface AddOn {
   id: string;
   name: string;
   description: string;
-  popular?: boolean;
-  premium?: boolean;
+  price: number;
+  image?: string;
+  category: string;
+  tags?: string[];
 }
 
 const AddOns = () => {
   const [selectedAddOns, setSelectedAddOns] = useState<Record<string, boolean>>({});
+  const [addOns, setAddOns] = useState<AddOn[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const addOns: AddOn[] = [
-    {
-      id: "premium-honey",
-      name: "Premium Manuka Honey", 
-      description: "Rare New Zealand Manuka honey with unique healing properties",
-      premium: true
-    },
-    {
-      id: "artisan-bread-box",
-      name: "Artisan Bread Box",
-      description: "Selection of 3 fresh-baked breads from local bakeries", 
-      popular: true
-    },
-    {
-      id: "herb-garden",
-      name: "Fresh Herb Bundle",
-      description: "Basil, rosemary, thyme, and parsley for your cooking",
-      popular: true
-    },
-    {
-      id: "coffee-blend",
-      name: "Single-Origin Coffee",
-      description: "Freshly roasted beans from our partner coffee roaster"
-    },
-    {
-      id: "flower-bouquet",
-      name: "Seasonal Flower Bouquet",
-      description: "Beautiful locally grown flowers to brighten your home"
-    },
-    {
-      id: "fermented-foods",
-      name: "Fermented Foods Pack",
-      description: "Kombucha, kimchi, and sauerkraut for gut health"
-    },
-    {
-      id: "nut-butter",
-      name: "Artisan Nut Butter",
-      description: "Small-batch almond or peanut butter made locally"
-    },
-    {
-      id: "seasonal-fruit",
-      name: "Seasonal Fruit Box",
-      description: "Premium selection of the season's best fruits"
+  useEffect(() => {
+    fetchAddOns();
+  }, []);
+
+  const fetchAddOns = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('is_available', true)
+        .in('category', ['addon', 'specialty', 'premium', 'local'])
+        .order('name');
+
+      if (error) throw error;
+
+      const formattedAddOns: AddOn[] = (data || []).map(product => ({
+        id: product.id,
+        name: product.name,
+        description: product.description || '',
+        price: Number(product.price),
+        image: product.image,
+        category: product.category,
+        tags: product.tags || []
+      }));
+
+      setAddOns(formattedAddOns);
+    } catch (error) {
+      console.error('Error fetching add-ons:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load add-ons",
+        variant: "destructive"
+      });
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   const toggleAddOn = (addOnId: string) => {
     setSelectedAddOns(prev => ({
@@ -106,54 +105,78 @@ const AddOns = () => {
         </div>
 
         {/* Add-Ons Grid */}
-        <div className="grid md:grid-cols-2 gap-6 mb-12">
-          {addOns.map((addOn) => {
-            const isSelected = selectedAddOns[addOn.id] || false;
-            
-            return (
-              <Card 
-                key={addOn.id}
-                className={`transition-all duration-300 cursor-pointer ${
-                  isSelected 
-                    ? "ring-2 ring-primary shadow-medium" 
-                    : "hover:shadow-medium"
-                }`}
-                onClick={() => toggleAddOn(addOn.id)}
-              >
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <CardTitle className="flex items-center gap-2">
-                        {addOn.name}
-                        {addOn.popular && (
-                          <Badge variant="secondary">
-                            <Star className="w-3 h-3 mr-1" />
-                            Popular
-                          </Badge>
-                        )}
-                        {addOn.premium && (
-                          <Badge className="bg-gradient-fresh text-white">
-                            Premium
-                          </Badge>
-                        )}
-                      </CardTitle>
+        {loading ? (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">Loading add-ons...</p>
+          </div>
+        ) : addOns.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-muted-foreground">No add-ons available at the moment.</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 gap-6 mb-12">
+            {addOns.map((addOn) => {
+              const isSelected = selectedAddOns[addOn.id] || false;
+              const isPopular = addOn.tags?.includes('popular');
+              const isPremium = addOn.category === 'premium';
+              
+              return (
+                <Card 
+                  key={addOn.id}
+                  className={`transition-all duration-300 cursor-pointer ${
+                    isSelected 
+                      ? "ring-2 ring-primary shadow-medium" 
+                      : "hover:shadow-medium"
+                  }`}
+                  onClick={() => toggleAddOn(addOn.id)}
+                >
+                  {addOn.image && (
+                    <div className="aspect-square w-full overflow-hidden rounded-t-lg">
+                      <img
+                        src={addOn.image}
+                        alt={addOn.name}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
-                    <Switch
-                      checked={isSelected}
-                      onCheckedChange={() => toggleAddOn(addOn.id)}
-                      className="ml-4"
-                    />
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <CardDescription className="text-base">
-                    {addOn.description}
-                  </CardDescription>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
+                  )}
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="flex items-center gap-2 flex-wrap">
+                          {addOn.name}
+                          {isPopular && (
+                            <Badge variant="secondary">
+                              <Star className="w-3 h-3 mr-1" />
+                              Popular
+                            </Badge>
+                          )}
+                          {isPremium && (
+                            <Badge className="bg-gradient-fresh text-white">
+                              Premium
+                            </Badge>
+                          )}
+                        </CardTitle>
+                        <p className="text-lg font-semibold text-primary mt-2">
+                          ${addOn.price.toFixed(2)}
+                        </p>
+                      </div>
+                      <Switch
+                        checked={isSelected}
+                        onCheckedChange={() => toggleAddOn(addOn.id)}
+                        className="ml-4"
+                      />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <CardDescription className="text-base">
+                      {addOn.description}
+                    </CardDescription>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
 
         {/* Summary Section */}
         {selectedCount > 0 && (
@@ -167,7 +190,10 @@ const AddOns = () => {
                   .filter(addOn => selectedAddOns[addOn.id])
                   .map(addOn => (
                     <div key={addOn.id} className="flex items-center justify-between py-2">
-                      <span className="font-medium">{addOn.name}</span>
+                      <div>
+                        <span className="font-medium">{addOn.name}</span>
+                        <span className="text-primary font-semibold ml-2">${addOn.price.toFixed(2)}</span>
+                      </div>
                       <Button
                         variant="ghost"
                         size="sm"

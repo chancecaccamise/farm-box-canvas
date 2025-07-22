@@ -12,9 +12,18 @@ interface ImageUploadProps {
   onChange: (url: string) => void;
   label?: string;
   placeholder?: string;
+  bucketName?: string;
+  folder?: string;
 }
 
-export const ImageUpload = ({ value, onChange, label = "Product Image", placeholder = "Drop an image here or click to upload" }: ImageUploadProps) => {
+export const ImageUpload = ({ 
+  value, 
+  onChange, 
+  label = "Product Image", 
+  placeholder = "Drop an image here or click to upload",
+  bucketName = "product-images",
+  folder = "products"
+}: ImageUploadProps) => {
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [dragActive, setDragActive] = useState(false);
@@ -49,6 +58,38 @@ export const ImageUpload = ({ value, onChange, label = "Product Image", placehol
     }
   };
 
+  const resizeImageTo1x1 = (file: File): Promise<File> => {
+    return new Promise((resolve) => {
+      const canvas = document.createElement('canvas');
+      const ctx = canvas.getContext('2d');
+      const img = new Image();
+      
+      img.onload = () => {
+        const size = Math.min(img.width, img.height);
+        canvas.width = 800;
+        canvas.height = 800;
+        
+        // Calculate crop position to center the image
+        const cropX = (img.width - size) / 2;
+        const cropY = (img.height - size) / 2;
+        
+        ctx?.drawImage(img, cropX, cropY, size, size, 0, 0, 800, 800);
+        
+        canvas.toBlob((blob) => {
+          if (blob) {
+            const resizedFile = new File([blob], file.name, {
+              type: file.type,
+              lastModified: Date.now(),
+            });
+            resolve(resizedFile);
+          }
+        }, file.type, 0.9);
+      };
+      
+      img.src = URL.createObjectURL(file);
+    });
+  };
+
   const uploadImage = async (file: File) => {
     if (!file.type.startsWith('image/')) {
       toast({
@@ -72,15 +113,18 @@ export const ImageUpload = ({ value, onChange, label = "Product Image", placehol
     setUploadProgress(0);
 
     try {
+      // Resize image to 1:1 ratio
+      const resizedFile = await resizeImageTo1x1(file);
+      
       // Generate unique filename
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
-      const filePath = `products/${fileName}`;
+      const filePath = `${folder}/${fileName}`;
 
       // Upload to Supabase Storage
       const { data, error } = await supabase.storage
-        .from('product-images')
-        .upload(filePath, file, {
+        .from(bucketName)
+        .upload(filePath, resizedFile, {
           cacheControl: '3600',
           upsert: false
         });
@@ -91,7 +135,7 @@ export const ImageUpload = ({ value, onChange, label = "Product Image", placehol
 
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
-        .from('product-images')
+        .from(bucketName)
         .getPublicUrl(filePath);
 
       onChange(publicUrl);
@@ -99,7 +143,7 @@ export const ImageUpload = ({ value, onChange, label = "Product Image", placehol
       
       toast({
         title: "Success",
-        description: "Image uploaded successfully"
+        description: "Image uploaded successfully (resized to 1:1 ratio)"
       });
     } catch (error) {
       console.error('Error uploading image:', error);
@@ -138,7 +182,7 @@ export const ImageUpload = ({ value, onChange, label = "Product Image", placehol
           <img
             src={value}
             alt="Product preview"
-            className="w-full h-48 object-cover rounded-lg border"
+            className="w-full h-48 object-cover rounded-lg border aspect-square"
           />
           <Button
             type="button"
@@ -190,7 +234,7 @@ export const ImageUpload = ({ value, onChange, label = "Product Image", placehol
                 <div>
                   <p className="text-sm font-medium">{placeholder}</p>
                   <p className="text-xs text-muted-foreground mt-1">
-                    PNG, JPG, WEBP up to 5MB
+                    PNG, JPG, WEBP up to 5MB (automatically cropped to 1:1 ratio)
                   </p>
                 </div>
               </div>

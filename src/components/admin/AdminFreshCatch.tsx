@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Plus, Edit, Trash2, Fish } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { ImageUpload } from './ImageUpload';
 
 interface FreshCatchAnnouncement {
   id: string;
@@ -211,15 +212,14 @@ export const AdminFreshCatch = () => {
                 />
               </div>
 
-              <div>
-                <Label htmlFor="image_url">Image URL</Label>
-                <Input
-                  id="image_url"
-                  value={formData.image_url}
-                  onChange={(e) => setFormData({...formData, image_url: e.target.value})}
-                  placeholder="https://example.com/fish-image.jpg"
-                />
-              </div>
+              <ImageUpload
+                value={formData.image_url}
+                onChange={(url) => setFormData({...formData, image_url: url})}
+                label="Fresh Catch Image"
+                placeholder="Drop an image here or click to upload"
+                bucketName="fresh-catch-images"
+                folder="catches"
+              />
 
               <div className="flex justify-end space-x-2">
                 <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
