@@ -2,12 +2,10 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Leaf, Calendar, Settings, ShoppingBag } from "lucide-react";
+import { Calendar, ShoppingBag } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -15,14 +13,8 @@ import { useNavigate } from "react-router-dom";
 import { SubscriptionManager } from "@/components/SubscriptionManager";
 import { BoxSizeSelector } from "@/components/BoxSizeSelector";
 import { EditableDeliveryForm } from "@/components/EditableDeliveryForm";
+import { ContactForm } from "@/components/ContactForm";
 
-interface UserPreferences {
-  organic: boolean;
-  no_fish: boolean;
-  local_only: boolean;
-  vegetarian: boolean;
-  gluten_free: boolean;
-}
 
 interface DeliveryAddress {
   id: string;
@@ -55,6 +47,7 @@ interface WeeklyBag {
   delivery_fee: number;
   total_amount: number;
   addons_total: number;
+  is_confirmed: boolean;
 }
 
 const MyPlan = () => {
@@ -62,19 +55,11 @@ const MyPlan = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   
-  const [preferences, setPreferences] = useState<UserPreferences>({
-    organic: false,
-    no_fish: false,
-    local_only: false,
-    vegetarian: false,
-    gluten_free: false,
-  });
   
   const [deliveryAddress, setDeliveryAddress] = useState<DeliveryAddress | null>(null);
   const [subscription, setSubscription] = useState<SubscriptionInfo | null>(null);
   const [weeklyBag, setWeeklyBag] = useState<WeeklyBag | null>(null);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [promoCode, setPromoCode] = useState("");
   const [nextDeliveryDate, setNextDeliveryDate] = useState<string>("");
   const [orderHistory, setOrderHistory] = useState<any[]>([]);
@@ -89,22 +74,6 @@ const MyPlan = () => {
     try {
       setLoading(true);
       
-      // Load user preferences
-      const { data: prefsData } = await supabase
-        .from('user_preferences')
-        .select('*')
-        .eq('user_id', user?.id)
-        .single();
-      
-      if (prefsData) {
-        setPreferences({
-          organic: prefsData.organic,
-          no_fish: prefsData.no_fish,
-          local_only: prefsData.local_only,
-          vegetarian: prefsData.vegetarian,
-          gluten_free: prefsData.gluten_free,
-        });
-      }
 
       // Load delivery address
       const { data: addressData } = await supabase
@@ -176,40 +145,6 @@ const MyPlan = () => {
     }
   };
 
-  const savePreferences = async () => {
-    if (!user) return;
-    
-    try {
-      setSaving(true);
-      
-      const { error } = await supabase
-        .from('user_preferences')
-        .upsert({
-          user_id: user.id,
-          organic: preferences.organic,
-          no_fish: preferences.no_fish,
-          local_only: preferences.local_only,
-          vegetarian: preferences.vegetarian,
-          gluten_free: preferences.gluten_free,
-        });
-      
-      if (error) throw error;
-      
-      toast({
-        title: "Preferences Saved",
-        description: "Your dietary preferences have been updated successfully.",
-      });
-    } catch (error) {
-      console.error('Error saving preferences:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save preferences. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
 
   const handleBoxSizeChange = (newBoxSize: string, newPrice: number) => {
     // Update the weekly bag state with new pricing
@@ -279,6 +214,7 @@ const MyPlan = () => {
             <BoxSizeSelector 
               currentBoxSize={weeklyBag?.box_size || "medium"}
               onBoxSizeChange={handleBoxSizeChange}
+              isConfirmed={weeklyBag?.is_confirmed || false}
             />
 
             {/* Delivery Information */}
@@ -297,84 +233,8 @@ const MyPlan = () => {
               </CardContent>
             </Card>
 
-            {/* Dietary Preferences */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center space-x-2">
-                  <Leaf className="w-5 h-5 text-accent" />
-                  <span>Dietary Preferences</span>
-                </CardTitle>
-                <CardDescription>
-                  Customize your weekly selections based on your dietary needs
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="organic">Organic Only</Label>
-                    <p className="text-sm text-muted-foreground">Only certified organic produce</p>
-                  </div>
-                  <Switch 
-                    id="organic"
-                    checked={preferences.organic}
-                    onCheckedChange={(checked) => setPreferences({...preferences, organic: checked})}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="no-fish">No Fish</Label>
-                    <p className="text-sm text-muted-foreground">Exclude all fish and seafood</p>
-                  </div>
-                  <Switch 
-                    id="no-fish"
-                    checked={preferences.no_fish}
-                    onCheckedChange={(checked) => setPreferences({...preferences, no_fish: checked})}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="local-only">Local Only</Label>
-                    <p className="text-sm text-muted-foreground">Products sourced within 100 miles</p>
-                  </div>
-                  <Switch 
-                    id="local-only"
-                    checked={preferences.local_only}
-                    onCheckedChange={(checked) => setPreferences({...preferences, local_only: checked})}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="vegetarian">Vegetarian</Label>
-                    <p className="text-sm text-muted-foreground">No meat or fish products</p>
-                  </div>
-                  <Switch 
-                    id="vegetarian"
-                    checked={preferences.vegetarian}
-                    onCheckedChange={(checked) => setPreferences({...preferences, vegetarian: checked})}
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="gluten-free">Gluten Free</Label>
-                    <p className="text-sm text-muted-foreground">No gluten-containing products</p>
-                  </div>
-                  <Switch 
-                    id="gluten-free"
-                    checked={preferences.gluten_free}
-                    onCheckedChange={(checked) => setPreferences({...preferences, gluten_free: checked})}
-                  />
-                </div>
-
-                <Button onClick={savePreferences} disabled={saving} className="w-full">
-                  <Settings className="w-4 h-4 mr-2" />
-                  {saving ? "Saving..." : "Save Preferences"}
-                </Button>
-              </CardContent>
-            </Card>
+            {/* Contact Support */}
+            <ContactForm />
           </div>
 
           {/* Right Side - Summary & Actions */}
@@ -430,50 +290,6 @@ const MyPlan = () => {
               </CardContent>
             </Card>
 
-            {/* Active Preferences */}
-            <Card className="h-fit">
-              <CardHeader>
-                <CardTitle className="text-lg">Active Preferences</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {preferences.organic && (
-                    <div className="flex items-center space-x-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-accent" />
-                      <span>Organic Only</span>
-                    </div>
-                  )}
-                  {preferences.local_only && (
-                    <div className="flex items-center space-x-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-accent" />
-                      <span>Local Only</span>
-                    </div>
-                  )}
-                  {preferences.no_fish && (
-                    <div className="flex items-center space-x-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-accent" />
-                      <span>No Fish</span>
-                    </div>
-                  )}
-                  {preferences.vegetarian && (
-                    <div className="flex items-center space-x-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-accent" />
-                      <span>Vegetarian</span>
-                    </div>
-                  )}
-                  {preferences.gluten_free && (
-                    <div className="flex items-center space-x-2 text-sm">
-                      <CheckCircle className="w-4 h-4 text-accent" />
-                      <span>Gluten Free</span>
-                    </div>
-                  )}
-                  {!preferences.organic && !preferences.local_only && !preferences.no_fish && 
-                   !preferences.vegetarian && !preferences.gluten_free && (
-                    <p className="text-sm text-muted-foreground">No dietary restrictions</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
 
             {/* Recent Orders */}
             {orderHistory.length > 0 && (

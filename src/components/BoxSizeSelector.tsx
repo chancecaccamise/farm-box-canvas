@@ -9,6 +9,7 @@ import { Package, AlertCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/AuthProvider";
+import { PaymentConfirmationDialog } from "@/components/PaymentConfirmationDialog";
 
 interface BoxSize {
   id: string;
@@ -23,13 +24,15 @@ interface BoxSize {
 interface BoxSizeSelectorProps {
   currentBoxSize?: string;
   onBoxSizeChange: (newBoxSize: string, newPrice: number) => void;
+  isConfirmed?: boolean;
 }
 
-export function BoxSizeSelector({ currentBoxSize = "medium", onBoxSizeChange }: BoxSizeSelectorProps) {
+export function BoxSizeSelector({ currentBoxSize = "medium", onBoxSizeChange, isConfirmed = false }: BoxSizeSelectorProps) {
   const [boxSizes, setBoxSizes] = useState<BoxSize[]>([]);
   const [selectedSize, setSelectedSize] = useState(currentBoxSize);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
   const { toast } = useToast();
   const { user } = useAuth();
 
@@ -63,7 +66,23 @@ export function BoxSizeSelector({ currentBoxSize = "medium", onBoxSizeChange }: 
     }
   };
 
-  const handleSizeChange = async () => {
+  const handleSizeChange = () => {
+    if (selectedSize === currentBoxSize) return;
+    
+    const currentPrice = getCurrentPrice();
+    const newPrice = getSelectedPrice();
+    const isUpgrade = newPrice > currentPrice;
+    
+    // Show confirmation dialog for upgrades or if bag is confirmed
+    if (isUpgrade || isConfirmed) {
+      setShowPaymentDialog(true);
+    } else {
+      // Direct change for downgrades on unconfirmed bags
+      performBoxSizeChange();
+    }
+  };
+
+  const performBoxSizeChange = async () => {
     if (!user || selectedSize === currentBoxSize) return;
 
     setSaving(true);
@@ -80,9 +99,10 @@ export function BoxSizeSelector({ currentBoxSize = "medium", onBoxSizeChange }: 
 
       if (bagError) throw bagError;
 
+      const timing = isConfirmed ? "next week's" : "this week's";
       toast({
         title: "Box Size Updated",
-        description: `Your box has been changed to ${selectedBoxSize.display_name}. Changes will apply to your next delivery.`,
+        description: `Your box has been changed to ${selectedBoxSize.display_name}. Changes will apply to ${timing} delivery.`,
       });
 
       onBoxSizeChange(selectedSize, selectedBoxSize.base_price);
@@ -191,11 +211,29 @@ export function BoxSizeSelector({ currentBoxSize = "medium", onBoxSizeChange }: 
                 )}
               </div>
             </div>
+            {isConfirmed && (
+              <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                <p className="text-sm text-amber-800">
+                  <strong>Note:</strong> This week's bag is already confirmed. Changes will apply to next week's delivery.
+                </p>
+              </div>
+            )}
             <Button onClick={handleSizeChange} disabled={saving} className="w-full">
               {saving ? "Updating..." : "Update Box Size"}
             </Button>
           </div>
         )}
+
+        <PaymentConfirmationDialog
+          open={showPaymentDialog}
+          onOpenChange={setShowPaymentDialog}
+          currentBoxSize={currentBoxSize}
+          newBoxSize={selectedSize}
+          currentPrice={getCurrentPrice()}
+          newPrice={getSelectedPrice()}
+          onConfirm={performBoxSizeChange}
+          isConfirmed={isConfirmed}
+        />
       </CardContent>
     </Card>
   );
