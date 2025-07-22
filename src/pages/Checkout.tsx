@@ -6,10 +6,13 @@ import { ArrowLeft } from "lucide-react";
 import PaymentForm, { PaymentData } from "@/components/checkout/PaymentForm";
 import DeliveryForm, { DeliveryData } from "@/components/checkout/DeliveryForm";
 import SimplifiedOrderSummary from "@/components/checkout/SimplifiedOrderSummary";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 function Checkout() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
   const [deliveryData, setDeliveryData] = useState<DeliveryData | null>(null);
@@ -54,7 +57,6 @@ function Checkout() {
     }
 
     setLoading(true);
-    // TODO: Integrate with Stripe here
     console.log('Processing payment...', {
       payment: paymentData,
       delivery: deliveryData,
@@ -63,12 +65,43 @@ function Checkout() {
       itemsCount: bagItems.length
     });
     
-    // Simulate processing delay
-    setTimeout(() => {
+    try {
+      const { data, error } = await supabase.functions.invoke('create-payment', {
+        body: {
+          weeklyBag,
+          bagItems,
+          hasActiveSubscription,
+          deliveryData,
+          paymentData
+        }
+      });
+
+      if (error) {
+        console.error("Payment error:", error);
+        toast({
+          title: "Payment Error",
+          description: error.message || "Failed to process payment. Please try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (data?.url) {
+        // Redirect to Stripe Checkout
+        window.open(data.url, '_blank');
+      } else {
+        throw new Error("No checkout URL received");
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+      toast({
+        title: "Checkout Error",
+        description: "Failed to initiate checkout. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
       setLoading(false);
-      // TODO: Navigate to success page after successful payment
-      navigate('/my-bag');
-    }, 2000);
+    }
   };
 
   const canProceedToPayment = paymentData && deliveryData;
