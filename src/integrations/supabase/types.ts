@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      bouquet_requests: {
+        Row: {
+          admin_notes: string | null
+          color_palette: string | null
+          created_at: string
+          email: string
+          estimated_price: number | null
+          event_date: string | null
+          event_type: string
+          id: string
+          name: string
+          preferences: string | null
+          reference_photos: string[] | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          admin_notes?: string | null
+          color_palette?: string | null
+          created_at?: string
+          email: string
+          estimated_price?: number | null
+          event_date?: string | null
+          event_type: string
+          id?: string
+          name: string
+          preferences?: string | null
+          reference_photos?: string[] | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          admin_notes?: string | null
+          color_palette?: string | null
+          created_at?: string
+          email?: string
+          estimated_price?: number | null
+          event_date?: string | null
+          event_type?: string
+          id?: string
+          name?: string
+          preferences?: string | null
+          reference_photos?: string[] | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       box_sizes: {
         Row: {
           base_price: number
@@ -56,8 +104,11 @@ export type Database = {
       box_templates: {
         Row: {
           box_size: string
+          confirmed_at: string | null
+          confirmed_by: string | null
           created_at: string
           id: string
+          is_confirmed: boolean
           product_id: string
           quantity: number
           updated_at: string
@@ -65,8 +116,11 @@ export type Database = {
         }
         Insert: {
           box_size: string
+          confirmed_at?: string | null
+          confirmed_by?: string | null
           created_at?: string
           id?: string
+          is_confirmed?: boolean
           product_id: string
           quantity?: number
           updated_at?: string
@@ -74,8 +128,11 @@ export type Database = {
         }
         Update: {
           box_size?: string
+          confirmed_at?: string | null
+          confirmed_by?: string | null
           created_at?: string
           id?: string
+          is_confirmed?: boolean
           product_id?: string
           quantity?: number
           updated_at?: string
@@ -292,6 +349,54 @@ export type Database = {
           name?: string
           phone_number?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      fresh_fish_alerts_enhanced: {
+        Row: {
+          admin_notes: string | null
+          communication_preferences: string[] | null
+          created_at: string
+          delivery_preferences: string | null
+          email: string
+          id: string
+          name: string
+          phone_number: string
+          preferred_fish_types: string[] | null
+          special_requests: string | null
+          status: string
+          updated_at: string
+          zip_code: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          communication_preferences?: string[] | null
+          created_at?: string
+          delivery_preferences?: string | null
+          email: string
+          id?: string
+          name: string
+          phone_number: string
+          preferred_fish_types?: string[] | null
+          special_requests?: string | null
+          status?: string
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          communication_preferences?: string[] | null
+          created_at?: string
+          delivery_preferences?: string | null
+          email?: string
+          id?: string
+          name?: string
+          phone_number?: string
+          preferred_fish_types?: string[] | null
+          special_requests?: string | null
+          status?: string
+          updated_at?: string
+          zip_code?: string | null
         }
         Relationships: []
       }

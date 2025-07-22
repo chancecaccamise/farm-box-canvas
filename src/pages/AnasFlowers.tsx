@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -34,9 +36,67 @@ const AnasFlowers = () => {
     colorPalette: "",
     preferences: ""
   });
+  const [submitting, setSubmitting] = useState(false);
+  const { toast } = useToast();
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleFormSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.name || !formData.email || !formData.eventType) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const requestData = {
+        name: formData.name,
+        email: formData.email,
+        event_type: formData.eventType,
+        event_date: formData.eventDate || null,
+        color_palette: formData.colorPalette || null,
+        preferences: formData.preferences || null,
+        reference_photos: null // TODO: Implement file upload
+      };
+
+      const { error } = await supabase
+        .from('bouquet_requests')
+        .insert([requestData]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Your bouquet request has been submitted! We'll respond within 24 hours with a custom proposal."
+      });
+
+      // Reset form
+      setFormData({
+        name: "",
+        email: "",
+        eventType: "",
+        eventDate: "",
+        colorPalette: "",
+        preferences: ""
+      });
+    } catch (error) {
+      console.error('Error submitting bouquet request:', error);
+      toast({
+        title: "Error",
+        description: "Failed to submit your request. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const eventTypes = [
@@ -202,8 +262,9 @@ const AnasFlowers = () => {
                   Tell us about your vision and we'll create something beautiful together
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-6">
-                {/* Contact Information */}
+              <CardContent>
+                <form onSubmit={handleFormSubmit} className="space-y-6">
+                  {/* Contact Information */}
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="name">Your Name</Label>
@@ -297,14 +358,15 @@ const AnasFlowers = () => {
                   </div>
                 </div>
 
-                <Button className="w-full" size="lg">
-                  <Flower className="w-4 h-4 mr-2" />
-                  Submit Bouquet Request
-                </Button>
+                  <Button type="submit" className="w-full" size="lg" disabled={submitting}>
+                    <Flower className="w-4 h-4 mr-2" />
+                    {submitting ? "Submitting..." : "Submit Bouquet Request"}
+                  </Button>
 
-                <p className="text-xs text-center text-muted-foreground">
-                  We'll respond within 24 hours with a custom proposal and pricing
-                </p>
+                  <p className="text-xs text-center text-muted-foreground">
+                    We'll respond within 24 hours with a custom proposal and pricing
+                  </p>
+                </form>
               </CardContent>
             </Card>
           </div>

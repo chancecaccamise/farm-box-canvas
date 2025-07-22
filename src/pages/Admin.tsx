@@ -5,11 +5,13 @@ import { Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Package, ShoppingBag, Users, Fish, Settings } from 'lucide-react';
+import { Package, ShoppingBag, Users, Fish, Flower } from 'lucide-react';
 import { AdminProducts } from '@/components/admin/AdminProducts';
 import { AdminBoxTemplates } from '@/components/admin/AdminBoxTemplates';
 import { AdminOrders } from '@/components/admin/AdminOrders';
 import { AdminFreshCatch } from '@/components/admin/AdminFreshCatch';
+import { AdminBouquetRequests } from '@/components/admin/AdminBouquetRequests';
+import { AdminFreshFishAlerts } from '@/components/admin/AdminFreshFishAlerts';
 
 const Admin = () => {
   const { user, loading } = useAuth();
@@ -86,9 +88,9 @@ const Admin = () => {
               <Fish className="h-4 w-4" />
               Fresh Catch
             </TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-2">
-              <Settings className="h-4 w-4" />
-              Settings
+            <TabsTrigger value="arrangements" className="flex items-center gap-2">
+              <Flower className="h-4 w-4" />
+              Ana's Arrangements
             </TabsTrigger>
           </TabsList>
 
@@ -105,16 +107,34 @@ const Admin = () => {
           </TabsContent>
 
           <TabsContent value="fresh-catch">
-            <AdminFreshCatch />
-          </TabsContent>
-
-          <TabsContent value="settings">
             <Card>
               <CardHeader>
-                <CardTitle>System Settings</CardTitle>
+                <CardTitle>Fresh Catch Management</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">Settings panel coming soon...</p>
+                <AdminFreshCatch />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="arrangements">
+            <Card>
+              <CardHeader>
+                <CardTitle>Ana's Arrangements & Fresh Fish Alerts</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="bouquets" className="space-y-6">
+                  <TabsList>
+                    <TabsTrigger value="bouquets">Bouquet Requests</TabsTrigger>
+                    <TabsTrigger value="alerts">Fish Alerts</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="bouquets">
+                    <AdminBouquetRequests />
+                  </TabsContent>
+                  <TabsContent value="alerts">
+                    <AdminFreshFishAlerts />
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
           </TabsContent>

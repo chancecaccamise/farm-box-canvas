@@ -33,9 +33,15 @@ const FreshCatch = () => {
   const [imageUrl, setImageUrl] = useState("");
   const [fishermanName, setFishermanName] = useState("");
 
-  // SMS alerts form state
+  // Enhanced alerts form state
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [zipCode, setZipCode] = useState("");
+  const [preferredFish, setPreferredFish] = useState("");
+  const [deliveryPreferences, setDeliveryPreferences] = useState("");
+  const [communicationPrefs, setCommunicationPrefs] = useState<string[]>(['SMS']);
+  const [specialRequests, setSpecialRequests] = useState("");
 
   const checkAdminStatus = async () => {
     if (!user) return;
@@ -120,31 +126,48 @@ const FreshCatch = () => {
 
   const handleSMSSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !phoneNumber.trim()) return;
+    if (!name.trim() || !email.trim() || !phoneNumber.trim()) return;
 
     setAlertsSubmitting(true);
     try {
+      const alertData = {
+        name: name.trim(),
+        email: email.trim(),
+        phone_number: phoneNumber.trim(),
+        zip_code: zipCode.trim() || null,
+        preferred_fish_types: preferredFish.trim() 
+          ? preferredFish.split(',').map(fish => fish.trim()).filter(fish => fish.length > 0)
+          : null,
+        delivery_preferences: deliveryPreferences.trim() || null,
+        communication_preferences: communicationPrefs.length > 0 ? communicationPrefs : null,
+        special_requests: specialRequests.trim() || null
+      };
+
       const { error } = await supabase
-        .from("fresh_fish_alerts")
-        .insert({
-          name: name,
-          phone_number: phoneNumber,
-        });
+        .from("fresh_fish_alerts_enhanced")
+        .insert(alertData);
 
       if (error) throw error;
 
       toast({
         title: "Success",
-        description: "You've been signed up for fresh fish alerts!",
+        description: "You've been signed up for fresh fish alerts! We'll contact you when your preferred fish are available.",
       });
 
+      // Reset form
       setName("");
+      setEmail("");
       setPhoneNumber("");
+      setZipCode("");
+      setPreferredFish("");
+      setDeliveryPreferences("");
+      setCommunicationPrefs(['SMS']);
+      setSpecialRequests("");
     } catch (error) {
       console.error("Error signing up for alerts:", error);
       toast({
         title: "Error",
-        description: "Failed to sign up for alerts",
+        description: "Failed to sign up for alerts. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -173,66 +196,6 @@ const FreshCatch = () => {
           </p>
         </div>
 
-        {/* Admin Form - Only show to admins */}
-        {isAdmin && (
-          <Card className="mb-12 max-w-2xl mx-auto">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Fish className="h-5 w-5" />
-                Post New Catch
-              </CardTitle>
-              <CardDescription>
-                Add a new fresh catch announcement
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmitAnnouncement} className="space-y-4">
-                <div>
-                  <Label htmlFor="fishName">Fish Name</Label>
-                  <Input
-                    id="fishName"
-                    value={fishName}
-                    onChange={(e) => setFishName(e.target.value)}
-                    placeholder="e.g., Red Snapper"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="fishermanName">Fisherman Name</Label>
-                  <Input
-                    id="fishermanName"
-                    value={fishermanName}
-                    onChange={(e) => setFishermanName(e.target.value)}
-                    placeholder="e.g., Joe from South Shore Fish Co."
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="description">Description (Optional)</Label>
-                  <Textarea
-                    id="description"
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Fresh from the Savannah coast..."
-                    rows={3}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="imageUrl">Image URL (Optional)</Label>
-                  <Input
-                    id="imageUrl"
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    placeholder="https://example.com/fish-image.jpg"
-                    type="url"
-                  />
-                </div>
-                <Button type="submit" disabled={submitting} className="w-full">
-                  {submitting ? "Posting..." : "Post Announcement"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        )}
 
         {/* Announcements Feed */}
         <div className="mb-16">
@@ -286,43 +249,144 @@ const FreshCatch = () => {
           )}
         </div>
 
-        {/* SMS Alerts Signup */}
-        <Card className="max-w-md mx-auto">
+        {/* Enhanced Fresh Fish Alerts Signup */}
+        <Card className="max-w-2xl mx-auto">
           <CardHeader className="text-center">
             <CardTitle className="flex items-center justify-center gap-2">
-              <Phone className="h-5 w-5" />
-              Want Fresh Fish Alerts?
+              <Fish className="h-6 w-6 text-primary" />
+              Get Fresh Fish Alerts
             </CardTitle>
             <CardDescription>
-              Be the first to know when new fish come in
+              Join our community of fresh fish enthusiasts! Get notified when your favorite fish come in.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSMSSignup} className="space-y-4">
+            <form onSubmit={handleSMSSignup} className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="alertName">Full Name *</Label>
+                  <Input
+                    id="alertName"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Your full name"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="email">Email Address *</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="phoneNumber">Phone Number *</Label>
+                  <Input
+                    id="phoneNumber"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder="(555) 123-4567"
+                    type="tel"
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="zipCode">Zip Code</Label>
+                  <Input
+                    id="zipCode"
+                    value={zipCode}
+                    onChange={(e) => setZipCode(e.target.value)}
+                    placeholder="12345"
+                  />
+                </div>
+              </div>
+
               <div>
-                <Label htmlFor="alertName">Name</Label>
+                <Label htmlFor="preferredFish">Preferred Fish Types</Label>
                 <Input
-                  id="alertName"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Your name"
-                  required
+                  id="preferredFish"
+                  value={preferredFish}
+                  onChange={(e) => setPreferredFish(e.target.value)}
+                  placeholder="e.g., Red Snapper, Grouper, Mahi Mahi (or leave blank for all types)"
+                />
+                <p className="text-xs text-muted-foreground mt-1">
+                  Separate multiple types with commas
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="deliveryPreferences">Delivery Preferences</Label>
+                <Input
+                  id="deliveryPreferences"
+                  value={deliveryPreferences}
+                  onChange={(e) => setDeliveryPreferences(e.target.value)}
+                  placeholder="e.g., Weekday evenings, Saturday mornings"
                 />
               </div>
+
               <div>
-                <Label htmlFor="phoneNumber">Phone Number</Label>
-                <Input
-                  id="phoneNumber"
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  placeholder="(555) 123-4567"
-                  type="tel"
-                  required
+                <Label>Communication Preferences</Label>
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={communicationPrefs.includes('SMS')}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setCommunicationPrefs([...communicationPrefs, 'SMS']);
+                        } else {
+                          setCommunicationPrefs(communicationPrefs.filter(p => p !== 'SMS'));
+                        }
+                      }}
+                      className="rounded"
+                    />
+                    <span>SMS/Text Messages</span>
+                  </label>
+                  <label className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={communicationPrefs.includes('Email')}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setCommunicationPrefs([...communicationPrefs, 'Email']);
+                        } else {
+                          setCommunicationPrefs(communicationPrefs.filter(p => p !== 'Email'));
+                        }
+                      }}
+                      className="rounded"
+                    />
+                    <span>Email Notifications</span>
+                  </label>
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="specialRequests">Special Requests or Notes</Label>
+                <Textarea
+                  id="specialRequests"
+                  value={specialRequests}
+                  onChange={(e) => setSpecialRequests(e.target.value)}
+                  placeholder="Any special requirements, preparation preferences, or notes..."
+                  rows={3}
                 />
               </div>
-              <Button type="submit" disabled={alertsSubmitting} className="w-full">
-                {alertsSubmitting ? "Signing Up..." : "Sign Me Up"}
+
+              <Button type="submit" disabled={alertsSubmitting} className="w-full" size="lg">
+                {alertsSubmitting ? "Signing Up..." : "Join Fresh Fish Alerts"}
               </Button>
+
+              <p className="text-xs text-center text-muted-foreground">
+                We respect your privacy and will only contact you about fresh fish availability.
+                You can unsubscribe at any time.
+              </p>
             </form>
           </CardContent>
         </Card>

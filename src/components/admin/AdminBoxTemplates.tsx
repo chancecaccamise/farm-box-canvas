@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Plus, Minus, Copy } from 'lucide-react';
+import { Calendar, Plus, Minus, Copy, CheckCircle, XCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 interface Product {
@@ -23,6 +23,9 @@ interface BoxTemplate {
   box_size: string;
   product_id: string;
   quantity: number;
+  is_confirmed: boolean;
+  confirmed_at: string | null;
+  confirmed_by: string | null;
   products: Product;
 }
 
@@ -39,6 +42,7 @@ export const AdminBoxTemplates = () => {
   const [selectedWeek, setSelectedWeek] = useState('');
   const [selectedBoxSize, setSelectedBoxSize] = useState('');
   const [loading, setLoading] = useState(true);
+  const [isConfirmed, setIsConfirmed] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -102,6 +106,9 @@ export const AdminBoxTemplates = () => {
 
       if (error) throw error;
       setTemplates(data || []);
+      
+      // Check if templates are confirmed
+      setIsConfirmed(data && data.length > 0 && data.every(t => t.is_confirmed));
     } catch (error) {
       console.error('Error fetching templates:', error);
       toast({
@@ -258,6 +265,74 @@ export const AdminBoxTemplates = () => {
     return boxPrice + productsPrice;
   };
 
+  const confirmTemplate = async () => {
+    if (templates.length === 0) {
+      toast({
+        title: "Error",
+        description: "No items in template to confirm",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('box_templates')
+        .update({ 
+          is_confirmed: true,
+          confirmed_at: new Date().toISOString()
+        })
+        .eq('week_start_date', selectedWeek)
+        .eq('box_size', selectedBoxSize);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Box template confirmed! This will now appear in customer MyBag pages."
+      });
+      
+      fetchTemplates();
+    } catch (error) {
+      console.error('Error confirming template:', error);
+      toast({
+        title: "Error",
+        description: "Failed to confirm template",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const unconfirmTemplate = async () => {
+    try {
+      const { error } = await supabase
+        .from('box_templates')
+        .update({ 
+          is_confirmed: false,
+          confirmed_at: null,
+          confirmed_by: null
+        })
+        .eq('week_start_date', selectedWeek)
+        .eq('box_size', selectedBoxSize);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Box template unconfirmed. This will no longer appear in customer MyBag pages."
+      });
+      
+      fetchTemplates();
+    } catch (error) {
+      console.error('Error unconfirming template:', error);
+      toast({
+        title: "Error",
+        description: "Failed to unconfirm template",
+        variant: "destructive"
+      });
+    }
+  };
+
   if (loading) {
     return <div className="flex justify-center p-8">Loading...</div>;
   }
@@ -266,10 +341,23 @@ export const AdminBoxTemplates = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Box Template Management</h2>
-        <Button onClick={copyFromPreviousWeek} variant="outline">
-          <Copy className="h-4 w-4 mr-2" />
-          Copy Previous Week
-        </Button>
+        <div className="flex space-x-2">
+          <Button onClick={copyFromPreviousWeek} variant="outline">
+            <Copy className="h-4 w-4 mr-2" />
+            Copy Previous Week
+          </Button>
+          {isConfirmed ? (
+            <Button onClick={unconfirmTemplate} variant="destructive">
+              <XCircle className="h-4 w-4 mr-2" />
+              Unconfirm Template
+            </Button>
+          ) : (
+            <Button onClick={confirmTemplate} disabled={templates.length === 0}>
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Confirm Template
+            </Button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -302,7 +390,15 @@ export const AdminBoxTemplates = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Card>
           <CardHeader>
-            <CardTitle>Current Box Contents</CardTitle>
+            <CardTitle className="flex items-center justify-between">
+              Current Box Contents
+              {isConfirmed && (
+                <Badge variant="default" className="bg-green-500">
+                  <CheckCircle className="h-3 w-3 mr-1" />
+                  Confirmed
+                </Badge>
+              )}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             {templates.length === 0 ? (
