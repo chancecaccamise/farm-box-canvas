@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -41,29 +42,16 @@ const Navbar = () => {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-         <Link to="/" className="flex items-center">
-  <img 
-    src={billysLogo} 
-    alt="Billy's Botanicals Logo" 
-    className="h-20 w-auto object-contain" // ~80px height
-  />
-</Link>
+          <Link to="/" className="flex items-center">
+            <img 
+              src={billysLogo} 
+              alt="Billy's Botanicals Logo" 
+              className="h-20 w-auto object-contain"
+            />
+          </Link>
 
           {/* Center Navigation */}
           <div className="hidden lg:flex items-center space-x-4 xl:space-x-6">
-            {user && (
-              <>
-                <Link to="/my-plan" className="text-foreground hover:text-primary transition-colors">
-                  My Plan
-                </Link>
-                
-                <Link to="/my-bag" className="text-foreground hover:text-primary transition-colors flex items-center space-x-1">
-                  <ShoppingBag className="w-4 h-4" />
-                  <span>My Bag</span>
-                </Link>
-              </>
-            )}
-
             {/* About Us Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger className="flex items-center space-x-1 text-foreground hover:text-primary transition-colors">
@@ -83,15 +71,6 @@ const Navbar = () => {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Link to="/faqs" className="text-foreground hover:text-primary transition-colors">
-              FAQs
-            </Link>
-
-            <Link to="/gift-cards" className="text-foreground hover:text-primary transition-colors">
-              Gift Cards
-            </Link>
-
-
             <Link to="/support-local" className="text-foreground hover:text-primary transition-colors">
               Support Local
             </Link>
@@ -100,8 +79,8 @@ const Navbar = () => {
               Fresh Catch
             </Link>
 
-            <Link to="/anas-flowers" className="text-foreground hover:text-primary transition-colors">
-              Ana's Flowers
+            <Link to="/anas-arrangements" className="text-foreground hover:text-primary transition-colors">
+              Ana's Arrangements
             </Link>
           </div>
 
@@ -131,20 +110,12 @@ const Navbar = () => {
                   {/* Navigation Links */}
                   <div className="space-y-3">
                     {user && (
-                      <>
-                        <Button variant="ghost" className="w-full justify-start" asChild>
-                          <Link to="/my-plan" onClick={() => setMobileMenuOpen(false)}>
-                            <Calendar className="w-4 h-4 mr-3" />
-                            My Plan
-                          </Link>
-                        </Button>
-                        <Button variant="ghost" className="w-full justify-start" asChild>
-                          <Link to="/my-bag" onClick={() => setMobileMenuOpen(false)}>
-                            <ShoppingBag className="w-4 h-4 mr-3" />
-                            My Bag
-                          </Link>
-                        </Button>
-                      </>
+                      <Button variant="ghost" className="w-full justify-start" asChild>
+                        <Link to="/my-bag" onClick={() => setMobileMenuOpen(false)}>
+                          <ShoppingBag className="w-4 h-4 mr-3" />
+                          My Bag
+                        </Link>
+                      </Button>
                     )}
 
                     <div className="pt-2">
@@ -169,16 +140,6 @@ const Navbar = () => {
                     </div>
 
                     <Button variant="ghost" className="w-full justify-start" asChild>
-                      <Link to="/faqs" onClick={() => setMobileMenuOpen(false)}>
-                        FAQs
-                      </Link>
-                    </Button>
-                    <Button variant="ghost" className="w-full justify-start" asChild>
-                      <Link to="/gift-cards" onClick={() => setMobileMenuOpen(false)}>
-                        Gift Cards
-                      </Link>
-                    </Button>
-                    <Button variant="ghost" className="w-full justify-start" asChild>
                       <Link to="/support-local" onClick={() => setMobileMenuOpen(false)}>
                         Support Local
                       </Link>
@@ -189,8 +150,8 @@ const Navbar = () => {
                       </Link>
                     </Button>
                     <Button variant="ghost" className="w-full justify-start" asChild>
-                      <Link to="/anas-flowers" onClick={() => setMobileMenuOpen(false)}>
-                        Ana's Flowers
+                      <Link to="/anas-arrangements" onClick={() => setMobileMenuOpen(false)}>
+                        Ana's Arrangements
                       </Link>
                     </Button>
                   </div>
@@ -199,6 +160,12 @@ const Navbar = () => {
                   <div className="pt-4 border-t space-y-3">
                     {user ? (
                       <>
+                        <Button variant="ghost" className="w-full justify-start" asChild>
+                          <Link to="/my-plan" onClick={() => setMobileMenuOpen(false)}>
+                            <Calendar className="w-4 h-4 mr-3" />
+                            My Plan
+                          </Link>
+                        </Button>
                         <Button variant="ghost" className="w-full justify-start" asChild>
                           <Link to="/account" onClick={() => setMobileMenuOpen(false)}>
                             <Settings className="w-4 h-4 mr-3" />
@@ -240,41 +207,45 @@ const Navbar = () => {
           {/* Right Side - Desktop */}
           <div className="hidden lg:flex items-center space-x-4">
             {user ? (
-              /* Account Dropdown for authenticated users */
-              <DropdownMenu>
-                <DropdownMenuTrigger className="flex items-center space-x-2 text-foreground hover:text-primary transition-colors">
-                  <User className="w-5 h-5" />
-                  <span className="hidden sm:inline">{getDisplayName()}</span>
-                  <ChevronDown className="w-4 h-4" />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem asChild>
-                    <Link to="/my-plan" className="flex items-center space-x-2">
-                      <Calendar className="w-4 h-4" />
-                      <span>My Plan</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/my-bag" className="flex items-center space-x-2">
-                      <ShoppingBag className="w-4 h-4" />
-                      <span>My Bag</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem asChild>
-                    <Link to="/account" className="flex items-center space-x-2">
-                      <Settings className="w-4 h-4" />
-                      <span>Account Settings</span>
-                    </Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem 
-                    className="flex items-center space-x-2 text-destructive cursor-pointer"
-                    onClick={() => signOut()}
-                  >
-                    <LogOut className="w-4 h-4" />
-                    <span>Sign Out</span>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <div className="flex items-center space-x-4">
+                {/* My Bag Button */}
+                <Button variant="ghost" className="flex items-center space-x-2" asChild>
+                  <Link to="/my-bag">
+                    <ShoppingBag className="w-5 h-5" />
+                    <span>My Bag</span>
+                  </Link>
+                </Button>
+
+                {/* Account Dropdown */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="flex items-center space-x-2 text-foreground hover:text-primary transition-colors">
+                    <User className="w-5 h-5" />
+                    <span className="hidden sm:inline">{getDisplayName()}</span>
+                    <ChevronDown className="w-4 h-4" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem asChild>
+                      <Link to="/my-plan" className="flex items-center space-x-2">
+                        <Calendar className="w-4 h-4" />
+                        <span>My Plan</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/account" className="flex items-center space-x-2">
+                        <Settings className="w-4 h-4" />
+                        <span>Account Settings</span>
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      className="flex items-center space-x-2 text-destructive cursor-pointer"
+                      onClick={() => signOut()}
+                    >
+                      <LogOut className="w-4 h-4" />
+                      <span>Sign Out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             ) : (
               /* Login/Signup buttons for unauthenticated users */
               <div className="flex items-center space-x-2">

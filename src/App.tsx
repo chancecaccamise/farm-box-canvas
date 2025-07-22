@@ -61,6 +61,7 @@ const AppRoutes = () => {
         {/* Public routes */}
         <Route path="/auth" element={<Auth />} />
         <Route path="/anas-flowers" element={<AnasFlowers />} />
+        <Route path="/anas-arrangements" element={<AnasFlowers />} />
         <Route path="/how-we-grow" element={<HowWeGrow />} />
         <Route path="/our-mission" element={<OurMission />} />
         <Route path="/meet-farmers" element={<MeetFarmers />} />
