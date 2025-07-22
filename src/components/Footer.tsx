@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
@@ -51,17 +52,36 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-6">Quick Links</h3>
             <div className="space-y-3">
-              <Link to="/how-we-grow" className="block text-primary-foreground/80 hover:text-accent transition-colors">
-                How We Grow
-              </Link>
               <Link to="/how-farm-bags-work" className="block text-primary-foreground/80 hover:text-accent transition-colors">
-                How Farm Bags Work
+                How It Works
               </Link>
               <Link to="/meet-farmers" className="block text-primary-foreground/80 hover:text-accent transition-colors">
                 Meet the Farmers
               </Link>
+              <Link to="/anas-flowers" className="block text-primary-foreground/80 hover:text-accent transition-colors">
+                Ana's Flowers
+              </Link>
               <Link to="/faqs" className="block text-primary-foreground/80 hover:text-accent transition-colors">
-                FAQs
+                FAQ
+              </Link>
+            </div>
+          </div>
+
+          {/* Partners & Services */}
+          <div>
+            <h3 className="text-lg font-semibold mb-6">Partners & Services</h3>
+            <div className="space-y-3">
+              <Link to="/become-a-partner" className="block text-primary-foreground/80 hover:text-accent transition-colors">
+                Partner Sign-Up
+              </Link>
+              <Link to="/support-local" className="block text-primary-foreground/80 hover:text-accent transition-colors">
+                Support Local
+              </Link>
+              <Link to="/fresh-catch" className="block text-primary-foreground/80 hover:text-accent transition-colors">
+                Fresh Catch
+              </Link>
+              <Link to="/gift-cards" className="block text-primary-foreground/80 hover:text-accent transition-colors">
+                Gift Cards
               </Link>
             </div>
           </div>
@@ -86,27 +106,6 @@ const Footer = () => {
                 </span>
               </div>
             </div>
-          </div>
-
-          {/* Newsletter Signup */}
-          <div>
-            <h3 className="text-lg font-semibold mb-6">Join Billy's Botanical Family</h3>
-            <p className="text-primary-foreground/80 mb-4">
-              Get weekly farm updates, Billy's growing tips, and first access to seasonal harvests.
-            </p>
-            <form onSubmit={handleNewsletterSubmit} className="space-y-3">
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/60"
-                required
-              />
-              <Button type="submit" variant="secondary" className="w-full">
-                Subscribe
-              </Button>
-            </form>
           </div>
         </div>
 
