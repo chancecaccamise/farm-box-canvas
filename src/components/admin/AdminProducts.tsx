@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2, Search } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { ImageUpload } from './ImageUpload';
 
 interface Product {
   id: string;
@@ -271,15 +272,12 @@ export const AdminProducts = () => {
                 />
               </div>
 
-              <div>
-                <Label htmlFor="image">Image URL</Label>
-                <Input
-                  id="image"
-                  value={formData.image}
-                  onChange={(e) => setFormData({...formData, image: e.target.value})}
-                  placeholder="https://example.com/image.jpg"
-                />
-              </div>
+              <ImageUpload
+                value={formData.image}
+                onChange={(url) => setFormData({...formData, image: url})}
+                label="Product Image"
+                placeholder="Drop an image here or click to upload"
+              />
 
               <div>
                 <Label htmlFor="tags">Tags (comma-separated)</Label>
