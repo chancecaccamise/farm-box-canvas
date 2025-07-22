@@ -14,6 +14,90 @@ export type Database = {
   }
   public: {
     Tables: {
+      box_sizes: {
+        Row: {
+          base_price: number
+          created_at: string
+          description: string | null
+          display_name: string
+          id: string
+          is_active: boolean
+          item_count_range: string | null
+          name: string
+          serves_text: string | null
+          updated_at: string
+        }
+        Insert: {
+          base_price: number
+          created_at?: string
+          description?: string | null
+          display_name: string
+          id?: string
+          is_active?: boolean
+          item_count_range?: string | null
+          name: string
+          serves_text?: string | null
+          updated_at?: string
+        }
+        Update: {
+          base_price?: number
+          created_at?: string
+          description?: string | null
+          display_name?: string
+          id?: string
+          is_active?: boolean
+          item_count_range?: string | null
+          name?: string
+          serves_text?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      box_templates: {
+        Row: {
+          box_size: string
+          created_at: string
+          id: string
+          product_id: string
+          quantity: number
+          updated_at: string
+          week_start_date: string
+        }
+        Insert: {
+          box_size: string
+          created_at?: string
+          id?: string
+          product_id: string
+          quantity?: number
+          updated_at?: string
+          week_start_date: string
+        }
+        Update: {
+          box_size?: string
+          created_at?: string
+          id?: string
+          product_id?: string
+          quantity?: number
+          updated_at?: string
+          week_start_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "box_templates_box_size_fkey"
+            columns: ["box_size"]
+            isOneToOne: false
+            referencedRelation: "box_sizes"
+            referencedColumns: ["name"]
+          },
+          {
+            foreignKeyName: "box_templates_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       current_bag: {
         Row: {
           id: string
@@ -790,6 +874,7 @@ export type Database = {
         Row: {
           created_at: string
           id: string
+          item_type: string
           price_at_time: number
           product_id: string
           quantity: number
@@ -799,6 +884,7 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
+          item_type?: string
           price_at_time: number
           product_id: string
           quantity?: number
@@ -808,6 +894,7 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
+          item_type?: string
           price_at_time?: number
           product_id?: string
           quantity?: number
@@ -833,6 +920,9 @@ export type Database = {
       }
       weekly_bags: {
         Row: {
+          addons_total: number | null
+          box_price: number | null
+          box_size: string | null
           confirmed_at: string | null
           created_at: string
           cutoff_time: string
@@ -847,6 +937,9 @@ export type Database = {
           week_start_date: string
         }
         Insert: {
+          addons_total?: number | null
+          box_price?: number | null
+          box_size?: string | null
           confirmed_at?: string | null
           created_at?: string
           cutoff_time: string
@@ -861,6 +954,9 @@ export type Database = {
           week_start_date: string
         }
         Update: {
+          addons_total?: number | null
+          box_price?: number | null
+          box_size?: string | null
           confirmed_at?: string | null
           created_at?: string
           cutoff_time?: string
@@ -874,7 +970,15 @@ export type Database = {
           week_end_date?: string
           week_start_date?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "weekly_bags_box_size_fkey"
+            columns: ["box_size"]
+            isOneToOne: false
+            referencedRelation: "box_sizes"
+            referencedColumns: ["name"]
+          },
+        ]
       }
     }
     Views: {
@@ -889,12 +993,24 @@ export type Database = {
         Args: { user_uuid: string }
         Returns: string
       }
+      get_or_create_current_week_bag_with_size: {
+        Args: { user_uuid: string; box_size_name?: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _user_id: string
           _role: Database["public"]["Enums"]["app_role"]
         }
         Returns: boolean
+      }
+      populate_weekly_bag_from_template: {
+        Args: { bag_id: string; box_size_name: string; week_start: string }
+        Returns: undefined
+      }
+      update_weekly_bag_totals: {
+        Args: { bag_id: string }
+        Returns: undefined
       }
     }
     Enums: {

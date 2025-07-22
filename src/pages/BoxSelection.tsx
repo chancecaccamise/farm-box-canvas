@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Package, Repeat, ShoppingBag, CheckCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCheckout } from "@/contexts/CheckoutContext";
+import { supabase } from "@/integrations/supabase/client";
 
 type BoxType = "one-time" | "subscription";
 type BoxSize = "small" | "medium" | "large";
@@ -13,6 +14,8 @@ const BoxSelection = () => {
   const { checkoutState, updateBoxType, updateBoxSize } = useCheckout();
   const [boxType, setBoxType] = useState<BoxType>(checkoutState.boxType);
   const [boxSize, setBoxSize] = useState<BoxSize>(checkoutState.boxSize);
+  const [boxSizes, setBoxSizes] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -20,32 +23,29 @@ const BoxSelection = () => {
     updateBoxSize(boxSize);
   }, [boxType, boxSize, updateBoxType, updateBoxSize]);
 
-  const boxSizes = [
-    {
-      id: "small" as BoxSize,
-      name: "Small Box",
-      items: "8-10 items",
-      description: "Perfect for 1-2 people",
-      popular: false
-    },
-    {
-      id: "medium" as BoxSize,
-      name: "Medium Box", 
-      items: "12-15 items",
-      description: "Great for 2-4 people",
-      popular: true
-    },
-    {
-      id: "large" as BoxSize,
-      name: "Large Box",
-      items: "18-22 items", 
-      description: "Ideal for 4+ people",
-      popular: false
+  useEffect(() => {
+    fetchBoxSizes();
+  }, []);
+
+  const fetchBoxSizes = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('box_sizes')
+        .select('*')
+        .eq('is_active', true)
+        .order('base_price', { ascending: true });
+
+      if (error) throw error;
+      setBoxSizes(data || []);
+    } catch (error) {
+      console.error('Error fetching box sizes:', error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
   const handleContinue = () => {
-    navigate("/product-selection");
+    navigate("/add-ons");
   };
 
   return (
@@ -139,36 +139,44 @@ const BoxSelection = () => {
         {/* Box Size Selection */}
         <div className="mb-12">
           <h2 className="text-2xl font-semibold mb-6 text-center">Box Size</h2>
-          <div className="grid md:grid-cols-3 gap-6">
-            {boxSizes.map((size) => (
-              <Card 
-                key={size.id}
-                className={`cursor-pointer transition-all duration-300 ${
-                  boxSize === size.id 
-                    ? "ring-2 ring-primary shadow-medium" 
-                    : "hover:shadow-medium"
-                }`}
-                onClick={() => setBoxSize(size.id)}
-              >
-                <CardHeader className="text-center">
-                  <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Package className="w-8 h-8 text-white" />
-                  </div>
-                  <CardTitle className="flex items-center justify-center gap-2">
-                    {size.name}
-                    {size.popular && <Badge variant="secondary">Popular</Badge>}
-                  </CardTitle>
-                  {boxSize === size.id && (
-                    <CheckCircle className="w-6 h-6 text-primary mx-auto" />
-                  )}
-                </CardHeader>
-                <CardContent className="text-center">
-                  <div className="text-2xl font-bold text-primary mb-2">{size.items}</div>
-                  <CardDescription className="text-base">{size.description}</CardDescription>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          {loading ? (
+            <div className="text-center">Loading box sizes...</div>
+          ) : (
+            <div className="grid md:grid-cols-3 gap-6">
+              {boxSizes.map((size) => (
+                <Card 
+                  key={size.name}
+                  className={`cursor-pointer transition-all duration-300 ${
+                    boxSize === size.name 
+                      ? "ring-2 ring-primary shadow-medium" 
+                      : "hover:shadow-medium"
+                  }`}
+                  onClick={() => setBoxSize(size.name as BoxSize)}
+                >
+                  <CardHeader className="text-center">
+                    <div className="w-16 h-16 bg-gradient-primary rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Package className="w-8 h-8 text-white" />
+                    </div>
+                    <CardTitle className="flex items-center justify-center gap-2">
+                      {size.display_name}
+                      {size.name === 'medium' && <Badge variant="secondary">Popular</Badge>}
+                    </CardTitle>
+                    {boxSize === size.name && (
+                      <CheckCircle className="w-6 h-6 text-primary mx-auto" />
+                    )}
+                  </CardHeader>
+                  <CardContent className="text-center">
+                    <div className="text-2xl font-bold text-primary mb-2">${size.base_price}</div>
+                    <div className="text-lg font-medium mb-2">{size.item_count_range}</div>
+                    <CardDescription className="text-base">{size.serves_text}</CardDescription>
+                    {size.description && (
+                      <CardDescription className="text-sm mt-2">{size.description}</CardDescription>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* Summary */}
@@ -183,8 +191,8 @@ const BoxSelection = () => {
               <div>
                 <span className="text-muted-foreground">Box Size:</span>
                 <span className="ml-2 font-medium">
-                  {boxSizes.find(s => s.id === boxSize)?.name} 
-                  ({boxSizes.find(s => s.id === boxSize)?.items})
+                  {boxSizes.find(s => s.name === boxSize)?.display_name} 
+                  ({boxSizes.find(s => s.name === boxSize)?.item_count_range})
                 </span>
               </div>
             </div>
@@ -199,7 +207,7 @@ const BoxSelection = () => {
             size="xl"
             className="w-full md:w-auto"
           >
-            Continue to Product Selection
+            Continue to Add-ons
           </Button>
         </div>
       </div>

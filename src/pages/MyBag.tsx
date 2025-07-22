@@ -26,6 +26,9 @@ interface WeeklyBag {
   subtotal: number;
   delivery_fee: number;
   total_amount: number;
+  box_size: string;
+  box_price: number;
+  addons_total: number;
 }
 
 interface WeeklyBagItem {
@@ -33,7 +36,9 @@ interface WeeklyBagItem {
   product_id: string;
   quantity: number;
   price_at_time: number;
+  item_type: 'box_item' | 'addon';
   products: {
+    id: string;
     name: string;
     price: number;
     category: string;
@@ -116,9 +121,12 @@ function MyBag() {
 
   const initializeCurrentWeekBag = async () => {
     try {
-      // Get or create current week bag using the database function
+      // Use the new function that handles box size and templates
       const { data: bagIdData, error: bagError } = await supabase
-        .rpc('get_or_create_current_week_bag', { user_uuid: user?.id });
+        .rpc('get_or_create_current_week_bag_with_size', { 
+          user_uuid: user?.id,
+          box_size_name: 'medium' // Default to medium, user can change later
+        });
 
       if (bagError) {
         console.error("Database function error:", bagError);
@@ -155,7 +163,9 @@ function MyBag() {
           product_id,
           quantity,
           price_at_time,
+          item_type,
           products (
+            id,
             name,
             price,
             category,
@@ -165,7 +175,7 @@ function MyBag() {
         .eq("weekly_bag_id", bagId);
 
       if (error) throw error;
-      setBagItems(data || []);
+      setBagItems((data || []) as WeeklyBagItem[]);
     } catch (error) {
       console.error("Error fetching bag items:", error);
     }
@@ -190,12 +200,13 @@ function MyBag() {
 
     try {
       if (newQuantity <= 0) {
-        // Remove item
+        // Remove addon item only (box items can't be removed)
         await supabase
           .from("weekly_bag_items")
           .delete()
           .eq("weekly_bag_id", currentWeekBag.id)
-          .eq("product_id", productId);
+          .eq("product_id", productId)
+          .eq("item_type", "addon");
       } else {
         // Get current product price
         const { data: productData } = await supabase
@@ -206,15 +217,35 @@ function MyBag() {
 
         if (!productData) return;
 
-        // Upsert item
-        await supabase
+        // Check if item exists
+        const { data: existingItem } = await supabase
           .from("weekly_bag_items")
-          .upsert({
-            weekly_bag_id: currentWeekBag.id,
-            product_id: productId,
-            quantity: newQuantity,
-            price_at_time: productData.price
-          });
+          .select("*")
+          .eq("weekly_bag_id", currentWeekBag.id)
+          .eq("product_id", productId)
+          .maybeSingle();
+
+        if (existingItem) {
+          // Update existing addon only
+          if (existingItem.item_type === 'addon') {
+            await supabase
+              .from("weekly_bag_items")
+              .update({ quantity: newQuantity })
+              .eq("weekly_bag_id", currentWeekBag.id)
+              .eq("product_id", productId);
+          }
+        } else {
+          // Add new addon
+          await supabase
+            .from("weekly_bag_items")
+            .insert({
+              weekly_bag_id: currentWeekBag.id,
+              product_id: productId,
+              quantity: newQuantity,
+              price_at_time: productData.price,
+              item_type: "addon"
+            });
+        }
       }
 
       await fetchBagItems(currentWeekBag.id);
@@ -233,30 +264,22 @@ function MyBag() {
     if (!currentWeekBag) return;
 
     try {
-      const { data, error } = await supabase
-        .from("weekly_bag_items")
-        .select("quantity, price_at_time")
-        .eq("weekly_bag_id", currentWeekBag.id);
+      // Use the database function to update totals
+      const { error } = await supabase
+        .rpc('update_weekly_bag_totals', { bag_id: currentWeekBag.id });
 
       if (error) throw error;
 
-      const subtotal = data.reduce((sum, item) => sum + (item.quantity * item.price_at_time), 0);
-      const deliveryFee = currentWeekBag.delivery_fee;
-      const total = subtotal + deliveryFee;
-
-      await supabase
+      // Refresh the weekly bag data
+      const { data: bagData, error: fetchError } = await supabase
         .from("weekly_bags")
-        .update({
-          subtotal,
-          total_amount: total
-        })
-        .eq("id", currentWeekBag.id);
+        .select("*")
+        .eq("id", currentWeekBag.id)
+        .single();
 
-      setCurrentWeekBag(prev => prev ? {
-        ...prev,
-        subtotal,
-        total_amount: total
-      } : null);
+      if (!fetchError && bagData) {
+        setCurrentWeekBag(bagData);
+      }
     } catch (error) {
       console.error("Error updating bag totals:", error);
     }
@@ -321,10 +344,21 @@ function MyBag() {
   };
 
   const getCurrentBagProducts = () => {
-    return bagItems.reduce((acc, item) => {
-      acc[item.product_id] = item.quantity;
-      return acc;
-    }, {} as Record<string, number>);
+    // Only include add-ons in the product grid (box items are predetermined)
+    return bagItems
+      .filter(item => item.item_type === 'addon')
+      .reduce((acc, item) => {
+        acc[item.product_id] = item.quantity;
+        return acc;
+      }, {} as Record<string, number>);
+  };
+
+  const getBoxItems = () => {
+    return bagItems.filter(item => item.item_type === 'box_item');
+  };
+
+  const getAddonItems = () => {
+    return bagItems.filter(item => item.item_type === 'addon');
   };
 
   const scrollToProducts = () => {
@@ -432,7 +466,7 @@ function MyBag() {
           <div className="text-center">
             <h1 className="text-4xl font-bold text-foreground mb-2">My Bag</h1>
             <p className="text-muted-foreground">
-              Customize your weekly farm box delivery
+              Your curated {currentWeekBag?.box_size} box with optional add-ons
             </p>
           </div>
 
@@ -447,19 +481,55 @@ function MyBag() {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Left Side - Bag Items & Products */}
             <div className="lg:col-span-2 space-y-8">
-              {/* Current Week Items */}
-              {bagItems.length > 0 ? (
-                <div className="space-y-6">
-                  <div className="flex items-center gap-3">
-                    <Package className="w-6 h-6 text-primary" />
-                    <h2 className="text-2xl font-semibold">This Week's Selections</h2>
-                    <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
-                      {bagItems.length} item{bagItems.length !== 1 ? 's' : ''}
-                    </Badge>
-                  </div>
-                  
+              {/* Current Week's Box */}
+              <div className="space-y-6">
+                <div className="flex items-center gap-3">
+                  <Package className="w-6 h-6 text-primary" />
+                  <h2 className="text-2xl font-semibold">
+                    This Week's {currentWeekBag?.box_size ? currentWeekBag.box_size.charAt(0).toUpperCase() + currentWeekBag.box_size.slice(1) : ''} Box
+                  </h2>
+                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+                    {getBoxItems().length} item{getBoxItems().length !== 1 ? 's' : ''}
+                  </Badge>
+                </div>
+                <p className="text-muted-foreground">
+                  These items are curated by our team and included in your subscription.
+                </p>
+                
+                {getBoxItems().length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {bagItems.map((item) => (
+                    {getBoxItems().map((item) => (
+                      <BagItemCard 
+                        key={item.id}
+                        item={item}
+                        onUpdateQuantity={() => {}} // Box items can't be modified
+                        isLocked={true} // Always locked for box items
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    Your box contents will be available once curated for this week.
+                  </div>
+                )}
+              </div>
+
+              {/* Add-ons Section */}
+              <div className="space-y-6">
+                <div className="flex items-center gap-3">
+                  <ShoppingCart className="w-6 h-6 text-primary" />
+                  <h2 className="text-2xl font-semibold">Your Add-ons</h2>
+                  <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
+                    {getAddonItems().length} item{getAddonItems().length !== 1 ? 's' : ''}
+                  </Badge>
+                </div>
+                <p className="text-muted-foreground">
+                  Extra items you've added to supplement your weekly box.
+                </p>
+                
+                {getAddonItems().length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {getAddonItems().map((item) => (
                       <BagItemCard 
                         key={item.id}
                         item={item}
@@ -468,18 +538,24 @@ function MyBag() {
                       />
                     ))}
                   </div>
-                </div>
-              ) : (
-                <EmptyBagState onStartShopping={scrollToProducts} />
-              )}
+                ) : (
+                  <EmptyBagState onStartShopping={scrollToProducts} />
+                )}
+              </div>
 
               {/* Available Products */}
               <div id="products-section">
-                <ProductGrid 
-                  bagItems={getCurrentBagProducts()} 
-                  onUpdateQuantity={updateItemQuantity}
-                  isLocked={currentWeekBag?.is_confirmed || isLocked}
-                />
+                <div className="space-y-4">
+                  <h2 className="text-2xl font-semibold">Browse Add-ons</h2>
+                  <p className="text-muted-foreground">
+                    Supplement your weekly box with these additional products.
+                  </p>
+                  <ProductGrid 
+                    bagItems={getCurrentBagProducts()} 
+                    onUpdateQuantity={updateItemQuantity}
+                    isLocked={currentWeekBag?.is_confirmed || isLocked}
+                  />
+                </div>
               </div>
 
               {/* Bag History */}
