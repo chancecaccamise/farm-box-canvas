@@ -54,6 +54,7 @@ interface WeeklyBag {
   subtotal: number;
   delivery_fee: number;
   total_amount: number;
+  addons_total: number;
 }
 
 const MyPlan = () => {
