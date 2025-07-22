@@ -71,6 +71,16 @@ const Navbar = () => {
               </DropdownMenuContent>
             </DropdownMenu>
 
+            {/* My Bag - positioned after About Us */}
+            {user && (
+              <Button variant="ghost" className="flex items-center space-x-2" asChild>
+                <Link to="/my-bag">
+                  <ShoppingBag className="w-5 h-5" />
+                  <span>My Bag</span>
+                </Link>
+              </Button>
+            )}
+
             <Link to="/support-local" className="text-foreground hover:text-primary transition-colors">
               Support Local
             </Link>
@@ -109,15 +119,6 @@ const Navbar = () => {
 
                   {/* Navigation Links */}
                   <div className="space-y-3">
-                    {user && (
-                      <Button variant="ghost" className="w-full justify-start" asChild>
-                        <Link to="/my-bag" onClick={() => setMobileMenuOpen(false)}>
-                          <ShoppingBag className="w-4 h-4 mr-3" />
-                          My Bag
-                        </Link>
-                      </Button>
-                    )}
-
                     <div className="pt-2">
                       <p className="text-sm font-medium text-muted-foreground mb-3">About Us</p>
                       <div className="space-y-1 pl-4">
@@ -138,6 +139,15 @@ const Navbar = () => {
                         </Button>
                       </div>
                     </div>
+
+                    {user && (
+                      <Button variant="ghost" className="w-full justify-start" asChild>
+                        <Link to="/my-bag" onClick={() => setMobileMenuOpen(false)}>
+                          <ShoppingBag className="w-4 h-4 mr-3" />
+                          My Bag
+                        </Link>
+                      </Button>
+                    )}
 
                     <Button variant="ghost" className="w-full justify-start" asChild>
                       <Link to="/support-local" onClick={() => setMobileMenuOpen(false)}>
@@ -208,14 +218,6 @@ const Navbar = () => {
           <div className="hidden lg:flex items-center space-x-4">
             {user ? (
               <div className="flex items-center space-x-4">
-                {/* My Bag Button */}
-                <Button variant="ghost" className="flex items-center space-x-2" asChild>
-                  <Link to="/my-bag">
-                    <ShoppingBag className="w-5 h-5" />
-                    <span>My Bag</span>
-                  </Link>
-                </Button>
-
                 {/* Account Dropdown */}
                 <DropdownMenu>
                   <DropdownMenuTrigger className="flex items-center space-x-2 text-foreground hover:text-primary transition-colors">

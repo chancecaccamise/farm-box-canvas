@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { ShoppingCart, Lock, Calendar, Tag, Truck } from "lucide-react";
+import { ShoppingCart, Lock, Calendar, Tag, Truck, Clock } from "lucide-react";
 
 interface WeeklyBagSummaryProps {
   weeklyBag: {
@@ -78,7 +78,7 @@ export function WeeklyBagSummary({
 
   const getCheckoutButtonText = () => {
     if (hasActiveSubscription) {
-      return addonsTotal > 0 ? "Checkout Add-Ons" : "No Add-Ons to Checkout";
+      return addonsTotal > 0 ? "Checkout Add-Ons" : "Your Box is Ready";
     } else {
       return "Checkout Entire Order";
     }
@@ -86,11 +86,14 @@ export function WeeklyBagSummary({
 
   const shouldShowCheckoutButton = () => {
     if (hasActiveSubscription) {
-      return addonsTotal > 0;
+      return addonsTotal > 0; // Only show checkout if there are add-ons to pay for
     } else {
-      return itemCount > 0;
+      return itemCount > 0; // Show checkout if there are any items
     }
   };
+
+  // Determine if editing should be disabled - only when cutoff has passed
+  const isEditingDisabled = isLocked;
 
   if (loading) {
     return (
@@ -178,8 +181,8 @@ export function WeeklyBagSummary({
             </div>
           </div>
 
-          {/* Promo Code Section */}
-          {!weeklyBag?.is_confirmed && !isLocked && shouldShowCheckoutButton() && (
+          {/* Promo Code Section - only show if not locked and there's something to checkout */}
+          {!isEditingDisabled && shouldShowCheckoutButton() && (
             <>
               <Separator />
               <div className="space-y-2">
@@ -222,13 +225,21 @@ export function WeeklyBagSummary({
             </div>
           </div>
 
+          {/* Editing Status Info */}
+          {isEditingDisabled && (
+            <div className="bg-destructive/10 border border-destructive/20 p-3 rounded-lg">
+              <div className="flex items-center gap-2 text-sm font-medium text-destructive mb-1">
+                <Clock className="h-4 w-4" />
+                Cutoff Time Passed
+              </div>
+              <div className="text-xs text-muted-foreground">
+                Changes are no longer allowed for this week's bag.
+              </div>
+            </div>
+          )}
+
           {/* Checkout Button */}
-          {weeklyBag?.is_confirmed ? (
-            <Button className="w-full" disabled>
-              <Lock className="h-4 w-4 mr-2" />
-              Bag Confirmed
-            </Button>
-          ) : isLocked ? (
+          {isEditingDisabled ? (
             <Button className="w-full" disabled variant="destructive">
               <Lock className="h-4 w-4 mr-2" />
               Cutoff Passed
@@ -241,18 +252,23 @@ export function WeeklyBagSummary({
               <Calendar className="h-4 w-4 mr-2" />
               {getCheckoutButtonText()}
             </Button>
+          ) : hasActiveSubscription && addonsTotal === 0 ? (
+            <Button className="w-full" disabled variant="outline">
+              <ShoppingCart className="h-4 w-4 mr-2" />
+              Your Box is Ready for Delivery
+            </Button>
           ) : (
             <Button className="w-full" disabled variant="outline">
               <ShoppingCart className="h-4 w-4 mr-2" />
-              {hasActiveSubscription ? "No Add-Ons Selected" : "Add Items to Continue"}
+              Add Items to Continue
             </Button>
           )}
 
           {/* Additional Info */}
-          {!weeklyBag?.is_confirmed && !isLocked && (
+          {!isEditingDisabled && (
             <p className="text-xs text-center text-muted-foreground">
               {hasActiveSubscription 
-                ? "Your subscription box will be delivered automatically"
+                ? "Your subscription box will be delivered automatically. You can add extras until the cutoff time."
                 : "You can modify your selections until the cutoff time"
               }
             </p>

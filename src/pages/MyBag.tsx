@@ -188,10 +188,11 @@ function MyBag() {
   };
 
   const updateItemQuantity = async (productId: string, newQuantity: number) => {
-    if (!currentWeekBag || currentWeekBag.is_confirmed || isLocked) {
+    // Only prevent editing if cutoff time has passed - remove is_confirmed check
+    if (!currentWeekBag || isLocked) {
       toast({
         title: "Cannot Modify",
-        description: "Your bag is locked and cannot be modified.",
+        description: "The cutoff time has passed and your bag can no longer be modified.",
         variant: "destructive",
       });
       return;
@@ -249,6 +250,11 @@ function MyBag() {
 
       await fetchBagItems(currentWeekBag.id);
       await updateBagTotals();
+      
+      toast({
+        title: "Success",
+        description: `${newQuantity > 0 ? 'Added to' : 'Removed from'} your bag`,
+      });
     } catch (error) {
       console.error("Error updating item quantity:", error);
       toast({
@@ -468,7 +474,7 @@ function MyBag() {
                   </div>
                 )}
 
-                {/* Subscription Status Message */}
+                {/* Status Message - Updated to show cutoff info */}
                 <div className="bg-primary/5 border border-primary/20 p-4 rounded-lg">
                   <div className="flex items-start gap-3">
                     <Calendar className="w-5 h-5 text-primary mt-0.5" />
@@ -479,7 +485,10 @@ function MyBag() {
                             Your box will be delivered automatically
                           </p>
                           <p className="text-xs text-muted-foreground mt-1">
-                            You only need to check out if you've added any extras below.
+                            {isLocked 
+                              ? "Cutoff time has passed. No more changes allowed for this week."
+                              : "You can add extras until the cutoff time. Check out only if you've added extras."
+                            }
                           </p>
                         </div>
                       ) : (
@@ -488,7 +497,10 @@ function MyBag() {
                             One-time purchase
                           </p>
                           <p className="text-xs text-muted-foreground mt-1">
-                            Complete checkout to receive your box and any add-ons.
+                            {isLocked 
+                              ? "Cutoff time has passed. No more changes allowed."
+                              : "Complete checkout to receive your box and any add-ons."
+                            }
                           </p>
                         </div>
                       )}
@@ -513,7 +525,7 @@ function MyBag() {
                           key={item.id}
                           item={item}
                           onUpdateQuantity={updateItemQuantity}
-                          isLocked={currentWeekBag?.is_confirmed || isLocked}
+                          isLocked={isLocked} // Only lock based on cutoff time
                         />
                       ))}
                     </div>
@@ -525,7 +537,7 @@ function MyBag() {
               <AddOnsGrid 
                 bagItems={getCurrentBagProducts()} 
                 onUpdateQuantity={updateItemQuantity}
-                isLocked={currentWeekBag?.is_confirmed || isLocked}
+                isLocked={isLocked} // Only lock based on cutoff time
               />
             </div>
 
