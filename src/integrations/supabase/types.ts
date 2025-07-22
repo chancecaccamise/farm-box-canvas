@@ -985,6 +985,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      assign_admin_role: {
+        Args: { user_email: string }
+        Returns: undefined
+      }
       get_next_cutoff_time: {
         Args: { input_date?: string }
         Returns: string
@@ -1002,6 +1006,10 @@ export type Database = {
           _user_id: string
           _role: Database["public"]["Enums"]["app_role"]
         }
+        Returns: boolean
+      }
+      is_current_user_admin: {
+        Args: Record<PropertyKey, never>
         Returns: boolean
       }
       populate_weekly_bag_from_template: {

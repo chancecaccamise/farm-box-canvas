@@ -35,6 +35,7 @@ import HowFarmBagsWork from "./pages/HowFarmBagsWork";
 import PartnerCategory from "./pages/PartnerCategory";
 import PartnerProfile from "./pages/PartnerProfile";
 import NotFound from "./pages/NotFound";
+import Admin from "./pages/Admin";
 
 const queryClient = new QueryClient();
 
@@ -92,6 +93,7 @@ const AppRoutes = () => {
             <Route path="/my-plan" element={<MyPlan />} />
             <Route path="/my-bag" element={<MyBag />} />
             <Route path="/checkout" element={<Checkout />} />
+            <Route path="/admin" element={<Admin />} />
           </>
         ) : (
           <>
