@@ -1,0 +1,21 @@
+-- Add missing columns to orders table to match what create-payment edge function expects
+ALTER TABLE public.orders 
+ADD COLUMN IF NOT EXISTS stripe_session_id TEXT,
+ADD COLUMN IF NOT EXISTS payment_status TEXT DEFAULT 'pending',
+ADD COLUMN IF NOT EXISTS addons_total NUMERIC DEFAULT 0,
+ADD COLUMN IF NOT EXISTS box_price NUMERIC DEFAULT 0,
+ADD COLUMN IF NOT EXISTS delivery_fee NUMERIC DEFAULT 4.99,
+ADD COLUMN IF NOT EXISTS customer_email TEXT,
+ADD COLUMN IF NOT EXISTS customer_name TEXT,
+ADD COLUMN IF NOT EXISTS customer_phone TEXT,
+ADD COLUMN IF NOT EXISTS shipping_address_street TEXT,
+ADD COLUMN IF NOT EXISTS shipping_address_apartment TEXT,
+ADD COLUMN IF NOT EXISTS shipping_address_city TEXT,
+ADD COLUMN IF NOT EXISTS shipping_address_state TEXT,
+ADD COLUMN IF NOT EXISTS shipping_address_zip TEXT,
+ADD COLUMN IF NOT EXISTS delivery_instructions TEXT,
+ADD COLUMN IF NOT EXISTS has_active_subscription BOOLEAN DEFAULT false,
+ADD COLUMN IF NOT EXISTS week_start_date DATE,
+ADD COLUMN IF NOT EXISTS week_end_date DATE,
+ADD COLUMN IF NOT EXISTS weekly_bag_id UUID,
+ADD COLUMN IF NOT EXISTS box_size TEXT;

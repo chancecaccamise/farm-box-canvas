@@ -444,37 +444,94 @@ export type Database = {
       }
       orders: {
         Row: {
+          addons_total: number | null
+          box_price: number | null
+          box_size: string | null
           created_at: string
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone: string | null
           delivery_date: string | null
+          delivery_fee: number | null
+          delivery_instructions: string | null
+          has_active_subscription: boolean | null
           id: string
           order_date: string
           order_type: string
+          payment_status: string | null
+          shipping_address_apartment: string | null
+          shipping_address_city: string | null
+          shipping_address_state: string | null
+          shipping_address_street: string | null
+          shipping_address_zip: string | null
           status: string
+          stripe_session_id: string | null
           total_amount: number
           updated_at: string
           user_id: string
+          week_end_date: string | null
+          week_start_date: string | null
+          weekly_bag_id: string | null
         }
         Insert: {
+          addons_total?: number | null
+          box_price?: number | null
+          box_size?: string | null
           created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
           delivery_date?: string | null
+          delivery_fee?: number | null
+          delivery_instructions?: string | null
+          has_active_subscription?: boolean | null
           id?: string
           order_date?: string
           order_type?: string
+          payment_status?: string | null
+          shipping_address_apartment?: string | null
+          shipping_address_city?: string | null
+          shipping_address_state?: string | null
+          shipping_address_street?: string | null
+          shipping_address_zip?: string | null
           status?: string
+          stripe_session_id?: string | null
           total_amount?: number
           updated_at?: string
           user_id: string
+          week_end_date?: string | null
+          week_start_date?: string | null
+          weekly_bag_id?: string | null
         }
         Update: {
+          addons_total?: number | null
+          box_price?: number | null
+          box_size?: string | null
           created_at?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
           delivery_date?: string | null
+          delivery_fee?: number | null
+          delivery_instructions?: string | null
+          has_active_subscription?: boolean | null
           id?: string
           order_date?: string
           order_type?: string
+          payment_status?: string | null
+          shipping_address_apartment?: string | null
+          shipping_address_city?: string | null
+          shipping_address_state?: string | null
+          shipping_address_street?: string | null
+          shipping_address_zip?: string | null
           status?: string
+          stripe_session_id?: string | null
           total_amount?: number
           updated_at?: string
           user_id?: string
+          week_end_date?: string | null
+          week_start_date?: string | null
+          weekly_bag_id?: string | null
         }
         Relationships: []
       }
