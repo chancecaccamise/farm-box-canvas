@@ -351,14 +351,52 @@ function MyBag() {
     }
   };
 
-  const handleCheckout = () => {
-    navigate('/checkout', {
-      state: {
-        weeklyBag: currentWeekBag,
-        bagItems: bagItems,
-        hasActiveSubscription: hasActiveSubscription
+  const handleCheckout = async () => {
+    if (!currentWeekBag || !bagItems) {
+      toast({
+        title: "Error",
+        description: "Unable to process checkout. Please refresh the page.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('create-payment', {
+        body: {
+          weeklyBag: currentWeekBag,
+          bagItems: bagItems,
+          hasActiveSubscription: hasActiveSubscription
+        }
+      });
+
+      if (error) {
+        console.error("Payment error:", error);
+        toast({
+          title: "Payment Error",
+          description: error.message || "Failed to create checkout session. Please try again.",
+          variant: "destructive",
+        });
+        return;
       }
-    });
+
+      if (data?.url) {
+        // Redirect to Stripe Checkout
+        window.location.href = data.url;
+      } else {
+        throw new Error("No checkout URL received");
+      }
+    } catch (error) {
+      console.error("Checkout error:", error);
+      toast({
+        title: "Checkout Error",
+        description: "Failed to initiate checkout. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getBoxItems = () => {

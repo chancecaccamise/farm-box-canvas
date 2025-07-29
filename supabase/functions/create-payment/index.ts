@@ -46,9 +46,7 @@ serve(async (req) => {
     const { 
       weeklyBag, 
       bagItems, 
-      hasActiveSubscription, 
-      deliveryData, 
-      paymentData 
+      hasActiveSubscription
     } = requestData;
 
     if (!weeklyBag || !bagItems) {
@@ -137,7 +135,13 @@ serve(async (req) => {
       line_items: lineItems,
       mode: "payment",
       success_url: `${req.headers.get("origin")}/confirmation?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get("origin")}/checkout`,
+      cancel_url: `${req.headers.get("origin")}/my-bag`,
+      shipping_address_collection: {
+        allowed_countries: ['US'],
+      },
+      phone_number_collection: {
+        enabled: true,
+      },
       metadata: {
         user_id: user.id,
         weekly_bag_id: weeklyBag.id,
@@ -154,14 +158,14 @@ serve(async (req) => {
       total_amount: totalAmount,
       payment_status: 'pending',
       customer_email: user.email,
-      customer_name: deliveryData?.fullName || null,
-      customer_phone: deliveryData?.phoneNumber || null,
-      shipping_address_street: deliveryData?.streetAddress || null,
-      shipping_address_apartment: deliveryData?.apartment || null,
-      shipping_address_city: deliveryData?.city || null,
-      shipping_address_state: deliveryData?.state || null,
-      shipping_address_zip: deliveryData?.zipCode || null,
-      delivery_instructions: deliveryData?.deliveryInstructions || null,
+      customer_name: null, // Will be filled from Stripe checkout
+      customer_phone: null, // Will be filled from Stripe checkout
+      shipping_address_street: null, // Will be filled from Stripe checkout
+      shipping_address_apartment: null, // Will be filled from Stripe checkout
+      shipping_address_city: null, // Will be filled from Stripe checkout
+      shipping_address_state: null, // Will be filled from Stripe checkout
+      shipping_address_zip: null, // Will be filled from Stripe checkout
+      delivery_instructions: null, // Will be filled from Stripe checkout
       box_size: weeklyBag.box_size,
       box_price: boxPrice,
       addons_total: addonsTotal,

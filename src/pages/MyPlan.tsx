@@ -14,6 +14,7 @@ import { SubscriptionManager } from "@/components/SubscriptionManager";
 import { BoxSizeSelector } from "@/components/BoxSizeSelector";
 import { EditableDeliveryForm } from "@/components/EditableDeliveryForm";
 import { ContactForm } from "@/components/ContactForm";
+import NotificationPreferences from "@/components/NotificationPreferences";
 
 
 interface DeliveryAddress {
@@ -222,6 +223,9 @@ const MyPlan = () => {
               address={deliveryAddress}
               onAddressUpdate={handleAddressUpdate}
             />
+
+            {/* Notification Preferences */}
+            <NotificationPreferences />
 
             {/* Next Delivery Info */}
             <Card>
