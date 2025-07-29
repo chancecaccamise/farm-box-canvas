@@ -134,7 +134,7 @@ serve(async (req) => {
       customer_email: customerId ? undefined : user.email,
       line_items: lineItems,
       mode: "payment",
-      success_url: `${req.headers.get("origin")}/confirmation?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${req.headers.get("origin")}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.get("origin")}/my-bag`,
       shipping_address_collection: {
         allowed_countries: ['US'],

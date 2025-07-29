@@ -1,0 +1,208 @@
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CheckCircle, Calendar, Truck, ArrowRight, Home } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "@/components/AuthProvider";
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState } from "react";
+import { useToast } from "@/hooks/use-toast";
+
+const ThankYou = () => {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const [orderDetails, setOrderDetails] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadOrderDetails = async () => {
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const sessionId = urlParams.get('session_id');
+
+        if (sessionId && user) {
+          // Fetch order details from database using session ID
+          const { data: order } = await supabase
+            .from('orders')
+            .select(`
+              *,
+              order_items (
+                id,
+                product_name,
+                quantity,
+                price,
+                item_type
+              )
+            `)
+            .eq('stripe_session_id', sessionId)
+            .eq('user_id', user.id)
+            .single();
+
+          if (order) {
+            setOrderDetails(order);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading order details:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (user) {
+      loadOrderDetails();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/30 flex items-center justify-center px-4">
+      <div className="max-w-2xl mx-auto text-center">
+        {/* Success Icon */}
+        <div className="w-24 h-24 bg-gradient-fresh rounded-full flex items-center justify-center mx-auto mb-8">
+          <CheckCircle className="w-12 h-12 text-white" />
+        </div>
+
+        {/* Main Message */}
+        <h1 className="text-4xl font-bold mb-4">Thank You for Your Order!</h1>
+        <p className="text-xl text-muted-foreground mb-12 max-w-lg mx-auto">
+          {orderDetails ? 
+            `Your order has been confirmed and will be delivered to ${orderDetails.shipping_address_street || 'your address'}.` :
+            'Your order has been confirmed and is being processed.'
+          }
+        </p>
+
+        {/* Order Details Card */}
+        <Card className="mb-8 shadow-medium text-left">
+          <CardHeader>
+            <CardTitle>Order Confirmation</CardTitle>
+            <CardDescription>
+              {orderDetails ? `Order #${orderDetails.id.slice(0, 8)}` : 'Order details'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {loading ? (
+              <div className="animate-pulse space-y-4">
+                <div className="h-4 bg-muted rounded w-3/4"></div>
+                <div className="h-20 bg-muted rounded"></div>
+              </div>
+            ) : orderDetails ? (
+              <>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mt-1">
+                      <Calendar className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold mb-1">Delivery Address</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {orderDetails.shipping_address_street}
+                        {orderDetails.shipping_address_apartment && `, ${orderDetails.shipping_address_apartment}`}<br />
+                        {orderDetails.shipping_address_city}, {orderDetails.shipping_address_state} {orderDetails.shipping_address_zip}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mt-1">
+                      <Truck className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold mb-1">Delivery Window</h3>
+                      <p className="text-sm text-muted-foreground">
+                        {orderDetails.week_start_date ? 
+                          `Week of ${new Date(orderDetails.week_start_date).toLocaleDateString()}` : 
+                          'Next available delivery window'
+                        }<br />
+                        Between 8 AM - 12 PM
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-secondary/50 rounded-lg p-4">
+                  <h4 className="font-medium mb-3">📦 Your Order Summary</h4>
+                  <div className="space-y-2 text-sm">
+                    {orderDetails.order_items?.map((item: any) => (
+                      <div key={item.id} className="flex justify-between">
+                        <span>{item.quantity}x {item.product_name}</span>
+                        <span>${(item.price * item.quantity).toFixed(2)}</span>
+                      </div>
+                    ))}
+                    <div className="border-t pt-2 mt-2 font-semibold flex justify-between">
+                      <span>Total</span>
+                      <span>${orderDetails.total_amount.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {orderDetails.delivery_instructions && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <h4 className="font-medium mb-2">📝 Delivery Instructions</h4>
+                    <p className="text-sm text-blue-800">{orderDetails.delivery_instructions}</p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="text-center py-4">
+                <p className="text-muted-foreground">Loading order details...</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* What's Next */}
+        <Card className="mb-8 shadow-soft">
+          <CardContent className="p-6">
+            <h3 className="font-semibold mb-4">What's Next?</h3>
+            <div className="grid md:grid-cols-3 gap-4 text-sm">
+              <div className="text-center">
+                <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-2 text-xs font-bold">1</div>
+                <p className="font-medium">We Pack Your Box</p>
+                <p className="text-muted-foreground">Fresh from the farm the night before delivery</p>
+              </div>
+              <div className="text-center">
+                <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-2 text-xs font-bold">2</div>
+                <p className="font-medium">Out for Delivery</p>
+                <p className="text-muted-foreground">You'll get a text when it's on the way</p>
+              </div>
+              <div className="text-center">
+                <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-2 text-xs font-bold">3</div>
+                <p className="font-medium">Enjoy Fresh Food</p>
+                <p className="text-muted-foreground">Unpack and start cooking amazing meals</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* CTA Buttons */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <Button variant="hero" size="lg" onClick={() => navigate('/my-bag')}>
+            <Home className="w-4 h-4 mr-2" />
+            Manage Your Bag
+          </Button>
+          
+          <Button variant="outline" size="lg" asChild>
+            <Link to="/">
+              Return to Home
+              <ArrowRight className="w-4 h-4 ml-2" />
+            </Link>
+          </Button>
+        </div>
+
+        {loading && (
+          <div className="text-sm text-muted-foreground mt-4">
+            Loading your order details...
+          </div>
+        )}
+
+        <p className="text-sm text-muted-foreground mt-8">
+          Questions? Contact our team at hello@farmbox.com or (555) 123-4567
+        </p>
+      </div>
+    </div>
+  );
+};
+
+export default ThankYou;

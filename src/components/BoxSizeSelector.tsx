@@ -66,8 +66,25 @@ export function BoxSizeSelector({ currentBoxSize = "medium", onBoxSizeChange, is
     }
   };
 
-  const handleSizeChange = () => {
+  const handleSizeChange = async () => {
     if (selectedSize === currentBoxSize) return;
+    
+    // Check if user has an active subscription
+    const { data: subscription } = await supabase
+      .from('user_subscriptions')
+      .select('status')
+      .eq('user_id', user?.id)
+      .eq('status', 'active')
+      .single();
+    
+    if (subscription) {
+      toast({
+        title: "Subscription Change Required",
+        description: "To change your box size, you'll need to cancel your current subscription and start a new one.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     const currentPrice = getCurrentPrice();
     const newPrice = getSelectedPrice();

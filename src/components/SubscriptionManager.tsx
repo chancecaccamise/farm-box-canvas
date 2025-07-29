@@ -5,7 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Calendar, Pause, Play, X, CalendarDays } from "lucide-react";
+import { Calendar, Pause, Play, X, CalendarDays, ShoppingCart } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -27,6 +28,7 @@ export function SubscriptionManager({ subscription, onSubscriptionUpdate }: Subs
   const [cancelReason, setCancelReason] = useState("");
   const [resumeDate, setResumeDate] = useState("");
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   if (!subscription) {
     return null;
@@ -285,10 +287,15 @@ export function SubscriptionManager({ subscription, onSubscriptionUpdate }: Subs
           )}
 
           {subscription.status === 'cancelled' && (
-            <Button onClick={handleResumeSubscription} disabled={loading} size="sm">
-              <Play className="h-4 w-4 mr-2" />
-              {loading ? 'Reactivating...' : 'Reactivate Subscription'}
-            </Button>
+            <div className="flex flex-col gap-2">
+              <p className="text-sm text-muted-foreground">
+                To change your subscription, you'll need to start a new one.
+              </p>
+              <Button onClick={() => navigate('/')} size="sm" variant="outline">
+                <ShoppingCart className="h-4 w-4 mr-2" />
+                Start New Subscription
+              </Button>
+            </div>
           )}
         </div>
       </CardContent>

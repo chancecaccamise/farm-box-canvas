@@ -31,7 +31,7 @@ import ProductSelection from "./pages/ProductSelection";
 import AddOns from "./pages/AddOns";
 import Delivery from "./pages/Delivery";
 import OrderSummary from "./pages/OrderSummary";
-import Confirmation from "./pages/Confirmation";
+import ThankYou from "./pages/ThankYou";
 import HowFarmBagsWork from "./pages/HowFarmBagsWork";
 import PartnerCategory from "./pages/PartnerCategory";
 import PartnerProfile from "./pages/PartnerProfile";
@@ -97,7 +97,7 @@ const AppRoutes = () => {
             <Route path="/add-ons" element={<AddOns />} />
             <Route path="/delivery" element={<Delivery />} />
             <Route path="/order-summary" element={<OrderSummary />} />
-            <Route path="/confirmation" element={<Confirmation />} />
+            <Route path="/thank-you" element={<ThankYou />} />
             <Route path="/my-plan" element={<MyPlan />} />
             <Route path="/my-bag" element={<MyBag />} />
             <Route path="/admin" element={<Admin />} />
