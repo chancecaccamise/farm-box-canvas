@@ -154,10 +154,8 @@ serve(async (req) => {
       total_amount: totalAmount,
       payment_status: 'pending',
       customer_email: user.email,
-      customer_name: deliveryData?.firstName && deliveryData?.lastName 
-        ? `${deliveryData.firstName} ${deliveryData.lastName}` 
-        : null,
-      customer_phone: deliveryData?.phone || null,
+      customer_name: deliveryData?.fullName || null,
+      customer_phone: deliveryData?.phoneNumber || null,
       shipping_address_street: deliveryData?.streetAddress || null,
       shipping_address_apartment: deliveryData?.apartment || null,
       shipping_address_city: deliveryData?.city || null,
