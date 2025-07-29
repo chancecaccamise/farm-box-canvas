@@ -82,9 +82,9 @@ export function WeeklyBagSummary({
     }
     
     if (hasActiveSubscription) {
-      return addonsTotal > 0 ? "Checkout Add-Ons" : "Confirm Your Bag";
+      return addonsTotal > 0 ? "Checkout" : "Confirm Your Bag";
     } else {
-      return "Checkout Entire Order";
+      return "Checkout";
     }
   };
 
