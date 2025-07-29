@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -31,7 +31,9 @@ export default function PaymentForm({ onSubmit, loading = false }: PaymentFormPr
   const validateForm = () => {
     const newErrors: Partial<PaymentData> = {};
 
-    if (!formData.cardNumber || formData.cardNumber.length < 16) {
+    // Remove spaces for validation but keep original format
+    const cardNumberClean = formData.cardNumber.replace(/\s/g, '');
+    if (!cardNumberClean || cardNumberClean.length < 16) {
       newErrors.cardNumber = "Please enter a valid card number";
     }
     if (!formData.expiryDate || !/^\d{2}\/\d{2}$/.test(formData.expiryDate)) {
@@ -47,6 +49,13 @@ export default function PaymentForm({ onSubmit, loading = false }: PaymentFormPr
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
+
+  // Auto-submit when form is valid
+  useEffect(() => {
+    if (validateForm()) {
+      onSubmit(formData);
+    }
+  }, [formData, onSubmit]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();

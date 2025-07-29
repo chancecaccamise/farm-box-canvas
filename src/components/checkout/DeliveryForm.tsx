@@ -111,6 +111,30 @@ export default function DeliveryForm({ onSubmit, loading = false }: DeliveryForm
     return Object.keys(newErrors).length === 0;
   };
 
+  // Auto-submit when form is valid
+  useEffect(() => {
+    if (validateForm()) {
+      onSubmit(formData);
+    }
+  }, [formData, onSubmit]);
+
+  // Auto-submit existing address
+  useEffect(() => {
+    if (existingAddress && !showForm) {
+      const deliveryData: DeliveryData = {
+        fullName: existingAddress.full_name || "Customer",
+        streetAddress: existingAddress.street_address,
+        apartment: existingAddress.apartment || "",
+        city: existingAddress.city,
+        state: existingAddress.state,
+        zipCode: existingAddress.zip_code,
+        phoneNumber: existingAddress.phone_number || "",
+        deliveryInstructions: existingAddress.delivery_instructions || "",
+      };
+      onSubmit(deliveryData);
+    }
+  }, [existingAddress, showForm, onSubmit]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
