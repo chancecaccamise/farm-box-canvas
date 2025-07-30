@@ -124,7 +124,7 @@ const AddOns = () => {
             <p className="text-muted-foreground">No add-ons available at the moment.</p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+          <div className="grid md:grid-cols-2 gap-6 mb-12">
             {addOns.map((addOn) => {
               const quantity = selectedAddOns[addOn.id] || 0;
               const isSelected = quantity > 0;

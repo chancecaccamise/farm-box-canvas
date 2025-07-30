@@ -6,6 +6,7 @@ interface CheckoutState {
   selectedItems: Record<string, number>;
   addOns: Record<string, number>; // Changed to Record<string, number> for quantities
   zipCode: string;
+  deliveryDay: string;
 }
 
 interface CheckoutContextType {
@@ -15,6 +16,7 @@ interface CheckoutContextType {
   updateSelectedItems: (items: Record<string, number>) => void;
   updateAddOns: (addOns: Record<string, number>) => void; // Updated type
   updateZipCode: (zipCode: string) => void;
+  updateDeliveryDay: (deliveryDay: string) => void;
   clearCheckout: () => void;
 }
 
@@ -24,6 +26,7 @@ const initialState: CheckoutState = {
   selectedItems: {},
   addOns: {}, // Changed to empty object
   zipCode: '',
+  deliveryDay: '',
 };
 
 const CheckoutContext = createContext<CheckoutContextType | undefined>(undefined);
@@ -63,6 +66,10 @@ export const CheckoutProvider: React.FC<CheckoutProviderProps> = ({ children }) 
     setCheckoutState(prev => ({ ...prev, zipCode }));
   };
 
+  const updateDeliveryDay = (deliveryDay: string) => {
+    setCheckoutState(prev => ({ ...prev, deliveryDay }));
+  };
+
   const clearCheckout = () => {
     setCheckoutState(initialState);
   };
@@ -74,6 +81,7 @@ export const CheckoutProvider: React.FC<CheckoutProviderProps> = ({ children }) 
     updateSelectedItems,
     updateAddOns,
     updateZipCode,
+    updateDeliveryDay,
     clearCheckout,
   };
 

@@ -1,13 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Calendar, Truck, CheckCircle, ShoppingCart } from "lucide-react";
+import { ArrowLeft, Calendar, Truck, CheckCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCheckout } from "@/contexts/CheckoutContext";
-import { useAuth } from "@/components/AuthProvider";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 
 type DeliveryDay = {
   id: string;
@@ -19,29 +16,11 @@ type DeliveryDay = {
 
 const Delivery = () => {
   const [selectedDay, setSelectedDay] = useState<string>("");
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
-  const [addOnProducts, setAddOnProducts] = useState<any[]>([]);
-  const [boxPrice, setBoxPrice] = useState(0);
   const navigate = useNavigate();
-  const { checkoutState } = useCheckout();
-  const { user } = useAuth();
-  const { toast } = useToast();
+  const { checkoutState, updateDeliveryDay } = useCheckout();
 
-  // Mock delivery options for the next week
+  // Delivery options limited to Thursday, Saturday, and Sunday
   const deliveryDays: DeliveryDay[] = [
-    {
-      id: "tuesday",
-      day: "Tuesday",
-      date: "Jan 16",
-      available: true,
-      popular: true
-    },
-    {
-      id: "wednesday", 
-      day: "Wednesday",
-      date: "Jan 17",
-      available: true
-    },
     {
       id: "thursday",
       day: "Thursday", 
@@ -50,97 +29,29 @@ const Delivery = () => {
       popular: true
     },
     {
-      id: "friday",
-      day: "Friday",
-      date: "Jan 19", 
-      available: true
-    },
-    {
       id: "saturday",
       day: "Saturday",
       date: "Jan 20",
-      available: false
+      available: true
     },
     {
       id: "sunday",
       day: "Sunday",
       date: "Jan 21",
-      available: false
+      available: true,
+      popular: true
     }
   ];
 
-  useEffect(() => {
-    fetchCheckoutData();
-  }, [checkoutState]);
-
-  const fetchCheckoutData = async () => {
-    try {
-      // Fetch box price
-      if (checkoutState.boxSize) {
-        const { data: boxData } = await supabase
-          .from('box_sizes')
-          .select('base_price')
-          .eq('name', checkoutState.boxSize)
-          .single();
-        setBoxPrice(boxData?.base_price || 0);
-      }
-
-      // Fetch add-on products
-      if (Object.keys(checkoutState.addOns).length > 0) {
-        const addOnIds = Object.keys(checkoutState.addOns);
-        const { data: products } = await supabase
-          .from('products')
-          .select('*')
-          .in('id', addOnIds);
-        setAddOnProducts(products || []);
-      }
-    } catch (error) {
-      console.error('Error fetching checkout data:', error);
+  const handleContinue = () => {
+    if (!selectedDay) return;
+    
+    const selectedDayData = deliveryDays.find(day => day.id === selectedDay);
+    if (selectedDayData) {
+      updateDeliveryDay(`${selectedDayData.day}, ${selectedDayData.date}`);
+      navigate("/order-summary");
     }
   };
-
-  const handleCheckout = async () => {
-    if (!user) {
-      navigate('/auth');
-      return;
-    }
-
-    setIsCheckingOut(true);
-    try {
-      // Call the payment creation function with checkout state
-      const { data, error } = await supabase.functions.invoke('create-payment', {
-        body: {
-          checkoutState,
-          hasActiveSubscription: false, // New customers don't have active subscriptions
-        }
-      });
-
-      if (error) throw error;
-
-      if (data?.url) {
-        window.location.href = data.url;
-      } else {
-        throw new Error('No checkout URL received');
-      }
-    } catch (error) {
-      console.error('Error creating checkout session:', error);
-      toast({
-        title: "Checkout Error",
-        description: "Failed to create checkout session. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsCheckingOut(false);
-    }
-  };
-
-  const addOnTotal = addOnProducts.reduce((total, product) => {
-    const quantity = checkoutState.addOns[product.id] || 0;
-    return total + (product.price * quantity);
-  }, 0);
-
-  const deliveryFee = 4.99;
-  const totalAmount = boxPrice + addOnTotal + deliveryFee;
 
   return (
     <div className="min-h-screen bg-background py-8 px-4">
@@ -246,76 +157,20 @@ const Delivery = () => {
           </CardContent>
         </Card>
 
-        {/* Order Summary */}
-        <Card className="mb-8 shadow-medium">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ShoppingCart className="w-5 h-5" />
-              Order Summary
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Box */}
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="font-medium">
-                  {checkoutState.boxSize?.charAt(0).toUpperCase() + checkoutState.boxSize?.slice(1)} Box
-                </h3>
-                <p className="text-sm text-muted-foreground">Fresh seasonal produce</p>
-              </div>
-              <span className="font-medium">${boxPrice.toFixed(2)}</span>
-            </div>
-
-            {/* Add-ons */}
-            {addOnProducts.length > 0 && (
-              <>
-                <div className="border-t pt-4">
-                  <h3 className="font-medium mb-2">Add-ons</h3>
-                  {addOnProducts.map((product) => {
-                    const quantity = checkoutState.addOns[product.id];
-                    return (
-                      <div key={product.id} className="flex justify-between items-center text-sm mb-1">
-                        <span>{product.name} ×{quantity}</span>
-                        <span>${(product.price * quantity).toFixed(2)}</span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </>
-            )}
-
-            {/* Pricing */}
-            <div className="border-t pt-4 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Subtotal</span>
-                <span>${(boxPrice + addOnTotal).toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span>Delivery fee</span>
-                <span>${deliveryFee.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between font-semibold text-lg border-t pt-2">
-                <span>Total</span>
-                <span>${totalAmount.toFixed(2)}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Checkout Button */}
+        {/* Continue Button */}
         <div className="text-center">
           <Button 
-            onClick={handleCheckout}
-            disabled={isCheckingOut || totalAmount <= 0}
+            onClick={handleContinue}
+            disabled={!selectedDay}
             variant="hero"
             size="xl"
             className="w-full md:w-auto"
           >
-            {isCheckingOut ? "Creating Checkout..." : `Checkout - $${totalAmount.toFixed(2)}`}
+            Continue to Order Summary
             <CheckCircle className="w-5 h-5 ml-2" />
           </Button>
           <p className="text-sm text-muted-foreground mt-4">
-            You'll be redirected to secure checkout to complete your order.
+            Please select a delivery day to continue with your order.
           </p>
         </div>
       </div>

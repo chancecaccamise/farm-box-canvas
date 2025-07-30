@@ -2,105 +2,95 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Package, Calendar, MapPin, CheckCircle } from "lucide-react";
+import { ArrowLeft, Package, Calendar, ShoppingCart, CheckCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useCheckout } from "@/contexts/CheckoutContext";
 
 const OrderSummary = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
-  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [addOnProducts, setAddOnProducts] = useState<any[]>([]);
+  const [boxPrice, setBoxPrice] = useState(0);
+  const { checkoutState } = useCheckout();
 
-  // Mock order data - in a real app this would come from state/context
-  const orderDetails = {
-    boxType: "Subscription",
-    boxSize: "Medium Box (12-15 items)",
-    deliveryDay: "Thursday, Jan 18",
-    zipCode: "12345",
-    selectedItems: [
-      "Bell Pepper Trio",
-      "Leafy Greens Mix", 
-      "Heritage Tomatoes",
-      "Rainbow Carrots",
-      "Free-Range Chicken Breast",
-      "Wild-Caught Salmon",
-      "Farm Fresh Eggs",
-      "Artisan Sourdough",
-      "Local Wildflower Honey",
-      "Extra Virgin Olive Oil",
-      "Artisan Cheese Selection",
-      "Grass-Fed Ground Beef"
-    ],
-    addOns: [
-      "Artisan Bread Box",
-      "Fresh Herb Bundle",
-      "Premium Manuka Honey"
-    ]
-  };
+  useEffect(() => {
+    fetchCheckoutData();
+  }, [checkoutState]);
 
-  const handlePlaceOrder = async () => {
-    if (!user) return;
-    
-    setIsPlacingOrder(true);
-    
+  const fetchCheckoutData = async () => {
     try {
-      // Create subscription
-      const { error: subError } = await supabase
-        .from('user_subscriptions')
-        .insert({
-          user_id: user.id,
-          subscription_type: 'weekly',
-          status: 'active'
-        });
+      // Fetch box price
+      if (checkoutState.boxSize) {
+        const { data: boxData } = await supabase
+          .from('box_sizes')
+          .select('base_price')
+          .eq('name', checkoutState.boxSize)
+          .single();
+        setBoxPrice(boxData?.base_price || 0);
+      }
 
-      if (subError) throw subError;
-
-      // Create initial weekly bag
-      const { data: bagId, error: bagError } = await supabase
-        .rpc('get_or_create_current_week_bag', { user_uuid: user.id });
-
-      if (bagError) throw bagError;
-
-      // Create order record
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .insert({
-          user_id: user.id,
-          order_type: 'subscription',
-          status: 'confirmed',
-          total_amount: 0 // Will be calculated later
-        })
-        .select()
-        .single();
-
-      if (orderError) throw orderError;
-
-      // Store selected items in context for confirmation page to create bag items
-      localStorage.setItem('checkoutItems', JSON.stringify(orderDetails.selectedItems));
-      localStorage.setItem('checkoutAddOns', JSON.stringify(orderDetails.addOns));
-      localStorage.setItem('bagId', bagId);
-
-      toast({
-        title: "Order Placed!",
-        description: "Your subscription has been created successfully.",
-      });
-
-      navigate("/confirmation");
+      // Fetch add-on products
+      if (Object.keys(checkoutState.addOns).length > 0) {
+        const addOnIds = Object.keys(checkoutState.addOns);
+        const { data: products } = await supabase
+          .from('products')
+          .select('*')
+          .in('id', addOnIds);
+        setAddOnProducts(products || []);
+      }
     } catch (error) {
-      console.error('Error placing order:', error);
-      toast({
-        title: "Error",
-        description: "Failed to place order. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsPlacingOrder(false);
+      console.error('Error fetching checkout data:', error);
     }
   };
+
+  const handleCheckout = async () => {
+    if (!user) {
+      navigate('/auth');
+      return;
+    }
+
+    setIsCheckingOut(true);
+    try {
+      // Call the payment creation function with checkout state
+      const { data, error } = await supabase.functions.invoke('create-payment', {
+        body: {
+          checkoutState,
+          hasActiveSubscription: false, // New customers don't have active subscriptions
+        }
+      });
+
+      if (error) throw error;
+
+      if (data?.url) {
+        window.location.href = data.url;
+      } else {
+        throw new Error('No checkout URL received');
+      }
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+      toast({
+        title: "Checkout Error",
+        description: "Failed to create checkout session. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsCheckingOut(false);
+    }
+  };
+
+  const addOnTotal = addOnProducts.reduce((total, product) => {
+    const quantity = checkoutState.addOns[product.id] || 0;
+    return total + (product.price * quantity);
+  }, 0);
+
+  const deliveryFee = 4.99;
+  const totalAmount = boxPrice + addOnTotal + deliveryFee;
 
   return (
     <div className="min-h-screen bg-background py-8 px-4">
@@ -137,11 +127,11 @@ const OrderSummary = () => {
               <CardContent className="space-y-4">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Box Type:</span>
-                  <span className="font-medium">{orderDetails.boxType}</span>
+                  <span className="font-medium">{checkoutState.boxType === 'subscription' ? 'Subscription' : 'One-Time'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Box Size:</span>
-                  <span className="font-medium">{orderDetails.boxSize}</span>
+                  <span className="font-medium">{checkoutState.boxSize?.charAt(0).toUpperCase() + checkoutState.boxSize?.slice(1)} Box</span>
                 </div>
               </CardContent>
             </Card>
@@ -157,7 +147,7 @@ const OrderSummary = () => {
               <CardContent className="space-y-4">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Delivery Day:</span>
-                  <span className="font-medium">{orderDetails.deliveryDay}</span>
+                  <span className="font-medium">{checkoutState.deliveryDay || 'Not selected'}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Delivery Time:</span>
@@ -165,49 +155,62 @@ const OrderSummary = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">ZIP Code:</span>
-                  <span className="font-medium">{orderDetails.zipCode}</span>
+                  <span className="font-medium">{checkoutState.zipCode || 'Not provided'}</span>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Selected Items */}
+            {/* Box Details */}
             <Card className="shadow-soft">
               <CardHeader>
-                <CardTitle>Selected Items ({orderDetails.selectedItems.length})</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <Package className="w-5 h-5" />
+                  Box Contents
+                </CardTitle>
                 <CardDescription>
-                  Fresh ingredients for your weekly box
+                  Your {checkoutState.boxSize} box selection
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid md:grid-cols-2 gap-2">
-                  {orderDetails.selectedItems.map((item, index) => (
-                    <div key={index} className="flex items-center gap-2 py-1">
-                      <CheckCircle className="w-4 h-4 text-primary" />
-                      <span className="text-sm">{item}</span>
-                    </div>
-                  ))}
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h3 className="font-medium">
+                      {checkoutState.boxSize?.charAt(0).toUpperCase() + checkoutState.boxSize?.slice(1)} Box
+                    </h3>
+                    <p className="text-sm text-muted-foreground">Fresh seasonal produce</p>
+                  </div>
+                  <span className="font-medium">${boxPrice.toFixed(2)}</span>
                 </div>
               </CardContent>
             </Card>
 
             {/* Add-Ons */}
-            {orderDetails.addOns.length > 0 && (
+            {addOnProducts.length > 0 && (
               <Card className="shadow-soft">
                 <CardHeader>
-                  <CardTitle>Add-Ons ({orderDetails.addOns.length})</CardTitle>
+                  <CardTitle>Add-Ons ({Object.keys(checkoutState.addOns).length})</CardTitle>
                   <CardDescription>
                     Premium additions to enhance your box
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-2">
-                    {orderDetails.addOns.map((addOn, index) => (
-                      <div key={index} className="flex items-center gap-2 py-1">
-                        <CheckCircle className="w-4 h-4 text-accent" />
-                        <span className="text-sm">{addOn}</span>
-                        <Badge variant="secondary" className="ml-auto">Add-on</Badge>
-                      </div>
-                    ))}
+                  <div className="space-y-3">
+                    {addOnProducts.map((product) => {
+                      const quantity = checkoutState.addOns[product.id];
+                      return (
+                        <div key={product.id} className="flex items-center justify-between py-2">
+                          <div className="flex items-center gap-2">
+                            <CheckCircle className="w-4 h-4 text-accent" />
+                            <div>
+                              <span className="text-sm font-medium">{product.name}</span>
+                              <span className="text-xs text-muted-foreground ml-2">×{quantity}</span>
+                            </div>
+                            <Badge variant="secondary" className="ml-auto">Add-on</Badge>
+                          </div>
+                          <span className="font-medium">${(product.price * quantity).toFixed(2)}</span>
+                        </div>
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>
@@ -223,45 +226,43 @@ const OrderSummary = () => {
               <CardContent className="space-y-4">
                 <div className="space-y-3">
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Box Items:</span>
-                    <span>{orderDetails.selectedItems.length} items</span>
+                    <span className="text-muted-foreground">Box Price:</span>
+                    <span>${boxPrice.toFixed(2)}</span>
                   </div>
+                  {addOnProducts.length > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Add-ons Total:</span>
+                      <span>${addOnTotal.toFixed(2)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between">
-                    <span className="text-muted-foreground">Add-Ons:</span>
-                    <span>{orderDetails.addOns.length} items</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Delivery:</span>
-                    <span>Weekly {orderDetails.deliveryDay.split(',')[0]}s</span>
+                    <span className="text-muted-foreground">Delivery Fee:</span>
+                    <span>${deliveryFee.toFixed(2)}</span>
                   </div>
                 </div>
 
                 <Separator />
 
                 <div className="space-y-3">
-                  <div className="text-center py-4 bg-secondary/50 rounded-lg">
-                    <h3 className="font-semibold text-lg mb-2">
-                      Total: {orderDetails.selectedItems.length + orderDetails.addOns.length} Items
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Pricing will be calculated at checkout
-                    </p>
+                  <div className="flex justify-between font-semibold text-lg">
+                    <span>Total Amount:</span>
+                    <span className="text-primary">${totalAmount.toFixed(2)}</span>
                   </div>
                 </div>
 
                 <Button 
-                  onClick={handlePlaceOrder}
+                  onClick={handleCheckout}
                   variant="hero"
                   size="lg"
                   className="w-full"
-                  disabled={isPlacingOrder}
+                  disabled={isCheckingOut || totalAmount <= 0}
                 >
-                  {isPlacingOrder ? "Creating Subscription..." : "Place Order"}
+                  {isCheckingOut ? "Creating Checkout..." : `Checkout - $${totalAmount.toFixed(2)}`}
                 </Button>
 
                 <div className="text-center">
                   <p className="text-xs text-muted-foreground">
-                    This is a demo order. No payment will be processed.
+                    You'll be redirected to secure checkout to complete your order.
                   </p>
                 </div>
               </CardContent>
