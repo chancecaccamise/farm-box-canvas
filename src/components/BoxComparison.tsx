@@ -7,10 +7,12 @@ import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCheckout } from "@/contexts/CheckoutContext";
+import { useAuth } from "@/components/AuthProvider";
 
 const BoxComparison = () => {
   const navigate = useNavigate();
   const { updateBoxSize } = useCheckout();
+  const { user } = useAuth();
   const [boxOptions, setBoxOptions] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -90,7 +92,11 @@ const BoxComparison = () => {
 
   const handleSelectPlan = (boxSize) => {
     updateBoxSize(boxSize);
-    navigate('/zipcode');
+    if (user) {
+      navigate('/zip-code');
+    } else {
+      navigate('/auth');
+    }
   };
 
   if (loading) {

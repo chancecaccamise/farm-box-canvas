@@ -7,6 +7,7 @@ import rainbowCarrots from "@/assets/rainbow-carrots.jpg";
 import leafyGreens from "@/assets/leafy-greens.jpg";
 import tomatoes from "@/assets/tomatoes.jpg";
 import bellPeppers from "@/assets/bell-peppers.jpg";
+import BoxComparison from "@/components/BoxComparison";
 
 const UnauthenticatedLanding = () => {
   return (
@@ -179,6 +180,9 @@ const UnauthenticatedLanding = () => {
           </div>
         </div>
       </section>
+
+      {/* Subscription Plans */}
+      <BoxComparison />
 
       {/* Customer Testimonials */}
       <section className="py-20 px-4 bg-secondary/50">
