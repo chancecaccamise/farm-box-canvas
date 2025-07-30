@@ -20,7 +20,7 @@ interface CheckoutContextType {
 
 const initialState: CheckoutState = {
   boxType: 'subscription',
-  boxSize: 'medium',
+  boxSize: 'small',
   selectedItems: {},
   addOns: [],
   zipCode: '',

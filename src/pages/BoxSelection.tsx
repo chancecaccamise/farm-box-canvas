@@ -13,7 +13,7 @@ type BoxSize = "small" | "medium" | "large";
 const BoxSelection = () => {
   const { checkoutState, updateBoxType, updateBoxSize } = useCheckout();
   const [boxType, setBoxType] = useState<BoxType>(checkoutState.boxType);
-  const [boxSize, setBoxSize] = useState<BoxSize>(checkoutState.boxSize);
+  const [boxSize, setBoxSize] = useState<BoxSize>(checkoutState.boxSize || "small");
   const [boxSizes, setBoxSizes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();

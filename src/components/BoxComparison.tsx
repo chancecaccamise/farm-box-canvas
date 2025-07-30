@@ -3,38 +3,105 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useCheckout } from "@/contexts/CheckoutContext";
 
 const BoxComparison = () => {
-  const boxOptions = [
-    {
-      size: "small",
-      name: "Small Box",
-      price: "$24.99",
-      items: "8-10 items",
-      serves: "Perfect for 1-2 people",
-      sampleItems: ["Rainbow Carrots", "Leafy Greens", "Heritage Tomatoes", "Fresh Herbs"],
-      popular: false
-    },
-    {
-      size: "medium", 
-      name: "Medium Box",
-      price: "$34.99",
-      items: "12-15 items",
-      serves: "Great for 2-4 people",
-      sampleItems: ["Rainbow Carrots", "Leafy Greens", "Heritage Tomatoes", "Bell Peppers", "Fresh Fish", "Artisan Bread"],
-      popular: true
-    },
-    {
-      size: "large",
-      name: "Large Box", 
-      price: "$44.99",
-      items: "18-22 items",
-      serves: "Ideal for 4+ people",
-      sampleItems: ["Rainbow Carrots", "Leafy Greens", "Heritage Tomatoes", "Bell Peppers", "Fresh Fish", "Artisan Bread", "Seasonal Herbs", "Local Honey"],
-      popular: false
+  const navigate = useNavigate();
+  const { updateBoxSize } = useCheckout();
+  const [boxOptions, setBoxOptions] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchBoxSizes = async () => {
+      try {
+        const { data: boxSizes, error } = await supabase
+          .from('box_sizes')
+          .select('*')
+          .eq('is_active', true)
+          .order('base_price', { ascending: true });
+
+        if (error) throw error;
+
+        const formattedBoxes = boxSizes.map((box, index) => ({
+          size: box.name,
+          name: box.display_name,
+          price: `$${box.base_price}`,
+          items: box.item_count_range,
+          serves: box.serves_text,
+          sampleItems: getSampleItems(box.name),
+          popular: box.name === 'medium' // Keep medium as most popular
+        }));
+
+        setBoxOptions(formattedBoxes);
+      } catch (error) {
+        console.error('Error fetching box sizes:', error);
+        // Fallback to default data if there's an error
+        setBoxOptions([
+          {
+            size: "small",
+            name: "Small Box",
+            price: "$24.99",
+            items: "8-10 items",
+            serves: "Perfect for 1-2 people",
+            sampleItems: ["Rainbow Carrots", "Leafy Greens", "Heritage Tomatoes", "Fresh Herbs"],
+            popular: false
+          },
+          {
+            size: "medium", 
+            name: "Medium Box",
+            price: "$34.99",
+            items: "12-15 items",
+            serves: "Great for 2-4 people",
+            sampleItems: ["Rainbow Carrots", "Leafy Greens", "Heritage Tomatoes", "Bell Peppers", "Fresh Fish", "Artisan Bread"],
+            popular: true
+          },
+          {
+            size: "large",
+            name: "Large Box", 
+            price: "$44.99",
+            items: "18-22 items",
+            serves: "Ideal for 4+ people",
+            sampleItems: ["Rainbow Carrots", "Leafy Greens", "Heritage Tomatoes", "Bell Peppers", "Fresh Fish", "Artisan Bread", "Seasonal Herbs", "Local Honey"],
+            popular: false
+          }
+        ]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBoxSizes();
+  }, []);
+
+  const getSampleItems = (boxSize) => {
+    const baseItems = ["Rainbow Carrots", "Leafy Greens", "Heritage Tomatoes"];
+    
+    if (boxSize === 'small') {
+      return [...baseItems, "Fresh Herbs"];
+    } else if (boxSize === 'medium') {
+      return [...baseItems, "Bell Peppers", "Fresh Fish", "Artisan Bread"];
+    } else {
+      return [...baseItems, "Bell Peppers", "Fresh Fish", "Artisan Bread", "Seasonal Herbs", "Local Honey"];
     }
-  ];
+  };
+
+  const handleSelectPlan = (boxSize) => {
+    updateBoxSize(boxSize);
+    navigate('/zipcode');
+  };
+
+  if (loading) {
+    return (
+      <section className="py-20 px-4 bg-secondary/30">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center">Loading box options...</div>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="py-20 px-4 bg-secondary/30">
@@ -74,8 +141,12 @@ const BoxComparison = () => {
                   </ul>
                 </div>
                 
-                <Button asChild className="w-full" variant={box.popular ? "default" : "outline"}>
-                  <Link to={`/box-selection?size=${box.size}`}>Select This Plan</Link>
+                <Button 
+                  className="w-full" 
+                  variant={box.popular ? "default" : "outline"}
+                  onClick={() => handleSelectPlan(box.size)}
+                >
+                  Select This Plan
                 </Button>
               </CardContent>
             </Card>
