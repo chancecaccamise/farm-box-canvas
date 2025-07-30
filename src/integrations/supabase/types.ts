@@ -407,7 +407,7 @@ export type Database = {
           item_type: string | null
           order_id: string
           price: number
-          product_id: string
+          product_id: string | null
           product_name: string | null
           quantity: number
         }
@@ -417,7 +417,7 @@ export type Database = {
           item_type?: string | null
           order_id: string
           price: number
-          product_id: string
+          product_id?: string | null
           product_name?: string | null
           quantity?: number
         }
@@ -427,7 +427,7 @@ export type Database = {
           item_type?: string | null
           order_id?: string
           price?: number
-          product_id?: string
+          product_id?: string | null
           product_name?: string | null
           quantity?: number
         }
