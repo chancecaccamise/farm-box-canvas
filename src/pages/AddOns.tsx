@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from "@/components/ui/switch";
-import { ArrowLeft, Star, Gift } from "lucide-react";
+import { ArrowLeft, Star, Gift, Plus, Minus } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useCheckout } from "@/contexts/CheckoutContext";
 
 interface AddOn {
   id: string;
@@ -19,15 +19,18 @@ interface AddOn {
 }
 
 const AddOns = () => {
-  const [selectedAddOns, setSelectedAddOns] = useState<Record<string, boolean>>({});
+  const [selectedAddOns, setSelectedAddOns] = useState<Record<string, number>>({});
   const [addOns, setAddOns] = useState<AddOn[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { updateAddOns, checkoutState } = useCheckout();
 
   useEffect(() => {
     fetchAddOns();
-  }, []);
+    // Initialize selectedAddOns from checkout context
+    setSelectedAddOns(checkoutState.addOns);
+  }, [checkoutState.addOns]);
 
   const fetchAddOns = async () => {
     try {
@@ -35,7 +38,7 @@ const AddOns = () => {
         .from('products')
         .select('*')
         .eq('is_available', true)
-        .in('category', ['addon', 'specialty', 'premium', 'local'])
+        .neq('category', 'vegetables') // Exclude basic vegetables - they're in the box
         .order('name');
 
       if (error) throw error;
@@ -63,16 +66,21 @@ const AddOns = () => {
     }
   };
 
-  const toggleAddOn = (addOnId: string) => {
-    setSelectedAddOns(prev => ({
-      ...prev,
-      [addOnId]: !prev[addOnId]
-    }));
+  const updateQuantity = (addOnId: string, quantity: number) => {
+    const newSelectedAddOns = { ...selectedAddOns };
+    if (quantity <= 0) {
+      delete newSelectedAddOns[addOnId];
+    } else {
+      newSelectedAddOns[addOnId] = quantity;
+    }
+    setSelectedAddOns(newSelectedAddOns);
   };
 
-  const selectedCount = Object.values(selectedAddOns).filter(Boolean).length;
+  const selectedCount = Object.keys(selectedAddOns).length;
+  const totalSelected = Object.values(selectedAddOns).reduce((sum, qty) => sum + qty, 0);
 
   const handleContinue = () => {
+    updateAddOns(selectedAddOns);
     navigate("/delivery");
   };
 
@@ -89,7 +97,9 @@ const AddOns = () => {
           </Button>
           
           <div className="flex items-center gap-2">
-            <Badge variant="secondary">{selectedCount} add-ons selected</Badge>
+            <Badge variant="secondary">
+              {totalSelected} item{totalSelected !== 1 ? 's' : ''} selected
+            </Badge>
           </div>
         </div>
 
@@ -114,31 +124,49 @@ const AddOns = () => {
             <p className="text-muted-foreground">No add-ons available at the moment.</p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 gap-6 mb-12">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             {addOns.map((addOn) => {
-              const isSelected = selectedAddOns[addOn.id] || false;
+              const quantity = selectedAddOns[addOn.id] || 0;
+              const isSelected = quantity > 0;
               const isPopular = addOn.tags?.includes('popular');
-              const isPremium = addOn.category === 'premium';
+              const isPremium = addOn.category === 'meat' || addOn.category === 'fish';
               
               return (
                 <Card 
                   key={addOn.id}
-                  className={`transition-all duration-300 cursor-pointer ${
+                  className={`transition-all duration-300 ${
                     isSelected 
                       ? "ring-2 ring-primary shadow-medium" 
                       : "hover:shadow-medium"
                   }`}
-                  onClick={() => toggleAddOn(addOn.id)}
                 >
-                  {addOn.image && (
+                  {addOn.image && addOn.image !== '/api/placeholder/300/200' ? (
                     <div className="aspect-square w-full overflow-hidden rounded-t-lg">
                       <img
                         src={addOn.image}
                         alt={addOn.name}
                         className="w-full h-full object-cover"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                        }}
                       />
                     </div>
+                  ) : (
+                    <div className="aspect-square w-full bg-gradient-to-br from-muted to-muted/60 flex items-center justify-center rounded-t-lg">
+                      <div className="text-center">
+                        <div className="text-4xl mb-2">
+                          {addOn.category === 'meat' ? '🥩' : 
+                           addOn.category === 'fish' ? '🐟' : 
+                           addOn.category === 'dairy' ? '🥛' : 
+                           addOn.category === 'Bakery' ? '🍞' : 
+                           addOn.category === 'other' ? '🍯' : '🥬'}
+                        </div>
+                        <span className="text-sm text-muted-foreground">Fresh Product</span>
+                      </div>
+                    </div>
                   )}
+                  
                   <CardHeader>
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
@@ -160,17 +188,53 @@ const AddOns = () => {
                           ${addOn.price.toFixed(2)}
                         </p>
                       </div>
-                      <Switch
-                        checked={isSelected}
-                        onCheckedChange={() => toggleAddOn(addOn.id)}
-                        className="ml-4"
-                      />
+                      {quantity > 0 && (
+                        <Badge className="bg-primary/90 backdrop-blur-sm">
+                          {quantity}x
+                        </Badge>
+                      )}
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <CardDescription className="text-base">
+                    <CardDescription className="text-base mb-4">
                       {addOn.description}
                     </CardDescription>
+                    
+                    {/* Quantity Controls */}
+                    <div className="flex items-center justify-center">
+                      {quantity > 0 ? (
+                        <div className="flex items-center gap-3 w-full">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => updateQuantity(addOn.id, quantity - 1)}
+                            className="h-9 w-9 p-0 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20"
+                          >
+                            <Minus className="h-4 w-4" />
+                          </Button>
+                          <span className="text-sm font-medium min-w-[2rem] text-center">
+                            {quantity}
+                          </span>
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => updateQuantity(addOn.id, quantity + 1)}
+                            className="h-9 w-9 p-0 hover:bg-primary/10 hover:text-primary hover:border-primary/20"
+                          >
+                            <Plus className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <Button
+                          size="sm"
+                          onClick={() => updateQuantity(addOn.id, 1)}
+                          className="w-full"
+                        >
+                          <Plus className="h-4 w-4 mr-2" />
+                          Add to Order
+                        </Button>
+                      )}
+                    </div>
                   </CardContent>
                 </Card>
               );
@@ -182,29 +246,46 @@ const AddOns = () => {
         {selectedCount > 0 && (
           <Card className="mb-8 shadow-medium">
             <CardHeader>
-              <CardTitle>Selected Add-Ons</CardTitle>
+              <CardTitle>Selected Add-Ons ({totalSelected} items)</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
                 {addOns
-                  .filter(addOn => selectedAddOns[addOn.id])
-                  .map(addOn => (
-                    <div key={addOn.id} className="flex items-center justify-between py-2">
-                      <div>
-                        <span className="font-medium">{addOn.name}</span>
-                        <span className="text-primary font-semibold ml-2">${addOn.price.toFixed(2)}</span>
+                  .filter(addOn => selectedAddOns[addOn.id] > 0)
+                  .map(addOn => {
+                    const qty = selectedAddOns[addOn.id];
+                    return (
+                      <div key={addOn.id} className="flex items-center justify-between py-2">
+                        <div>
+                          <span className="font-medium">{addOn.name}</span>
+                          <span className="text-sm text-muted-foreground ml-2">×{qty}</span>
+                          <span className="text-primary font-semibold ml-2">
+                            ${(addOn.price * qty).toFixed(2)}
+                          </span>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => updateQuantity(addOn.id, 0)}
+                          className="text-destructive hover:text-destructive"
+                        >
+                          Remove
+                        </Button>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => toggleAddOn(addOn.id)}
-                        className="text-destructive hover:text-destructive"
-                      >
-                        Remove
-                      </Button>
-                    </div>
-                  ))
+                    );
+                  })
                 }
+                <div className="border-t pt-2 mt-4">
+                  <div className="flex justify-between font-semibold">
+                    <span>Add-ons Total:</span>
+                    <span className="text-primary">
+                      ${addOns
+                        .filter(addOn => selectedAddOns[addOn.id] > 0)
+                        .reduce((total, addOn) => total + (addOn.price * selectedAddOns[addOn.id]), 0)
+                        .toFixed(2)}
+                    </span>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

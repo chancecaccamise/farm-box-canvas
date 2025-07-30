@@ -4,7 +4,7 @@ interface CheckoutState {
   boxType: 'subscription' | 'one-time';
   boxSize: 'small' | 'medium' | 'large';
   selectedItems: Record<string, number>;
-  addOns: string[];
+  addOns: Record<string, number>; // Changed to Record<string, number> for quantities
   zipCode: string;
 }
 
@@ -13,7 +13,7 @@ interface CheckoutContextType {
   updateBoxType: (type: 'subscription' | 'one-time') => void;
   updateBoxSize: (size: 'small' | 'medium' | 'large') => void;
   updateSelectedItems: (items: Record<string, number>) => void;
-  updateAddOns: (addOns: string[]) => void;
+  updateAddOns: (addOns: Record<string, number>) => void; // Updated type
   updateZipCode: (zipCode: string) => void;
   clearCheckout: () => void;
 }
@@ -22,7 +22,7 @@ const initialState: CheckoutState = {
   boxType: 'subscription',
   boxSize: 'small',
   selectedItems: {},
-  addOns: [],
+  addOns: {}, // Changed to empty object
   zipCode: '',
 };
 
@@ -55,7 +55,7 @@ export const CheckoutProvider: React.FC<CheckoutProviderProps> = ({ children }) 
     setCheckoutState(prev => ({ ...prev, selectedItems: items }));
   };
 
-  const updateAddOns = (addOns: string[]) => {
+  const updateAddOns = (addOns: Record<string, number>) => {
     setCheckoutState(prev => ({ ...prev, addOns }));
   };
 

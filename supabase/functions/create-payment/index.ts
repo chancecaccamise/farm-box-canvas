@@ -46,10 +46,11 @@ serve(async (req) => {
     const { 
       weeklyBag, 
       bagItems, 
-      hasActiveSubscription
+      hasActiveSubscription,
+      checkoutState // New checkout state with add-ons
     } = requestData;
 
-    if (!weeklyBag || !bagItems) {
+    if (!weeklyBag && !checkoutState) {
       throw new Error("Missing order data");
     }
 
@@ -71,11 +72,45 @@ serve(async (req) => {
       logStep("No existing customer found");
     }
 
-    // Calculate totals
-    const boxPrice = hasActiveSubscription ? 0 : (weeklyBag.box_price || 0);
-    const addonsTotal = bagItems.reduce((total: number, item: any) => 
-      total + (item.quantity * item.price_at_time), 0
-    );
+    // Calculate totals - support both bag and checkout flows
+    let boxPrice = 0;
+    let addonsTotal = 0;
+    let addOnProducts = [];
+
+    if (weeklyBag && bagItems) {
+      // Existing bag-based flow
+      boxPrice = hasActiveSubscription ? 0 : (weeklyBag.box_price || 0);
+      addonsTotal = bagItems.reduce((total: number, item: any) => 
+        total + (item.quantity * item.price_at_time), 0
+      );
+    } else if (checkoutState) {
+      // New checkout flow with add-ons
+      // Fetch box price from database
+      if (checkoutState.boxSize && !hasActiveSubscription) {
+        const { data: boxSizeData } = await supabaseClient
+          .from('box_sizes')
+          .select('base_price')
+          .eq('name', checkoutState.boxSize)
+          .single();
+        boxPrice = boxSizeData?.base_price || 0;
+      }
+
+      // Fetch add-on product details and calculate total
+      if (checkoutState.addOns && Object.keys(checkoutState.addOns).length > 0) {
+        const addOnIds = Object.keys(checkoutState.addOns);
+        const { data: products } = await supabaseClient
+          .from('products')
+          .select('*')
+          .in('id', addOnIds);
+
+        addOnProducts = products || [];
+        addonsTotal = addOnProducts.reduce((total, product) => {
+          const quantity = checkoutState.addOns[product.id] || 0;
+          return total + (product.price * quantity);
+        }, 0);
+      }
+    }
+
     const deliveryFee = hasActiveSubscription ? 0 : 4.99;
     const totalAmount = boxPrice + addonsTotal + deliveryFee;
 
@@ -102,16 +137,32 @@ serve(async (req) => {
       });
     }
 
-    // Add add-ons
-    for (const item of bagItems) {
-      lineItems.push({
-        price_data: {
-          currency: "usd",
-          product_data: { name: item.products?.name || `Product ${item.product_id}` },
-          unit_amount: Math.round(item.price_at_time * 100),
-        },
-        quantity: item.quantity,
-      });
+    // Add add-ons (support both flows)
+    if (bagItems && bagItems.length > 0) {
+      // Existing bag flow
+      for (const item of bagItems) {
+        lineItems.push({
+          price_data: {
+            currency: "usd",
+            product_data: { name: item.products?.name || `Product ${item.product_id}` },
+            unit_amount: Math.round(item.price_at_time * 100),
+          },
+          quantity: item.quantity,
+        });
+      }
+    } else if (addOnProducts.length > 0) {
+      // New checkout flow
+      for (const product of addOnProducts) {
+        const quantity = checkoutState.addOns[product.id];
+        lineItems.push({
+          price_data: {
+            currency: "usd",
+            product_data: { name: product.name },
+            unit_amount: Math.round(product.price * 100),
+          },
+          quantity: quantity,
+        });
+      }
     }
 
     // Add delivery fee if not subscription
@@ -144,8 +195,9 @@ serve(async (req) => {
       },
       metadata: {
         user_id: user.id,
-        weekly_bag_id: weeklyBag.id,
+        weekly_bag_id: weeklyBag?.id || 'new-checkout',
         has_active_subscription: hasActiveSubscription.toString(),
+        box_size: checkoutState?.boxSize || weeklyBag?.box_size || 'medium',
       },
     });
 
@@ -166,13 +218,13 @@ serve(async (req) => {
       shipping_address_state: null, // Will be filled from Stripe checkout
       shipping_address_zip: null, // Will be filled from Stripe checkout
       delivery_instructions: null, // Will be filled from Stripe checkout
-      box_size: weeklyBag.box_size,
+      box_size: checkoutState?.boxSize || weeklyBag?.box_size || 'medium',
       box_price: boxPrice,
       addons_total: addonsTotal,
       delivery_fee: deliveryFee,
       has_active_subscription: hasActiveSubscription,
-      week_start_date: weeklyBag.week_start_date,
-      week_end_date: weeklyBag.week_end_date,
+      week_start_date: weeklyBag?.week_start_date || null,
+      week_end_date: weeklyBag?.week_end_date || null,
       order_type: 'subscription',
       status: 'pending'
     };
@@ -205,16 +257,32 @@ serve(async (req) => {
       });
     }
 
-    // Add addon items
-    for (const item of bagItems) {
-      orderItems.push({
-        order_id: order.id,
-        product_id: item.product_id,
-        product_name: item.products?.name || `Product ${item.product_id}`,
-        quantity: item.quantity,
-        price: item.price_at_time,
-        item_type: 'addon'
-      });
+    // Add addon items (support both flows)
+    if (bagItems && bagItems.length > 0) {
+      // Existing bag flow
+      for (const item of bagItems) {
+        orderItems.push({
+          order_id: order.id,
+          product_id: item.product_id,
+          product_name: item.products?.name || `Product ${item.product_id}`,
+          quantity: item.quantity,
+          price: item.price_at_time,
+          item_type: 'addon'
+        });
+      }
+    } else if (addOnProducts.length > 0) {
+      // New checkout flow
+      for (const product of addOnProducts) {
+        const quantity = checkoutState.addOns[product.id];
+        orderItems.push({
+          order_id: order.id,
+          product_id: product.id,
+          product_name: product.name,
+          quantity: quantity,
+          price: product.price,
+          item_type: 'addon'
+        });
+      }
     }
 
     if (orderItems.length > 0) {
