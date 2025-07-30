@@ -55,8 +55,8 @@ serve(async (req) => {
     }
 
     logStep("Request data received", { 
-      weeklyBagId: weeklyBag.id, 
-      itemsCount: bagItems.length,
+      weeklyBagId: weeklyBag?.id || 'checkout-only', 
+      itemsCount: bagItems?.length || 0,
       hasActiveSubscription 
     });
 

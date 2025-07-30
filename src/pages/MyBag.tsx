@@ -16,6 +16,7 @@ import { ReadOnlyBagItem } from "@/components/ReadOnlyBagItem";
 import { AddOnsGrid } from "@/components/AddOnsGrid";
 import { SubscriptionManager } from "@/components/SubscriptionManager";
 import { UnconfirmBagDialog } from "@/components/UnconfirmBagDialog";
+import { useCheckout } from "@/contexts/CheckoutContext";
 
 interface WeeklyBag {
   id: string;
@@ -51,6 +52,17 @@ function MyBag() {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { checkoutState, updateAddOns } = useCheckout();
+
+  const handleNonSubscriberAddOnUpdate = (productId: string, quantity: number) => {
+    const currentAddOns = checkoutState.addOns || {};
+    if (quantity <= 0) {
+      const { [productId]: removed, ...rest } = currentAddOns;
+      updateAddOns(rest);
+    } else {
+      updateAddOns({ ...currentAddOns, [productId]: quantity });
+    }
+  };
   const [currentWeekBag, setCurrentWeekBag] = useState<WeeklyBag | null>(null);
   const [bagItems, setBagItems] = useState<WeeklyBagItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -525,10 +537,22 @@ function MyBag() {
               </div>
               
               <AddOnsGrid 
-                bagItems={{}} 
-                onUpdateQuantity={() => {}} // Add-ons for non-subscribers will use checkout context
+                bagItems={checkoutState.addOns || {}} 
+                onUpdateQuantity={handleNonSubscriberAddOnUpdate}
                 isLocked={false}
               />
+              
+              {Object.keys(checkoutState.addOns || {}).length > 0 && (
+                <div className="text-center pt-6">
+                  <Button 
+                    onClick={() => navigate('/delivery')}
+                    size="lg"
+                    className="px-8"
+                  >
+                    Continue to Checkout
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>
