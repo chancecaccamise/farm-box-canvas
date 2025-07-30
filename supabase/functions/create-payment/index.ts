@@ -125,12 +125,14 @@ serve(async (req) => {
 
     // Add box if not subscription
     if (!hasActiveSubscription && boxPrice > 0) {
+      const boxName = weeklyBag ? 
+        `${weeklyBag.box_size || 'Medium'} Farm Box - Week of ${new Date(weeklyBag.week_start_date).toLocaleDateString()}` :
+        `${checkoutState.boxSize?.charAt(0).toUpperCase() + checkoutState.boxSize?.slice(1) || 'Medium'} Farm Box`;
+      
       lineItems.push({
         price_data: {
           currency: "usd",
-          product_data: { 
-            name: `${weeklyBag.box_size || 'Medium'} Farm Box - Week of ${new Date(weeklyBag.week_start_date).toLocaleDateString()}` 
-          },
+          product_data: { name: boxName },
           unit_amount: Math.round(boxPrice * 100),
         },
         quantity: 1,
@@ -247,10 +249,14 @@ serve(async (req) => {
 
     // Add box item if not subscription
     if (!hasActiveSubscription && boxPrice > 0) {
+      const boxName = weeklyBag ? 
+        `${weeklyBag.box_size || 'Medium'} Farm Box` :
+        `${checkoutState.boxSize?.charAt(0).toUpperCase() + checkoutState.boxSize?.slice(1) || 'Medium'} Farm Box`;
+      
       orderItems.push({
         order_id: order.id,
         product_id: null, // Box doesn't have a product ID
-        product_name: `${weeklyBag.box_size || 'Medium'} Farm Box`,
+        product_name: boxName,
         quantity: 1,
         price: boxPrice,
         item_type: 'box'

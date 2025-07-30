@@ -37,6 +37,7 @@ import PartnerCategory from "./pages/PartnerCategory";
 import PartnerProfile from "./pages/PartnerProfile";
 import NotFound from "./pages/NotFound";
 import Admin from "./pages/Admin";
+import ScrollToTop from "./components/ScrollToTop";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -65,6 +66,7 @@ const AppRoutes = () => {
 
   return (
     <>
+      <ScrollToTop />
       <Navbar />
       <Routes>
         {/* Public routes */}

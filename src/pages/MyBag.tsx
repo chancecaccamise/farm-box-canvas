@@ -456,15 +456,16 @@ function MyBag() {
   if (hasActiveSubscription === false) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="max-w-4xl mx-auto px-4 py-16">
-          <div className="text-center space-y-8">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="space-y-8">
             <div>
               <h1 className="text-4xl font-bold text-foreground mb-4">My Bag</h1>
               <p className="text-muted-foreground">
-                Customize your weekly farm box delivery
+                Shop add-ons or start your farm box subscription
               </p>
             </div>
 
+            {/* No subscription - offer to start one */}
             <Card className="border-dashed border-2 border-muted-foreground/20">
               <CardContent className="pt-12 pb-12">
                 <div className="text-center space-y-6">
@@ -513,6 +514,22 @@ function MyBag() {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Add-ons for non-subscribers */}
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-2xl font-semibold mb-2">Or Shop Add-Ons</h2>
+                <p className="text-muted-foreground">
+                  Browse our premium products and artisanal goods available for individual purchase
+                </p>
+              </div>
+              
+              <AddOnsGrid 
+                bagItems={{}} 
+                onUpdateQuantity={() => {}} // Add-ons for non-subscribers will use checkout context
+                isLocked={false}
+              />
+            </div>
           </div>
         </div>
       </div>
