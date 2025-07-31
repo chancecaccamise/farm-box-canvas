@@ -50,37 +50,90 @@ const OrderSummary = () => {
   };
 
   const handleCheckout = async () => {
+    console.log('🚀 CHECKOUT INITIATED');
+    console.log('📋 Current checkout state:', JSON.stringify(checkoutState, null, 2));
+    console.log('👤 User authenticated:', !!user, user?.email);
+    
+    // Validate checkout state
+    const requiredFields = ['boxType', 'boxSize', 'zipCode', 'deliveryDay'];
+    const missingFields = requiredFields.filter(field => !checkoutState[field as keyof typeof checkoutState]);
+    
+    if (missingFields.length > 0) {
+      console.error('❌ Missing required fields:', missingFields);
+      toast({
+        title: "Incomplete Order",
+        description: `Please complete: ${missingFields.join(', ')}`,
+        variant: "destructive"
+      });
+      return;
+    }
+
     if (!user) {
+      console.log('🔐 No user, redirecting to auth');
       navigate('/auth');
       return;
     }
 
     setIsCheckingOut(true);
+    console.log('⏳ Setting checkout loading state');
+    
     try {
-      // Call the payment creation function with checkout state
+      console.log('📞 Calling create-payment edge function...');
+      
+      const requestBody = {
+        checkoutState,
+        hasActiveSubscription: false, // New customers don't have active subscriptions
+      };
+      console.log('📦 Request body:', JSON.stringify(requestBody, null, 2));
+
       const { data, error } = await supabase.functions.invoke('create-payment', {
-        body: {
-          checkoutState,
-          hasActiveSubscription: false, // New customers don't have active subscriptions
-        }
+        body: requestBody
       });
 
-      if (error) throw error;
+      console.log('📨 Edge function response:', { data, error });
+
+      if (error) {
+        console.error('❌ Edge function error:', error);
+        throw error;
+      }
 
       if (data?.url) {
+        console.log('✅ Checkout URL received:', data.url);
+        console.log('🔄 Redirecting to Stripe...');
+        
+        // Try immediate redirect
         window.location.href = data.url;
+        
+        // Fallback: If redirect doesn't work after 3 seconds, show manual link
+        setTimeout(() => {
+          console.log('⚠️ Automatic redirect may have failed, showing fallback');
+          toast({
+            title: "Redirect to Checkout",
+            description: "Click here if you weren't redirected automatically",
+            action: (
+              <Button onClick={() => window.open(data.url, '_blank')}>
+                Open Checkout
+              </Button>
+            ),
+          });
+        }, 3000);
+        
       } else {
-        throw new Error('No checkout URL received');
+        console.error('❌ No checkout URL in response:', data);
+        throw new Error('No checkout URL received from payment service');
       }
     } catch (error) {
-      console.error('Error creating checkout session:', error);
+      console.error('💥 Checkout error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      
       toast({
-        title: "Checkout Error",
-        description: "Failed to create checkout session. Please try again.",
+        title: "Checkout Failed",
+        description: `Error: ${errorMessage}. Please try again or contact support.`,
         variant: "destructive"
       });
     } finally {
       setIsCheckingOut(false);
+      console.log('🏁 Checkout process completed, loading state reset');
     }
   };
 
