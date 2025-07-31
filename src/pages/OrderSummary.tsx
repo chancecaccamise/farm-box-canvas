@@ -132,22 +132,20 @@ const OrderSummary = () => {
         console.log('✅ Checkout URL received:', data.url);
         console.log('🔄 Redirecting to Stripe...');
         
-        // Try immediate redirect
-        window.location.href = data.url;
+        // Show immediate feedback
+        toast({
+          title: "Redirecting to Checkout",
+          description: "Taking you to Stripe to complete your payment...",
+        });
         
-        // Fallback: If redirect doesn't work after 3 seconds, show manual link
-        setTimeout(() => {
-          console.log('⚠️ Automatic redirect may have failed, showing fallback');
-          toast({
-            title: "Redirect to Checkout",
-            description: "Click here if you weren't redirected automatically",
-            action: (
-              <Button onClick={() => window.open(data.url, '_blank')}>
-                Open Checkout
-              </Button>
-            ),
-          });
-        }, 3000);
+        // Try primary redirect method
+        try {
+          window.location.href = data.url;
+        } catch (redirectError) {
+          console.error('❌ Primary redirect failed:', redirectError);
+          // Fallback to window.open
+          window.open(data.url, '_self');
+        }
         
       } else {
         console.error('❌ No checkout URL in response:', data);
