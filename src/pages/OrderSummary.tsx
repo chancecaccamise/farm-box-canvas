@@ -130,22 +130,75 @@ const OrderSummary = () => {
 
       if (data?.url) {
         console.log('✅ Checkout URL received:', data.url);
-        console.log('🔄 Redirecting to Stripe...');
+        console.log('🔄 Attempting redirect to Stripe...');
         
-        // Show immediate feedback
-        toast({
-          title: "Redirecting to Checkout",
-          description: "Taking you to Stripe to complete your payment...",
-        });
-        
-        // Try primary redirect method
-        try {
-          window.location.href = data.url;
-        } catch (redirectError) {
-          console.error('❌ Primary redirect failed:', redirectError);
-          // Fallback to window.open
-          window.open(data.url, '_self');
+        // Validate URL
+        if (!data.url.includes('checkout.stripe.com')) {
+          console.error('❌ Invalid Stripe URL received:', data.url);
+          toast({
+            title: "Error",
+            description: "Invalid checkout URL received. Please try again.",
+            variant: "destructive",
+          });
+          return;
         }
+        
+        // Small delay to ensure DOM is ready, then redirect
+        setTimeout(() => {
+          console.log('🚀 Executing redirect to:', data.url);
+          
+          // Primary method: Direct assignment
+          try {
+            window.location.href = data.url;
+            console.log('✅ Primary redirect initiated');
+          } catch (error) {
+            console.error('❌ Primary redirect failed:', error);
+            
+            // Secondary method: Replace
+            try {
+              window.location.replace(data.url);
+              console.log('✅ Secondary redirect initiated');
+            } catch (error2) {
+              console.error('❌ Secondary redirect failed:', error2);
+              
+              // Tertiary method: Open with _self
+              try {
+                window.open(data.url, '_self');
+                console.log('✅ Tertiary redirect initiated');
+              } catch (error3) {
+                console.error('❌ All redirect methods failed:', error3);
+                
+                // Final fallback: Show manual link
+                toast({
+                  title: "Manual Checkout Required",
+                  description: "Please click the link below to complete your payment",
+                  action: (
+                    <Button onClick={() => window.open(data.url, '_blank')}>
+                      Open Stripe Checkout
+                    </Button>
+                  ),
+                });
+              }
+            }
+          }
+          
+          // Timeout detection
+          setTimeout(() => {
+            console.log('⚠️ Checking if redirect succeeded...');
+            if (window.location.pathname === '/order-summary') {
+              console.log('❌ Still on order summary page - redirect may have failed');
+              toast({
+                title: "Checkout Link",
+                description: "If the page didn't redirect, click below:",
+                action: (
+                  <Button onClick={() => window.open(data.url, '_blank')}>
+                    Open Checkout
+                  </Button>
+                ),
+              });
+            }
+          }, 2000);
+        }, 100);
         
       } else {
         console.error('❌ No checkout URL in response:', data);
