@@ -86,6 +86,7 @@ const AppRoutes = () => {
         <Route path="/partners/:slug" element={<PartnerProfile />} />
         <Route path="/how-farm-bags-work" element={<HowFarmBagsWork />} />
         <Route path="/gift-cards" element={<GiftCards />} />
+        <Route path="/thank-you" element={<ThankYou />} />
         
         {/* Conditional landing page */}
         <Route path="/" element={user ? <Landing /> : <UnauthenticatedLanding />} />
@@ -99,7 +100,6 @@ const AppRoutes = () => {
             <Route path="/add-ons" element={<AddOns />} />
             <Route path="/delivery" element={<Delivery />} />
             <Route path="/order-summary" element={<OrderSummary />} />
-            <Route path="/thank-you" element={<ThankYou />} />
             <Route path="/my-plan" element={<MyPlan />} />
             <Route path="/my-bag" element={<MyBag />} />
             <Route path="/admin" element={<Admin />} />

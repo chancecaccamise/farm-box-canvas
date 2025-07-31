@@ -20,41 +20,67 @@ const ThankYou = () => {
         const urlParams = new URLSearchParams(window.location.search);
         const sessionId = urlParams.get('session_id');
 
-        if (sessionId && user) {
-          // Fetch order details from database using session ID
-          const { data: order } = await supabase
-            .from('orders')
-            .select(`
-              *,
-              order_items (
-                id,
-                product_name,
-                quantity,
-                price,
-                item_type
-              )
-            `)
-            .eq('stripe_session_id', sessionId)
-            .eq('user_id', user.id)
-            .single();
+        if (!sessionId) {
+          console.log('No session_id found in URL');
+          setLoading(false);
+          return;
+        }
 
-          if (order) {
+        console.log('Loading order details for session:', sessionId);
+
+        // Try to fetch order details using just session ID first (for unauthenticated users)
+        const { data: order, error } = await supabase
+          .from('orders')
+          .select(`
+            *,
+            order_items (
+              id,
+              product_name,
+              quantity,
+              price,
+              item_type
+            )
+          `)
+          .eq('stripe_session_id', sessionId)
+          .maybeSingle();
+
+        if (error) {
+          console.error('Error fetching order:', error);
+          toast({
+            title: "Unable to load order details",
+            description: "Please check your email for order confirmation or contact support.",
+            variant: "destructive",
+          });
+        } else if (order) {
+          // If user is authenticated, verify it's their order
+          if (user && order.user_id !== user.id) {
+            console.log('Order belongs to different user');
+            setOrderDetails(null);
+          } else {
+            console.log('Order details loaded successfully');
             setOrderDetails(order);
           }
+        } else {
+          console.log('No order found for session ID');
+          toast({
+            title: "Order not found",
+            description: "Your order may still be processing. Please check your email for confirmation.",
+          });
         }
       } catch (error) {
         console.error('Error loading order details:', error);
+        toast({
+          title: "Error loading order",
+          description: "Please check your email for order confirmation or contact support.",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
     };
 
-    if (user) {
-      loadOrderDetails();
-    } else {
-      setLoading(false);
-    }
-  }, [user]);
+    loadOrderDetails();
+  }, [user, toast]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/30 flex items-center justify-center px-4">
@@ -69,7 +95,7 @@ const ThankYou = () => {
         <p className="text-xl text-muted-foreground mb-12 max-w-lg mx-auto">
           {orderDetails ? 
             `Your order has been confirmed and will be delivered to ${orderDetails.shipping_address_street || 'your address'}.` :
-            'Your order has been confirmed and is being processed.'
+            'Your payment has been processed successfully! Your order details are being finalized.'
           }
         </p>
 
@@ -146,7 +172,14 @@ const ThankYou = () => {
               </>
             ) : (
               <div className="text-center py-4">
-                <p className="text-muted-foreground">Loading order details...</p>
+                <p className="text-muted-foreground">
+                  {loading ? 'Loading order details...' : 'Your order is being processed. You will receive an email confirmation shortly.'}
+                </p>
+                {!loading && !user && (
+                  <p className="text-sm text-muted-foreground mt-2">
+                    <Link to="/auth" className="text-primary hover:underline">Sign in</Link> to view full order details.
+                  </p>
+                )}
               </div>
             )}
           </CardContent>
