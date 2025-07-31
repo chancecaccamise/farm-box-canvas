@@ -15,7 +15,7 @@ const ThankYou = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadOrderDetails = async () => {
+    const loadOrderDetails = async (attempt = 1) => {
       try {
         const urlParams = new URLSearchParams(window.location.search);
         const sessionId = urlParams.get('session_id');
@@ -26,7 +26,7 @@ const ThankYou = () => {
           return;
         }
 
-        console.log('Loading order details for session:', sessionId);
+        console.log(`Loading order details for session: ${sessionId} (attempt ${attempt})`);
 
         // Try to fetch order details using just session ID first (for unauthenticated users)
         const { data: order, error } = await supabase
@@ -46,6 +46,11 @@ const ThankYou = () => {
 
         if (error) {
           console.error('Error fetching order:', error);
+          if (attempt <= 3) {
+            console.log(`Retrying in ${attempt * 2} seconds...`);
+            setTimeout(() => loadOrderDetails(attempt + 1), attempt * 2000);
+            return;
+          }
           toast({
             title: "Unable to load order details",
             description: "Please check your email for order confirmation or contact support.",
@@ -56,12 +61,28 @@ const ThankYou = () => {
           if (user && order.user_id !== user.id) {
             console.log('Order belongs to different user');
             setOrderDetails(null);
-          } else {
-            console.log('Order details loaded successfully');
-            setOrderDetails(order);
+            setLoading(false);
+            return;
           }
+
+          // If order is still pending payment, retry to wait for webhook processing
+          if (order.payment_status === 'pending' && attempt <= 5) {
+            console.log(`Order still pending payment, retrying in ${attempt * 2} seconds...`);
+            setTimeout(() => loadOrderDetails(attempt + 1), attempt * 2000);
+            return;
+          }
+
+          console.log('Order details loaded successfully');
+          setOrderDetails(order);
         } else {
-          console.log('No order found for session ID');
+          // If order not found and we haven't tried many times, retry
+          if (attempt <= 3) {
+            console.log(`Order not found, retrying in ${attempt * 2} seconds...`);
+            setTimeout(() => loadOrderDetails(attempt + 1), attempt * 2000);
+            return;
+          }
+          
+          console.log('No order found for session ID after retries');
           toast({
             title: "Order not found",
             description: "Your order may still be processing. Please check your email for confirmation.",
@@ -69,13 +90,19 @@ const ThankYou = () => {
         }
       } catch (error) {
         console.error('Error loading order details:', error);
+        if (attempt <= 3) {
+          setTimeout(() => loadOrderDetails(attempt + 1), attempt * 2000);
+          return;
+        }
         toast({
           title: "Error loading order",
           description: "Please check your email for order confirmation or contact support.",
           variant: "destructive",
         });
       } finally {
-        setLoading(false);
+        if (attempt > 3 || orderDetails) {
+          setLoading(false);
+        }
       }
     };
 
