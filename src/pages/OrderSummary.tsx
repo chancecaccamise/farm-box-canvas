@@ -54,8 +54,14 @@ const OrderSummary = () => {
     console.log('📋 Current checkout state:', JSON.stringify(checkoutState, null, 2));
     console.log('👤 User authenticated:', !!user, user?.email);
     
-    // Validate checkout state
-    const requiredFields = ['boxType', 'boxSize', 'zipCode', 'deliveryDay'];
+    if (!user) {
+      console.log('🔐 No user, redirecting to auth');
+      navigate('/auth');
+      return;
+    }
+
+    // Validate checkout state (removed zipCode since it comes from delivery address)
+    const requiredFields = ['boxType', 'boxSize', 'deliveryDay'];
     const missingFields = requiredFields.filter(field => !checkoutState[field as keyof typeof checkoutState]);
     
     if (missingFields.length > 0) {
@@ -68,11 +74,36 @@ const OrderSummary = () => {
       return;
     }
 
-    if (!user) {
-      console.log('🔐 No user, redirecting to auth');
-      navigate('/auth');
+    // Check if user has a delivery address with ZIP code
+    console.log('📍 Checking user delivery address...');
+    const { data: deliveryAddress, error: addressError } = await supabase
+      .from('delivery_addresses')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('is_primary', true)
+      .maybeSingle();
+
+    if (addressError) {
+      console.error('❌ Error fetching delivery address:', addressError);
+      toast({
+        title: "Address Error",
+        description: "Failed to verify delivery address. Please try again.",
+        variant: "destructive"
+      });
       return;
     }
+
+    if (!deliveryAddress || !deliveryAddress.zip_code) {
+      console.error('❌ No delivery address or ZIP code found');
+      toast({
+        title: "Delivery Address Required",
+        description: "Please add a delivery address with ZIP code in your account settings.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    console.log('✅ Delivery address found:', deliveryAddress.zip_code);
 
     setIsCheckingOut(true);
     console.log('⏳ Setting checkout loading state');
