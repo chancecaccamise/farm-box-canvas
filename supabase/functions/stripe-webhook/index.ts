@@ -7,35 +7,48 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+// Helper logging function
+const logStep = (step: string, details?: any) => {
+  const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
+  console.log(`[STRIPE-WEBHOOK] ${step}${detailsStr}`);
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    logStep("Webhook received", { method: req.method, url: req.url });
+    
     const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
     if (!webhookSecret) {
+      logStep("ERROR: STRIPE_WEBHOOK_SECRET not configured");
       throw new Error("STRIPE_WEBHOOK_SECRET is not set");
     }
+    logStep("Webhook secret found");
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
       apiVersion: "2023-10-16",
     });
+    logStep("Stripe client initialized");
 
     const body = await req.text();
     const signature = req.headers.get("stripe-signature");
 
     if (!signature) {
+      logStep("ERROR: No Stripe signature in headers");
       throw new Error("No Stripe signature found");
     }
+    logStep("Stripe signature found");
 
     // Verify webhook signature
     const event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-    console.log(`[STRIPE-WEBHOOK] Event received: ${event.type}`);
+    logStep("Event verified and constructed", { type: event.type, id: event.id });
 
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
-      console.log(`[STRIPE-WEBHOOK] Processing session: ${session.id}`);
+      logStep("Processing checkout session completed", { sessionId: session.id });
 
       // Create Supabase client with service role key
       const supabase = createClient(
@@ -43,13 +56,39 @@ serve(async (req) => {
         Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
         { auth: { persistSession: false } }
       );
+      logStep("Supabase client created");
+
+      // First check if order exists
+      const { data: existingOrder, error: fetchError } = await supabase
+        .from("orders")
+        .select("id, payment_status, status")
+        .eq("stripe_session_id", session.id)
+        .maybeSingle();
+
+      if (fetchError) {
+        logStep("ERROR: Failed to fetch existing order", { error: fetchError });
+        throw fetchError;
+      }
+
+      if (!existingOrder) {
+        logStep("WARNING: No order found for session", { sessionId: session.id });
+        // Don't throw error, return success to avoid retries
+        return new Response(JSON.stringify({ received: true, warning: "Order not found" }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
+        });
+      }
+
+      logStep("Found existing order", { orderId: existingOrder.id, currentStatus: existingOrder.payment_status });
 
       // Retrieve full session details with customer and shipping info
       const fullSession = await stripe.checkout.sessions.retrieve(session.id, {
         expand: ['customer', 'shipping_details']
       });
-
-      console.log(`[STRIPE-WEBHOOK] Full session retrieved for: ${fullSession.id}`);
+      logStep("Retrieved full session details", { 
+        customerId: fullSession.customer,
+        hasShipping: !!fullSession.shipping_details 
+      });
 
       // Update the order with complete information
       const { error } = await supabase
@@ -70,11 +109,13 @@ serve(async (req) => {
         .eq("stripe_session_id", session.id);
 
       if (error) {
-        console.error(`[STRIPE-WEBHOOK] Error updating order:`, error);
+        logStep("ERROR: Failed to update order", { error });
         throw error;
       }
 
-      console.log(`[STRIPE-WEBHOOK] Order updated successfully for session: ${session.id}`);
+      logStep("Order updated successfully", { sessionId: session.id, orderId: existingOrder.id });
+    } else {
+      logStep("Unhandled event type", { type: event.type });
     }
 
     return new Response(JSON.stringify({ received: true }), {
@@ -82,8 +123,9 @@ serve(async (req) => {
       status: 200,
     });
   } catch (error) {
-    console.error("[STRIPE-WEBHOOK] Error:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logStep("CRITICAL ERROR", { message: errorMessage, stack: error instanceof Error ? error.stack : undefined });
+    return new Response(JSON.stringify({ error: errorMessage }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 400,
     });

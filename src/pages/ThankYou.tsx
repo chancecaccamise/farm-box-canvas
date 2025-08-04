@@ -65,11 +65,16 @@ const ThankYou = () => {
             return;
           }
 
-          // If order is still pending payment, retry to wait for webhook processing
-          if (order.payment_status === 'pending' && attempt <= 5) {
+          // If order is still pending payment, retry briefly but then show it anyway
+          if (order.payment_status === 'pending' && attempt <= 2) {
             console.log(`Order still pending payment, retrying in ${attempt * 2} seconds...`);
             setTimeout(() => loadOrderDetails(attempt + 1), attempt * 2000);
             return;
+          }
+
+          // Show order even if payment is still pending after brief retry
+          if (order.payment_status === 'pending') {
+            console.log('Showing order despite pending payment status - webhook may be delayed');
           }
 
           console.log('Order details loaded successfully');
@@ -121,10 +126,18 @@ const ThankYou = () => {
         <h1 className="text-4xl font-bold mb-4">Thank You for Your Order!</h1>
         <p className="text-xl text-muted-foreground mb-12 max-w-lg mx-auto">
           {orderDetails ? 
-            `Your order has been confirmed and will be delivered to ${orderDetails.shipping_address_street || 'your address'}.` :
+            `Your order has been ${orderDetails.payment_status === 'paid' ? 'confirmed' : 'received'} and will be delivered to ${orderDetails.shipping_address_street || 'your address'}.` :
             'Your payment has been processed successfully! Your order details are being finalized.'
           }
         </p>
+
+        {orderDetails && orderDetails.payment_status === 'pending' && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8 max-w-lg mx-auto">
+            <p className="text-sm text-blue-800">
+              🔄 Your payment is being processed. Your order will be confirmed shortly!
+            </p>
+          </div>
+        )}
 
         {/* Order Details Card */}
         <Card className="mb-8 shadow-medium text-left">
