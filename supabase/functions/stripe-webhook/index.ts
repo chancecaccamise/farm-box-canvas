@@ -140,7 +140,18 @@ serve(async (req) => {
       logStep("Order updated successfully", { sessionId: session.id, orderId: existingOrder.id });
 
       // Also confirm the weekly bag if this was an add-on purchase for a subscriber
-      const weeklyBagId = fullSession.metadata?.weekly_bag_id;
+      // Get weekly_bag_id from order record if not in metadata
+      let weeklyBagId = fullSession.metadata?.weekly_bag_id;
+      if (!weeklyBagId || weeklyBagId === 'new-checkout') {
+        // Try to get from the order record we just updated
+        const { data: orderRecord } = await supabase
+          .from("orders")
+          .select("weekly_bag_id")
+          .eq("stripe_session_id", session.id)
+          .single();
+        weeklyBagId = orderRecord?.weekly_bag_id;
+      }
+      
       const hasActiveSubscription = fullSession.metadata?.has_active_subscription === 'true';
       
       if (weeklyBagId && weeklyBagId !== 'new-checkout' && hasActiveSubscription) {

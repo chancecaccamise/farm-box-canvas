@@ -201,6 +201,7 @@ serve(async (req) => {
     const orderData = {
       user_id: user.id,
       stripe_session_id: session.id,
+      weekly_bag_id: weeklyBag?.id || null, // Include weekly_bag_id for webhook processing
       total_amount: totalAmount,
       payment_status: 'pending',
       customer_email: user.email,
