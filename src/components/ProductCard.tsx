@@ -19,9 +19,10 @@ interface ProductCardProps {
   quantity: number;
   onUpdateQuantity: (productId: string, quantity: number) => void;
   isLocked: boolean;
+  isConfirmed?: boolean;
 }
 
-export function ProductCard({ product, quantity, onUpdateQuantity, isLocked }: ProductCardProps) {
+export function ProductCard({ product, quantity, onUpdateQuantity, isLocked, isConfirmed = false }: ProductCardProps) {
   const getCategoryColor = (category: string) => {
     const colors = {
       produce: "bg-primary/10 text-primary border-primary/20",
@@ -99,8 +100,10 @@ export function ProductCard({ product, quantity, onUpdateQuantity, isLocked }: P
 
         {/* Quantity Badge */}
         {quantity > 0 && (
-          <Badge className="absolute top-3 right-3 bg-primary/90 backdrop-blur-sm shadow-soft">
-            {quantity}x
+          <Badge className={`absolute top-3 right-3 backdrop-blur-sm shadow-soft ${
+            isConfirmed ? 'bg-green-600/90 text-white' : 'bg-primary/90'
+          }`}>
+            {quantity}x {isConfirmed && '✓'}
           </Badge>
         )}
       </div>
@@ -129,7 +132,16 @@ export function ProductCard({ product, quantity, onUpdateQuantity, isLocked }: P
 
           {/* Quantity Controls */}
           <div className="flex items-center justify-center">
-            {quantity > 0 ? (
+            {isConfirmed ? (
+              <Button
+                size="sm"
+                disabled
+                variant="outline"
+                className="w-full border-green-200 bg-green-50 text-green-700"
+              >
+                ✓ Added to Bag
+              </Button>
+            ) : quantity > 0 ? (
               <div className="flex items-center gap-3 w-full">
                 <Button
                   size="sm"

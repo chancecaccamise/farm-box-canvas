@@ -6,9 +6,10 @@ import { Badge } from "@/components/ui/badge";
 interface CountdownTimerProps {
   cutoffTime: string;
   isConfirmed: boolean;
+  hasActiveSubscription?: boolean;
 }
 
-export function CountdownTimer({ cutoffTime, isConfirmed }: CountdownTimerProps) {
+export function CountdownTimer({ cutoffTime, isConfirmed, hasActiveSubscription = false }: CountdownTimerProps) {
   const [timeLeft, setTimeLeft] = useState<{
     days: number;
     hours: number;
@@ -100,7 +101,7 @@ export function CountdownTimer({ cutoffTime, isConfirmed }: CountdownTimerProps)
           <div className="flex items-center justify-center gap-2 mb-2">
             <Clock className="h-5 w-5 text-orange-600" />
             <span className="text-orange-800 font-medium">
-              Confirm your bag by {formatCutoffTime()}
+              {hasActiveSubscription ? 'Purchase additional add-ons' : 'Confirm your bag'} by {formatCutoffTime()}
             </span>
           </div>
           

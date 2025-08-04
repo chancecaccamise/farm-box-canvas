@@ -39,6 +39,7 @@ interface WeeklyBagItem {
   quantity: number;
   price_at_time: number;
   item_type: 'box_item' | 'addon';
+  is_paid: boolean;
   products: {
     id: string;
     name: string;
@@ -210,6 +211,7 @@ function MyBag() {
           quantity,
           price_at_time,
           item_type,
+          is_paid,
           products (
             id,
             name,
@@ -438,17 +440,17 @@ function MyBag() {
       return;
     }
 
-    // Check if subscriber with no add-ons - just confirm locally
-    const addonItems = getAddonItems();
-    if (hasActiveSubscription && addonItems.length === 0) {
+    // Check if subscriber with no unpaid add-ons - just confirm locally
+    const unpaidAddonItems = getUnpaidAddonItems();
+    if (hasActiveSubscription && unpaidAddonItems.length === 0) {
       await confirmBagWithoutPayment();
       return;
     }
 
     setLoading(true);
     try {
-      // For subscribers, only checkout add-ons
-      const itemsToCheckout = hasActiveSubscription ? addonItems : bagItems;
+      // For subscribers, only checkout unpaid add-ons
+      const itemsToCheckout = hasActiveSubscription ? unpaidAddonItems : bagItems;
       
       const { data, error } = await supabase.functions.invoke('create-payment', {
         body: {
@@ -492,6 +494,14 @@ function MyBag() {
 
   const getAddonItems = () => {
     return bagItems.filter(item => item.item_type === 'addon');
+  };
+
+  const getConfirmedAddonItems = () => {
+    return bagItems.filter(item => item.item_type === 'addon' && item.is_paid);
+  };
+
+  const getUnpaidAddonItems = () => {
+    return bagItems.filter(item => item.item_type === 'addon' && !item.is_paid);
   };
 
   const getCurrentBagProducts = () => {
@@ -652,6 +662,7 @@ function MyBag() {
             <CountdownTimer
               cutoffTime={currentWeekBag.cutoff_time}
               isConfirmed={currentWeekBag.is_confirmed}
+              hasActiveSubscription={hasActiveSubscription}
             />
           )}
 
@@ -762,19 +773,49 @@ function MyBag() {
                   </div>
                 </div>
 
-                {/* Your Add-ons Section */}
-                {getAddonItems().length > 0 && (
+                {/* Your Confirmed Add-ons Section */}
+                {getConfirmedAddonItems().length > 0 && (
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-3">
+                      <CheckCircle className="w-6 h-6 text-green-600" />
+                      <h3 className="text-xl font-semibold">Your Confirmed Add-ons</h3>
+                      <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">
+                        {getConfirmedAddonItems().length} item{getConfirmedAddonItems().length !== 1 ? 's' : ''} • Paid
+                      </Badge>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {getConfirmedAddonItems().map((item) => (
+                        <div key={item.id} className="relative">
+                          <BagItemCard 
+                            item={item}
+                            onUpdateQuantity={updateItemQuantity}
+                            isLocked={true}
+                          />
+                          <div className="absolute top-2 right-2">
+                            <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200 text-xs">
+                              Paid
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Your Pending Add-ons Section */}
+                {getUnpaidAddonItems().length > 0 && (
                   <div className="space-y-6">
                     <div className="flex items-center gap-3">
                       <ShoppingCart className="w-6 h-6 text-primary" />
                       <h3 className="text-xl font-semibold">Your Add-ons</h3>
                       <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
-                        {getAddonItems().length} item{getAddonItems().length !== 1 ? 's' : ''}
+                        {getUnpaidAddonItems().length} item{getUnpaidAddonItems().length !== 1 ? 's' : ''} • Needs checkout
                       </Badge>
                     </div>
                     
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {getAddonItems().map((item) => (
+                      {getUnpaidAddonItems().map((item) => (
                         <BagItemCard 
                           key={item.id}
                           item={item}
@@ -792,6 +833,7 @@ function MyBag() {
                 bagItems={getCurrentBagProducts()} 
                 onUpdateQuantity={updateItemQuantity}
                 isLocked={isLocked || currentWeekBag?.is_confirmed || false}
+                confirmedAddons={getConfirmedAddonItems().map(item => item.product_id)}
               />
             </div>
 
@@ -804,6 +846,7 @@ function MyBag() {
                 isLocked={isLocked}
                 loading={loading}
                 hasActiveSubscription={hasActiveSubscription}
+                unpaidAddonsTotal={getUnpaidAddonItems().reduce((total, item) => total + (item.price_at_time * item.quantity), 0)}
               />
               
               {/* Subscription Management */}

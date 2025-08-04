@@ -21,12 +21,13 @@ interface AddOnsGridProps {
   bagItems: Record<string, number>;
   onUpdateQuantity: (productId: string, quantity: number) => void;
   isLocked?: boolean;
+  confirmedAddons?: string[]; // Product IDs that are already confirmed/paid
 }
 
 const PRODUCTS_PER_PAGE = 9;
 const CATEGORIES = ["All", "Vegetables", "Fruits", "Herbs", "Dairy", "Meat", "Fish", "Bakery", "Pantry", "Other"];
 
-export function AddOnsGrid({ bagItems, onUpdateQuantity, isLocked = false }: AddOnsGridProps) {
+export function AddOnsGrid({ bagItems, onUpdateQuantity, isLocked = false, confirmedAddons = [] }: AddOnsGridProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -136,6 +137,7 @@ export function AddOnsGrid({ bagItems, onUpdateQuantity, isLocked = false }: Add
             quantity={bagItems[product.id] || 0}
             onUpdateQuantity={onUpdateQuantity}
             isLocked={isLocked}
+            isConfirmed={confirmedAddons.includes(product.id)}
           />
         ))}
       </div>

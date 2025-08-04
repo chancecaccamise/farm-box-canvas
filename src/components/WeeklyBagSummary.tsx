@@ -22,6 +22,7 @@ interface WeeklyBagSummaryProps {
   isLocked: boolean;
   loading: boolean;
   hasActiveSubscription?: boolean;
+  unpaidAddonsTotal?: number;
 }
 
 export function WeeklyBagSummary({ 
@@ -30,7 +31,8 @@ export function WeeklyBagSummary({
   onCheckout, 
   isLocked, 
   loading,
-  hasActiveSubscription = false
+  hasActiveSubscription = false,
+  unpaidAddonsTotal = 0
 }: WeeklyBagSummaryProps) {
   const [promoCode, setPromoCode] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
@@ -46,8 +48,8 @@ export function WeeklyBagSummary({
   // Updated total calculation - no delivery fee for anyone
   const getTotal = () => {
     if (hasActiveSubscription) {
-      // For subscribers, only charge for add-ons
-      return addonsTotal;
+      // For subscribers, only charge for unpaid add-ons
+      return unpaidAddonsTotal;
     } else {
       // For one-time customers, charge for box and add-ons (no delivery fee)
       return subtotal;
@@ -82,7 +84,7 @@ export function WeeklyBagSummary({
     }
     
     if (hasActiveSubscription) {
-      return addonsTotal > 0 ? "Checkout Add-ons" : "Confirm Your Bag";
+      return unpaidAddonsTotal > 0 ? "Checkout Add-ons" : "Confirm Your Bag";
     } else {
       return "Checkout";
     }
@@ -163,11 +165,20 @@ export function WeeklyBagSummary({
                 <span>${boxPrice.toFixed(2)}</span>
               </div>
             )}
-            {addonsTotal > 0 && (
-              <div className="flex items-center justify-between text-sm">
-                <span>Add-ons</span>
-                <span>${addonsTotal.toFixed(2)}</span>
-              </div>
+            {hasActiveSubscription ? (
+              unpaidAddonsTotal > 0 && (
+                <div className="flex items-center justify-between text-sm">
+                  <span>Additional add-ons</span>
+                  <span>${unpaidAddonsTotal.toFixed(2)}</span>
+                </div>
+              )
+            ) : (
+              addonsTotal > 0 && (
+                <div className="flex items-center justify-between text-sm">
+                  <span>Add-ons</span>
+                  <span>${addonsTotal.toFixed(2)}</span>
+                </div>
+              )
             )}
             <div className="flex items-center justify-between text-sm">
               <span>Delivery fee</span>

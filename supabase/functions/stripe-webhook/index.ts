@@ -159,6 +159,20 @@ serve(async (req) => {
         } else {
           logStep("Weekly bag confirmed successfully", { weeklyBagId });
         }
+
+        // Mark add-on items as paid for this weekly bag
+        const { error: updateItemsError } = await supabase
+          .from("weekly_bag_items")
+          .update({ is_paid: true })
+          .eq("weekly_bag_id", weeklyBagId)
+          .eq("item_type", "addon")
+          .eq("is_paid", false); // Only update unpaid items
+
+        if (updateItemsError) {
+          logStep("WARNING: Failed to mark add-ons as paid", { error: updateItemsError, weeklyBagId });
+        } else {
+          logStep("Add-ons marked as paid successfully", { weeklyBagId });
+        }
       }
     } else {
       logStep("Unhandled event type", { type: event.type });
