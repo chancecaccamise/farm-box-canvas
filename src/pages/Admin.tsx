@@ -3,15 +3,16 @@ import { useAuth } from '@/components/AuthProvider';
 import { supabase } from '@/integrations/supabase/client';
 import { Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Package, ShoppingBag, Users, Fish, Flower } from 'lucide-react';
+import { Package, ShoppingBag, Users, Fish, Flower, MapPin } from 'lucide-react';
 import { AdminProducts } from '@/components/admin/AdminProducts';
 import { AdminBoxTemplates } from '@/components/admin/AdminBoxTemplates';
 import { EnhancedOrderManagement } from '@/components/admin/EnhancedOrderManagement';
 import { AdminFreshCatch } from '@/components/admin/AdminFreshCatch';
 import { AdminBouquetRequests } from '@/components/admin/AdminBouquetRequests';
 import { AdminFreshFishAlerts } from '@/components/admin/AdminFreshFishAlerts';
+import { AdminDeliveryAreas } from '@/components/admin/AdminDeliveryAreas';
 
 const Admin = () => {
   const { user, loading } = useAuth();
@@ -71,7 +72,7 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="products" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               Products
@@ -95,6 +96,10 @@ const Admin = () => {
             <TabsTrigger value="arrangements" className="flex items-center gap-2">
               <Flower className="h-4 w-4" />
               Bouquet Requests
+            </TabsTrigger>
+            <TabsTrigger value="delivery-areas" className="flex items-center gap-2">
+              <MapPin className="h-4 w-4" />
+              Delivery Areas
             </TabsTrigger>
           </TabsList>
 
@@ -139,6 +144,20 @@ const Admin = () => {
               </CardHeader>
               <CardContent>
                 <AdminBouquetRequests />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="delivery-areas">
+            <Card>
+              <CardHeader>
+                <CardTitle>Delivery Areas Management</CardTitle>
+                <CardDescription>
+                  Manage ZIP codes where delivery is available. Only users in these areas can sign up for service.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AdminDeliveryAreas />
               </CardContent>
             </Card>
           </TabsContent>

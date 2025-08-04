@@ -1,37 +1,41 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MapPin, ArrowLeft } from "lucide-react";
+import { MapPin, ArrowLeft, Loader2, CheckCircle, XCircle, Bell } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
+import { useZipCodeValidation } from "@/hooks/useZipCodeValidation";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const ZipCode = () => {
   const [zipCode, setZipCode] = useState("");
-  const [isValid, setIsValid] = useState(false);
+  const [showNotificationRequest, setShowNotificationRequest] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { isValid, isLoading, error, zipCodeData } = useZipCodeValidation(zipCode);
 
   const handleZipChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value.replace(/\D/g, "");
     if (value.length <= 5) {
       setZipCode(value);
-      setIsValid(value.length === 5);
+      setShowNotificationRequest(false);
     }
   };
 
-  // Skip ZIP code validation and go straight to next step if user already authenticated
   const handleContinue = () => {
     if (isValid) {
       if (user) {
-        // Authenticated user goes to box selection
         navigate("/box-selection");
       } else {
-        // New user goes to account creation
         navigate("/account");
       }
     }
+  };
+
+  const handleNotificationRequest = () => {
+    setShowNotificationRequest(true);
   };
 
   return (
@@ -72,35 +76,100 @@ const ZipCode = () => {
               <Label htmlFor="zipcode" className="text-base font-medium">
                 ZIP Code
               </Label>
-              <Input
-                id="zipcode"
-                type="text"
-                value={zipCode}
-                onChange={handleZipChange}
-                placeholder="Enter ZIP code"
-                className="text-lg h-12"
-                maxLength={5}
-              />
-              {zipCode.length > 0 && zipCode.length < 5 && (
+              <div className="relative">
+                <Input
+                  id="zipcode"
+                  type="text"
+                  value={zipCode}
+                  onChange={handleZipChange}
+                  placeholder="Enter ZIP code"
+                  className="text-lg h-12 pr-10"
+                  maxLength={5}
+                />
+                {isLoading && (
+                  <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 animate-spin text-muted-foreground" />
+                )}
+              </div>
+
+              {/* Validation Messages */}
+              {zipCode.length > 0 && zipCode.length < 5 && !isLoading && (
                 <p className="text-sm text-muted-foreground">
                   Please enter a 5-digit ZIP code
                 </p>
               )}
-              {isValid && (
-                <p className="text-sm text-primary flex items-center">
-                  <span className="w-2 h-2 bg-primary rounded-full mr-2"></span>
-                  Great! We deliver to your area.
-                </p>
+              
+              {error && (
+                <Alert className="border-destructive">
+                  <XCircle className="h-4 w-4" />
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+
+              {isValid === true && zipCodeData && (
+                <Alert className="border-primary bg-primary/10">
+                  <CheckCircle className="h-4 w-4 text-primary" />
+                  <AlertDescription className="text-primary">
+                    <strong>Great! We deliver to {zipCodeData.city}, {zipCodeData.state}</strong>
+                    <br />
+                    Delivery available Tuesday through Saturday
+                  </AlertDescription>
+                </Alert>
+              )}
+
+              {isValid === false && zipCode.length === 5 && !isLoading && !error && (
+                <div className="space-y-3">
+                  <Alert className="border-orange-500 bg-orange-50">
+                    <XCircle className="h-4 w-4 text-orange-600" />
+                    <AlertDescription className="text-orange-800">
+                      <strong>We don't deliver to {zipCode} yet, but we're expanding!</strong>
+                      <br />
+                      Get notified when we start delivering to your area.
+                    </AlertDescription>
+                  </Alert>
+                  
+                  {!showNotificationRequest && (
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={handleNotificationRequest}
+                    >
+                      <Bell className="w-4 h-4 mr-2" />
+                      Get Notified When Available
+                    </Button>
+                  )}
+
+                  {showNotificationRequest && (
+                    <Card className="border-orange-200">
+                      <CardContent className="pt-4">
+                        <p className="text-sm text-muted-foreground mb-3">
+                          Thanks for your interest! You can contact us directly:
+                        </p>
+                        <div className="space-y-2 text-sm">
+                          <p><strong>Email:</strong> hello@billysbotanicals.com</p>
+                          <p><strong>Phone:</strong> (555) 123-FARM</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
               )}
             </div>
 
             <Button 
               onClick={handleContinue}
-              disabled={!isValid}
+              disabled={!isValid || isLoading}
               className="w-full h-12 text-base"
               variant="hero"
             >
-              {user ? "Continue to Box Selection" : "Continue to Account Setup"}
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Checking availability...
+                </>
+              ) : (
+                user ? "Continue to Box Selection" : "Continue to Account Setup"
+              )}
             </Button>
 
             <div className="bg-secondary/50 rounded-lg p-4">

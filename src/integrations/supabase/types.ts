@@ -799,6 +799,33 @@ export type Database = {
         }
         Relationships: []
       }
+      serviceable_zip_codes: {
+        Row: {
+          city: string
+          created_at: string
+          is_active: boolean
+          state: string
+          updated_at: string
+          zip_code: string
+        }
+        Insert: {
+          city: string
+          created_at?: string
+          is_active?: boolean
+          state: string
+          updated_at?: string
+          zip_code: string
+        }
+        Update: {
+          city?: string
+          created_at?: string
+          is_active?: boolean
+          state?: string
+          updated_at?: string
+          zip_code?: string
+        }
+        Relationships: []
+      }
       stop_assignments: {
         Row: {
           created_at: string | null
