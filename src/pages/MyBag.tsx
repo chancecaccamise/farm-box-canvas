@@ -130,6 +130,41 @@ function MyBag() {
     }
   }, [currentWeekBag]);
 
+  // Set up real-time subscription for bag item changes
+  useEffect(() => {
+    if (!user || !currentWeekBag?.id) return;
+
+    const channel = supabase
+      .channel('weekly-bag-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'weekly_bag_items',
+          filter: `weekly_bag_id=eq.${currentWeekBag.id}`
+        },
+        (payload) => {
+          console.log('Bag items updated:', payload);
+          // Refresh the bag when items change
+          initializeCurrentWeekBag();
+          
+          // Show notification if it's an update from template confirmation
+          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+            toast({
+              title: "Bag Updated",
+              description: "Your bag contents have been updated based on this week's confirmed selections.",
+            });
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, currentWeekBag?.id]);
+
   const initializeCurrentWeekBag = async () => {
     try {
       // Use the new function that handles box size and templates

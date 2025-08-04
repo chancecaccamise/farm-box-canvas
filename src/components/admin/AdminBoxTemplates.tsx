@@ -276,6 +276,14 @@ export const AdminBoxTemplates = () => {
     }
 
     try {
+      // Get count of affected bags before confirming
+      const { count: affectedBagsCount } = await supabase
+        .from('weekly_bags')
+        .select('*', { count: 'exact', head: true })
+        .eq('week_start_date', selectedWeek)
+        .eq('box_size', selectedBoxSize)
+        .eq('is_confirmed', false);
+
       const { error } = await supabase
         .from('box_templates')
         .update({ 
@@ -289,7 +297,7 @@ export const AdminBoxTemplates = () => {
 
       toast({
         title: "Success",
-        description: "Box template confirmed! This will now appear in customer MyBag pages."
+        description: `Box template confirmed! ${affectedBagsCount || 0} user bags will be updated automatically.`
       });
       
       fetchTemplates();
@@ -305,6 +313,14 @@ export const AdminBoxTemplates = () => {
 
   const unconfirmTemplate = async () => {
     try {
+      // Get count of affected bags before unconfirming
+      const { count: affectedBagsCount } = await supabase
+        .from('weekly_bags')
+        .select('*', { count: 'exact', head: true })
+        .eq('week_start_date', selectedWeek)
+        .eq('box_size', selectedBoxSize)
+        .eq('is_confirmed', false);
+
       const { error } = await supabase
         .from('box_templates')
         .update({ 
@@ -319,7 +335,7 @@ export const AdminBoxTemplates = () => {
 
       toast({
         title: "Success",
-        description: "Box template unconfirmed. This will no longer appear in customer MyBag pages."
+        description: `Box template unconfirmed! ${affectedBagsCount || 0} user bags will be updated automatically.`
       });
       
       fetchTemplates();

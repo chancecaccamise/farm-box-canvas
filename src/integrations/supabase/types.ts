@@ -101,6 +101,42 @@ export type Database = {
         }
         Relationships: []
       }
+      box_template_change_log: {
+        Row: {
+          affected_bags_count: number
+          box_size: string
+          changed_at: string
+          changed_by: string | null
+          id: string
+          new_confirmed_status: boolean
+          old_confirmed_status: boolean
+          template_id: string
+          week_start_date: string
+        }
+        Insert: {
+          affected_bags_count?: number
+          box_size: string
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          new_confirmed_status: boolean
+          old_confirmed_status: boolean
+          template_id: string
+          week_start_date: string
+        }
+        Update: {
+          affected_bags_count?: number
+          box_size?: string
+          changed_at?: string
+          changed_by?: string | null
+          id?: string
+          new_confirmed_status?: boolean
+          old_confirmed_status?: boolean
+          template_id?: string
+          week_start_date?: string
+        }
+        Relationships: []
+      }
       box_templates: {
         Row: {
           box_size: string
@@ -1210,6 +1246,14 @@ export type Database = {
       populate_weekly_bag_from_template: {
         Args: { bag_id: string; box_size_name: string; week_start: string }
         Returns: undefined
+      }
+      update_all_user_bags_for_template_change: {
+        Args: {
+          template_week_start: string
+          template_box_size: string
+          template_is_confirmed: boolean
+        }
+        Returns: number
       }
       update_weekly_bag_totals: {
         Args: { bag_id: string }
