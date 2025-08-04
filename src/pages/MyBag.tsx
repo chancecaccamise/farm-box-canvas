@@ -85,38 +85,18 @@ function MyBag() {
         .from("user_subscriptions")
         .select("*")
         .eq("user_id", user?.id)
-        .single();
+        .maybeSingle();
 
-      if (subError && subError.code !== "PGRST116") {
+      if (subError) {
         throw subError;
       }
 
-      const hasSubscription = !!subscriptionData;
       const isActiveSubscription = subscriptionData?.status === 'active';
       setSubscription(subscriptionData);
+      setHasActiveSubscription(isActiveSubscription);
 
       if (isActiveSubscription) {
-        setHasActiveSubscription(true);
         await initializeCurrentWeekBag();
-      } else {
-        // Check if user has any previous orders to allow bag access
-        const { data: orders, error: ordersError } = await supabase
-          .from('orders')
-          .select('id')
-          .eq('user_id', user?.id)
-          .limit(1);
-        
-        if (ordersError) {
-          console.error('Error checking orders:', ordersError);
-        }
-        
-        // Allow bag access if user has previous orders (they've purchased before)
-        if (orders && orders.length > 0) {
-          setHasActiveSubscription(true);
-          await initializeCurrentWeekBag();
-        } else {
-          setHasActiveSubscription(false);
-        }
       }
     } catch (error) {
       console.error("Error checking subscription:", error);
@@ -640,8 +620,8 @@ function MyBag() {
                 ) : (
                   <div className="text-center py-8 text-muted-foreground bg-muted/30 rounded-lg">
                     <Package className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                    <p>Your box contents will be available once curated for this week.</p>
-                    <p className="text-sm mt-2">Contents are based on the {currentWeekBag?.box_size} box template from our admin team.</p>
+                    <p className="font-medium">Your box is being curated by our team</p>
+                    <p className="text-sm mt-2">Box contents will appear here once our admin team confirms the {currentWeekBag?.box_size} box template for this week.</p>
                   </div>
                 )}
 
