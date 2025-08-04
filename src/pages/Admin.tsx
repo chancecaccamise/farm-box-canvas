@@ -71,7 +71,7 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="products" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               Products
@@ -88,9 +88,13 @@ const Admin = () => {
               <Fish className="h-4 w-4" />
               Fresh Catch
             </TabsTrigger>
+            <TabsTrigger value="fish-alerts" className="flex items-center gap-2">
+              <Fish className="h-4 w-4" />
+              Fish Alerts
+            </TabsTrigger>
             <TabsTrigger value="arrangements" className="flex items-center gap-2">
               <Flower className="h-4 w-4" />
-              Ana's Arrangements
+              Bouquet Requests
             </TabsTrigger>
           </TabsList>
 
@@ -117,24 +121,24 @@ const Admin = () => {
             </Card>
           </TabsContent>
 
+          <TabsContent value="fish-alerts">
+            <Card>
+              <CardHeader>
+                <CardTitle>Fresh Fish Alerts</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AdminFreshFishAlerts />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="arrangements">
             <Card>
               <CardHeader>
-                <CardTitle>Ana's Arrangements & Fresh Fish Alerts</CardTitle>
+                <CardTitle>Bouquet Requests</CardTitle>
               </CardHeader>
               <CardContent>
-                <Tabs defaultValue="bouquets" className="space-y-6">
-                  <TabsList>
-                    <TabsTrigger value="bouquets">Bouquet Requests</TabsTrigger>
-                    <TabsTrigger value="alerts">Fish Alerts</TabsTrigger>
-                  </TabsList>
-                  <TabsContent value="bouquets">
-                    <AdminBouquetRequests />
-                  </TabsContent>
-                  <TabsContent value="alerts">
-                    <AdminFreshFishAlerts />
-                  </TabsContent>
-                </Tabs>
+                <AdminBouquetRequests />
               </CardContent>
             </Card>
           </TabsContent>

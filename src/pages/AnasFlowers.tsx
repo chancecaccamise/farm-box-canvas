@@ -39,6 +39,20 @@ const AnasFlowers = () => {
   const [submitting, setSubmitting] = useState(false);
   const { toast } = useToast();
 
+  const scrollToForm = () => {
+    const formElement = document.getElementById('bouquet-form');
+    if (formElement) {
+      formElement.scrollIntoView({ behavior: 'smooth' });
+      // Focus the first input for accessibility
+      setTimeout(() => {
+        const firstInput = formElement.querySelector('input');
+        if (firstInput) {
+          firstInput.focus();
+        }
+      }, 500);
+    }
+  };
+
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
@@ -174,7 +188,7 @@ const AnasFlowers = () => {
             Creating beautiful, custom floral arrangements for life's most special moments. 
             From intimate bouquets to grand celebrations, every arrangement tells your unique story.
           </p>
-          <Button variant="organic" size="xl" className="animate-scale-in hover-scale">
+          <Button variant="organic" size="xl" className="animate-scale-in hover-scale" onClick={scrollToForm}>
             <Flower className="w-5 h-5 mr-2" />
             Request Custom Bouquet
           </Button>
@@ -251,7 +265,7 @@ const AnasFlowers = () => {
 
         <div className="grid lg:grid-cols-2 gap-12">
           {/* Bouquet Request Form */}
-          <div>
+          <div id="bouquet-form">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
