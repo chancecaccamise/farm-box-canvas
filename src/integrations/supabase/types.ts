@@ -1235,6 +1235,15 @@ export type Database = {
         Args: { user_uuid: string; box_size_name?: string }
         Returns: string
       }
+      get_or_create_weekly_order: {
+        Args: {
+          p_user_id: string
+          p_weekly_bag_id: string
+          p_week_start_date: string
+          p_week_end_date: string
+        }
+        Returns: string
+      }
       has_role: {
         Args: {
           _user_id: string
