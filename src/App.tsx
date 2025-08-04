@@ -98,13 +98,14 @@ const AppRoutes = () => {
           <>
             <Route path="/zip-code" element={<ZipCode />} />
             <Route path="/account" element={<Account />} />
-            <Route path="/box-selection" element={<BoxSelection />} />
-            <Route path="/add-ons" element={<AddOns />} />
-            <Route path="/delivery" element={<Delivery />} />
-            <Route path="/order-summary" element={<OrderSummary />} />
-            <Route path="/my-plan" element={<MyPlan />} />
-            <Route path="/my-bag" element={<MyBag />} />
-            <Route path="/admin" element={<Admin />} />
+        <Route path="/box-selection" element={<BoxSelection />} />
+        <Route path="/product-selection" element={<ProductSelection />} />
+        <Route path="/add-ons" element={<AddOns />} />
+        <Route path="/delivery" element={<Delivery />} />
+        <Route path="/order-summary" element={<OrderSummary />} />
+        <Route path="/my-plan" element={<MyPlan />} />
+        <Route path="/my-bag" element={<MyBag />} />
+        <Route path="/admin" element={<Admin />} />
           </>
         ) : (
           <>

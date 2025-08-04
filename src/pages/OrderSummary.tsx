@@ -224,7 +224,7 @@ const OrderSummary = () => {
     return total + (product.price * quantity);
   }, 0);
 
-  const deliveryFee = 4.99;
+  const deliveryFee = 0; // Free delivery
   const totalAmount = boxPrice + addOnTotal + deliveryFee;
 
   return (
@@ -372,7 +372,7 @@ const OrderSummary = () => {
                   )}
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Delivery Fee:</span>
-                    <span>${deliveryFee.toFixed(2)}</span>
+                    <span className="text-accent">Free</span>
                   </div>
                 </div>
 
