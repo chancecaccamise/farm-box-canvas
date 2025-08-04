@@ -111,7 +111,7 @@ serve(async (req) => {
       }
     }
 
-    const deliveryFee = hasActiveSubscription ? 0 : 4.99;
+    const deliveryFee = 0; // No delivery fee for any orders
     const totalAmount = boxPrice + addonsTotal + deliveryFee;
 
     logStep("Calculated totals", { boxPrice, addonsTotal, deliveryFee, totalAmount });
@@ -167,17 +167,8 @@ serve(async (req) => {
       }
     }
 
-    // Add delivery fee if not subscription
-    if (!hasActiveSubscription && deliveryFee > 0) {
-      lineItems.push({
-        price_data: {
-          currency: "usd",
-          product_data: { name: "Delivery Fee" },
-          unit_amount: Math.round(deliveryFee * 100),
-        },
-        quantity: 1,
-      });
-    }
+    // No delivery fee for any orders
+    // Removed delivery fee line item
 
     logStep("Created line items", { itemCount: lineItems.length });
 

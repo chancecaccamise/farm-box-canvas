@@ -18,13 +18,13 @@ export default function SimplifiedOrderSummary({
   
   const boxPrice = weeklyBag.box_price || 0;
   const addonsTotal = weeklyBag.addons_total || 0;
-  const deliveryFee = hasActiveSubscription ? 0 : 4.99;
+  const deliveryFee = 0; // No delivery fee for any orders
   
   const getTotal = () => {
     if (hasActiveSubscription) {
       return addonsTotal; // Only charge for add-ons
     } else {
-      return boxPrice + addonsTotal + deliveryFee; // Charge for everything
+      return boxPrice + addonsTotal; // Charge for box and add-ons (no delivery fee)
     }
   };
 
@@ -114,7 +114,7 @@ export default function SimplifiedOrderSummary({
           )}
           <div className="flex items-center justify-between text-sm">
             <span>Delivery fee</span>
-            <span>{hasActiveSubscription ? "Free" : `$${deliveryFee.toFixed(2)}`}</span>
+            <span>Free</span>
           </div>
           {hasActiveSubscription && (
             <div className="flex items-center justify-between text-sm text-muted-foreground">
