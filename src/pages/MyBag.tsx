@@ -80,19 +80,22 @@ function MyBag() {
 
   const checkSubscriptionAndInitialize = async () => {
     try {
-      // Check if user has an active subscription
-      const { data: subscriptionData, error: subError } = await supabase
+      // Check if user has an active subscription - get the most recent active one
+      const { data: subscriptionsData, error: subError } = await supabase
         .from("user_subscriptions")
         .select("*")
         .eq("user_id", user?.id)
-        .maybeSingle();
+        .order("created_at", { ascending: false });
 
       if (subError) {
         throw subError;
       }
 
-      const isActiveSubscription = subscriptionData?.status === 'active';
-      setSubscription(subscriptionData);
+      // Find the most recent active subscription
+      const activeSubscription = subscriptionsData?.find(sub => sub.status === 'active');
+      const isActiveSubscription = !!activeSubscription;
+      
+      setSubscription(activeSubscription || null);
       setHasActiveSubscription(isActiveSubscription);
 
       if (isActiveSubscription) {
