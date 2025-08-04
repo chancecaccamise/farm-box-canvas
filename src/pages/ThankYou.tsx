@@ -144,7 +144,9 @@ const ThankYou = () => {
         <h1 className="text-4xl font-bold mb-4">Thank You for Your Order!</h1>
         <p className="text-xl text-muted-foreground mb-12 max-w-lg mx-auto">
           {orderDetails ? 
-            `Your order has been ${orderDetails.payment_status === 'paid' ? 'confirmed' : 'received'} and will be delivered to ${orderDetails.shipping_address_street || 'your address'}.` :
+            orderDetails.has_active_subscription ? 
+              `Your add-ons have been ${orderDetails.payment_status === 'paid' ? 'confirmed' : 'received'} and will be delivered with your weekly subscription box to ${orderDetails.shipping_address_street || 'your address'}.` :
+              `Your order has been ${orderDetails.payment_status === 'paid' ? 'confirmed' : 'received'} and will be delivered to ${orderDetails.shipping_address_street || 'your address'}.` :
             'Your payment has been processed successfully! Your order details are being finalized.'
           }
         </p>

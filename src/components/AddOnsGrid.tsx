@@ -24,7 +24,7 @@ interface AddOnsGridProps {
 }
 
 const PRODUCTS_PER_PAGE = 9;
-const CATEGORIES = ["All", "Seafood", "Herbs", "Pantry"];
+const CATEGORIES = ["All", "Vegetables", "Fruits", "Herbs", "Dairy", "Meat", "Fish", "Bakery", "Pantry", "Other"];
 
 export function AddOnsGrid({ bagItems, onUpdateQuantity, isLocked = false }: AddOnsGridProps) {
   const [products, setProducts] = useState<Product[]>([]);
@@ -44,12 +44,11 @@ export function AddOnsGrid({ bagItems, onUpdateQuantity, isLocked = false }: Add
 
   const fetchAddOnProducts = async () => {
     try {
-      // Focus on products that are typically add-ons, not box staples
+      // Fetch ALL available products that users can add as add-ons
       const { data, error } = await supabase
         .from("products")
         .select("*")
         .eq("is_available", true)
-        .in("category", ["Seafood", "Herbs", "Pantry"])
         .order("name");
 
       if (error) throw error;

@@ -394,6 +394,40 @@ function MyBag() {
     }
   };
 
+  const confirmBagWithoutPayment = async () => {
+    if (!currentWeekBag) return;
+    
+    setLoading(true);
+    try {
+      const { error } = await supabase
+        .from("weekly_bags")
+        .update({ 
+          is_confirmed: true, 
+          confirmed_at: new Date().toISOString() 
+        })
+        .eq("id", currentWeekBag.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Bag Confirmed!",
+        description: "Your weekly bag has been confirmed and will be delivered automatically.",
+      });
+
+      // Refresh the bag data
+      await initializeCurrentWeekBag();
+    } catch (error) {
+      console.error("Error confirming bag:", error);
+      toast({
+        title: "Error",
+        description: "Failed to confirm your bag. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleCheckout = async () => {
     if (!currentWeekBag || !bagItems) {
       toast({
@@ -404,12 +438,22 @@ function MyBag() {
       return;
     }
 
+    // Check if subscriber with no add-ons - just confirm locally
+    const addonItems = getAddonItems();
+    if (hasActiveSubscription && addonItems.length === 0) {
+      await confirmBagWithoutPayment();
+      return;
+    }
+
     setLoading(true);
     try {
+      // For subscribers, only checkout add-ons
+      const itemsToCheckout = hasActiveSubscription ? addonItems : bagItems;
+      
       const { data, error } = await supabase.functions.invoke('create-payment', {
         body: {
           weeklyBag: currentWeekBag,
-          bagItems: bagItems,
+          bagItems: itemsToCheckout,
           hasActiveSubscription: hasActiveSubscription
         }
       });

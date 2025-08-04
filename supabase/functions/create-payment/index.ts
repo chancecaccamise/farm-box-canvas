@@ -80,6 +80,7 @@ serve(async (req) => {
     if (weeklyBag && bagItems) {
       // Existing bag-based flow
       boxPrice = hasActiveSubscription ? 0 : (weeklyBag.box_price || 0);
+      // For subscribers, we only process add-on items for payment
       addonsTotal = bagItems.reduce((total: number, item: any) => 
         total + (item.quantity * item.price_at_time), 0
       );

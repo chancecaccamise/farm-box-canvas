@@ -138,6 +138,28 @@ serve(async (req) => {
       }
 
       logStep("Order updated successfully", { sessionId: session.id, orderId: existingOrder.id });
+
+      // Also confirm the weekly bag if this was an add-on purchase for a subscriber
+      const weeklyBagId = fullSession.metadata?.weekly_bag_id;
+      const hasActiveSubscription = fullSession.metadata?.has_active_subscription === 'true';
+      
+      if (weeklyBagId && weeklyBagId !== 'new-checkout' && hasActiveSubscription) {
+        logStep("Confirming weekly bag for subscriber add-on purchase", { weeklyBagId });
+        
+        const { error: bagError } = await supabase
+          .from("weekly_bags")
+          .update({
+            is_confirmed: true,
+            confirmed_at: new Date().toISOString()
+          })
+          .eq("id", weeklyBagId);
+
+        if (bagError) {
+          logStep("WARNING: Failed to confirm weekly bag", { error: bagError, weeklyBagId });
+        } else {
+          logStep("Weekly bag confirmed successfully", { weeklyBagId });
+        }
+      }
     } else {
       logStep("Unhandled event type", { type: event.type });
     }
