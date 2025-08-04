@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { MapPin, ArrowLeft, Loader2, CheckCircle, XCircle, Bell } from "lucide-react";
+import { MapPin, ArrowLeft, Loader2, CheckCircle, XCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
 import { useZipCodeValidation } from "@/hooks/useZipCodeValidation";
@@ -11,7 +11,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const ZipCode = () => {
   const [zipCode, setZipCode] = useState("");
-  const [showNotificationRequest, setShowNotificationRequest] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
   const { isValid, isLoading, error, zipCodeData } = useZipCodeValidation(zipCode);
@@ -20,7 +19,6 @@ const ZipCode = () => {
     const value = e.target.value.replace(/\D/g, "");
     if (value.length <= 5) {
       setZipCode(value);
-      setShowNotificationRequest(false);
     }
   };
 
@@ -34,9 +32,6 @@ const ZipCode = () => {
     }
   };
 
-  const handleNotificationRequest = () => {
-    setShowNotificationRequest(true);
-  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/30 flex items-center justify-center px-4">
@@ -117,42 +112,12 @@ const ZipCode = () => {
               )}
 
               {isValid === false && zipCode.length === 5 && !isLoading && !error && (
-                <div className="space-y-3">
-                  <Alert className="border-orange-500 bg-orange-50">
-                    <XCircle className="h-4 w-4 text-orange-600" />
-                    <AlertDescription className="text-orange-800">
-                      <strong>We don't deliver to {zipCode} yet, but we're expanding!</strong>
-                      <br />
-                      Get notified when we start delivering to your area.
-                    </AlertDescription>
-                  </Alert>
-                  
-                  {!showNotificationRequest && (
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      className="w-full"
-                      onClick={handleNotificationRequest}
-                    >
-                      <Bell className="w-4 h-4 mr-2" />
-                      Get Notified When Available
-                    </Button>
-                  )}
-
-                  {showNotificationRequest && (
-                    <Card className="border-orange-200">
-                      <CardContent className="pt-4">
-                        <p className="text-sm text-muted-foreground mb-3">
-                          Thanks for your interest! You can contact us directly:
-                        </p>
-                        <div className="space-y-2 text-sm">
-                          <p><strong>Email:</strong> hello@billysbotanicals.com</p>
-                          <p><strong>Phone:</strong> (555) 123-FARM</p>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
+                <Alert className="border-orange-500 bg-orange-50">
+                  <XCircle className="h-4 w-4 text-orange-600" />
+                  <AlertDescription className="text-orange-800">
+                    <strong>We don't deliver to {zipCode} yet, but we're expanding!</strong>
+                  </AlertDescription>
+                </Alert>
               )}
             </div>
 
