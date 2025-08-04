@@ -103,7 +103,20 @@ function MyBag() {
       }
     } catch (error) {
       console.error("Error checking subscription:", error);
-      setHasActiveSubscription(false);
+      
+      // More specific error handling
+      if (error.message?.includes('PGRST116')) {
+        console.log("No subscription found, user needs to start one");
+        setHasActiveSubscription(false);
+      } else {
+        // For other errors, show user-friendly message
+        toast({
+          title: "Connection Error",
+          description: "Having trouble loading your subscription. Please refresh the page.",
+          variant: "destructive",
+        });
+        setHasActiveSubscription(false);
+      }
     } finally {
       setLoading(false);
     }
