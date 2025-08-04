@@ -65,7 +65,25 @@ const ThankYou = () => {
             return;
           }
 
-          // If order is still pending payment, retry briefly but then show it anyway
+          // If order is still pending payment, try to verify payment directly with Stripe
+          if (order.payment_status === 'pending' && attempt === 1) {
+            console.log('Order payment pending, attempting direct verification...');
+            try {
+              const { data: verificationResult } = await supabase.functions.invoke('verify-payment', {
+                body: { sessionId }
+              });
+
+              if (verificationResult?.success && verificationResult?.order) {
+                console.log('Payment verified successfully via fallback');
+                setOrderDetails(verificationResult.order);
+                setLoading(false);
+                return;
+              }
+            } catch (verifyError) {
+              console.warn('Payment verification failed, showing order as pending:', verifyError);
+            }
+          }
+
           if (order.payment_status === 'pending' && attempt <= 2) {
             console.log(`Order still pending payment, retrying in ${attempt * 2} seconds...`);
             setTimeout(() => loadOrderDetails(attempt + 1), attempt * 2000);

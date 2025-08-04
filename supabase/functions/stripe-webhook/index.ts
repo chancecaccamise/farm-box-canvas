@@ -19,12 +19,19 @@ serve(async (req) => {
   }
 
   try {
-    logStep("Webhook received", { method: req.method, url: req.url });
+    logStep("Webhook received", { 
+      method: req.method, 
+      url: req.url,
+      headers: Object.fromEntries(req.headers.entries())
+    });
     
     const webhookSecret = Deno.env.get("STRIPE_WEBHOOK_SECRET");
     if (!webhookSecret) {
       logStep("ERROR: STRIPE_WEBHOOK_SECRET not configured");
-      throw new Error("STRIPE_WEBHOOK_SECRET is not set");
+      return new Response(JSON.stringify({ error: "Webhook secret not configured" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
+      });
     }
     logStep("Webhook secret found");
 
@@ -36,15 +43,32 @@ serve(async (req) => {
     const body = await req.text();
     const signature = req.headers.get("stripe-signature");
 
+    logStep("Request details", { 
+      bodyLength: body.length,
+      hasSignature: !!signature,
+      signatureStart: signature?.substring(0, 20) + "..."
+    });
+
     if (!signature) {
-      logStep("ERROR: No Stripe signature in headers");
-      throw new Error("No Stripe signature found");
+      logStep("ERROR: No Stripe signature in headers", { availableHeaders: Object.keys(Object.fromEntries(req.headers.entries())) });
+      return new Response(JSON.stringify({ error: "No Stripe signature found" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+      });
     }
-    logStep("Stripe signature found");
 
     // Verify webhook signature
-    const event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
-    logStep("Event verified and constructed", { type: event.type, id: event.id });
+    let event;
+    try {
+      event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+      logStep("Event verified and constructed", { type: event.type, id: event.id });
+    } catch (err) {
+      logStep("ERROR: Webhook signature verification failed", { error: err.message });
+      return new Response(JSON.stringify({ error: "Webhook signature verification failed" }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 400,
+      });
+    }
 
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
