@@ -87,6 +87,8 @@ const AppRoutes = () => {
         <Route path="/how-farm-bags-work" element={<HowFarmBagsWork />} />
         <Route path="/gift-cards" element={<GiftCards />} />
         <Route path="/thank-you" element={<ThankYou />} />
+        <Route path="/payment-success" element={<ThankYou />} />
+        <Route path="/order-confirmation" element={<ThankYou />} />
         
         {/* Conditional landing page */}
         <Route path="/" element={user ? <Landing /> : <UnauthenticatedLanding />} />

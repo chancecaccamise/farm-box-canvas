@@ -77,7 +77,19 @@ function MyBag() {
     if (user) {
       checkSubscriptionAndInitialize();
     }
-  }, [user]);
+    
+    // Check for cancelled checkout
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('cancelled') === 'true') {
+      toast({
+        title: "Checkout cancelled",
+        description: "No worries! Your items are still in your bag.",
+        variant: "default",
+      });
+      // Clean up URL
+      window.history.replaceState({}, '', '/my-bag');
+    }
+  }, [user, toast]);
 
   const checkSubscriptionAndInitialize = async () => {
     try {

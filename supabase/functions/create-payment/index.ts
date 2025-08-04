@@ -180,7 +180,7 @@ serve(async (req) => {
       line_items: lineItems,
       mode: "payment",
       success_url: `${req.headers.get("origin")}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get("origin")}/my-bag`,
+      cancel_url: `${req.headers.get("origin")}/my-bag?cancelled=true`,
       shipping_address_collection: {
         allowed_countries: ['US'],
       },

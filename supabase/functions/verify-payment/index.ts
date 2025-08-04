@@ -7,7 +7,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-// Helper logging function
 const logStep = (step: string, details?: any) => {
   const detailsStr = details ? ` - ${JSON.stringify(details)}` : '';
   console.log(`[VERIFY-PAYMENT] ${step}${detailsStr}`);
@@ -19,121 +18,117 @@ serve(async (req) => {
   }
 
   try {
-    logStep("Payment verification started");
-    
-    const { sessionId } = await req.json();
-    
-    if (!sessionId) {
-      throw new Error("Session ID is required");
-    }
-    
-    logStep("Verifying session", { sessionId });
+    logStep("Function started");
 
-    // Initialize Stripe
-    const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
-      apiVersion: "2023-10-16",
-    });
+    const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
+    if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
+    logStep("Stripe key verified");
 
-    // Create Supabase client
-    const supabase = createClient(
+    const supabaseClient = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
       { auth: { persistSession: false } }
     );
 
+    const { sessionId } = await req.json();
+    if (!sessionId) throw new Error("Session ID is required");
+    logStep("Session ID received", { sessionId });
+
+    const stripe = new Stripe(stripeKey, { apiVersion: "2023-10-16" });
+
     // Get Stripe session details
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    const session = await stripe.checkout.sessions.retrieve(sessionId, {
+      expand: ['customer', 'shipping_details']
+    });
     logStep("Retrieved Stripe session", { 
       sessionId: session.id, 
       paymentStatus: session.payment_status,
-      status: session.status 
+      customerEmail: session.customer_details?.email 
     });
 
-    // Check if payment was successful
-    const isPaymentSuccessful = session.payment_status === 'paid' && session.status === 'complete';
-    
-    if (!isPaymentSuccessful) {
-      logStep("Payment not successful", { paymentStatus: session.payment_status, status: session.status });
+    if (session.payment_status !== 'paid') {
+      logStep("Payment not completed", { paymentStatus: session.payment_status });
       return new Response(JSON.stringify({ 
         success: false, 
-        paymentStatus: session.payment_status,
-        status: session.status 
+        payment_status: session.payment_status 
       }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 200,
       });
     }
 
-    // Find the order in our database
-    const { data: order, error: fetchError } = await supabase
-      .from("orders")
-      .select("*")
-      .eq("stripe_session_id", sessionId)
-      .maybeSingle();
-
-    if (fetchError) {
-      logStep("ERROR: Failed to fetch order", { error: fetchError });
-      throw fetchError;
-    }
-
-    if (!order) {
-      logStep("ERROR: Order not found", { sessionId });
-      throw new Error("Order not found");
-    }
-
-    // If order is already confirmed, return success
-    if (order.payment_status === 'paid') {
-      logStep("Order already confirmed", { orderId: order.id });
-      return new Response(JSON.stringify({ 
-        success: true, 
-        order: order,
-        alreadyConfirmed: true 
-      }), {
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-        status: 200,
-      });
-    }
-
-    // Update order status
-    const fullSession = await stripe.checkout.sessions.retrieve(sessionId, {
-      expand: ['customer', 'shipping_details']
-    });
-
-    const { error: updateError } = await supabase
+    // Update order in database if payment is confirmed
+    const { data: order, error: updateError } = await supabaseClient
       .from("orders")
       .update({
         payment_status: "paid",
         status: "confirmed",
-        customer_name: fullSession.customer_details?.name || fullSession.shipping_details?.name,
-        customer_email: fullSession.customer_details?.email,
-        customer_phone: fullSession.customer_details?.phone,
-        shipping_address_street: fullSession.shipping_details?.address?.line1,
-        shipping_address_apartment: fullSession.shipping_details?.address?.line2,
-        shipping_address_city: fullSession.shipping_details?.address?.city,
-        shipping_address_state: fullSession.shipping_details?.address?.state,
-        shipping_address_zip: fullSession.shipping_details?.address?.postal_code,
+        customer_name: session.customer_details?.name || session.shipping_details?.name,
+        customer_email: session.customer_details?.email,
+        customer_phone: session.customer_details?.phone,
+        shipping_address_street: session.shipping_details?.address?.line1,
+        shipping_address_apartment: session.shipping_details?.address?.line2,
+        shipping_address_city: session.shipping_details?.address?.city,
+        shipping_address_state: session.shipping_details?.address?.state,
+        shipping_address_zip: session.shipping_details?.address?.postal_code,
         updated_at: new Date().toISOString(),
       })
-      .eq("id", order.id);
+      .eq("stripe_session_id", sessionId)
+      .select(`
+        *,
+        order_items (
+          id,
+          product_name,
+          quantity,
+          price,
+          item_type
+        )
+      `)
+      .single();
 
     if (updateError) {
-      logStep("ERROR: Failed to update order", { error: updateError });
+      logStep("Error updating order", { error: updateError });
       throw updateError;
     }
 
-    // Fetch updated order
-    const { data: updatedOrder } = await supabase
-      .from("orders")
-      .select("*")
-      .eq("id", order.id)
-      .single();
-
     logStep("Order updated successfully", { orderId: order.id });
+
+    // Also handle weekly bag confirmation for subscribers
+    if (order.weekly_bag_id && order.has_active_subscription) {
+      logStep("Confirming weekly bag for subscriber", { weeklyBagId: order.weekly_bag_id });
+      
+      const { error: bagError } = await supabaseClient
+        .from("weekly_bags")
+        .update({
+          is_confirmed: true,
+          confirmed_at: new Date().toISOString()
+        })
+        .eq("id", order.weekly_bag_id);
+
+      if (bagError) {
+        logStep("WARNING: Failed to confirm weekly bag", { error: bagError });
+      } else {
+        logStep("Weekly bag confirmed successfully");
+      }
+
+      // Mark add-on items as paid
+      const { error: updateItemsError } = await supabaseClient
+        .from("weekly_bag_items")
+        .update({ is_paid: true })
+        .eq("weekly_bag_id", order.weekly_bag_id)
+        .eq("item_type", "addon")
+        .eq("is_paid", false);
+
+      if (updateItemsError) {
+        logStep("WARNING: Failed to mark add-ons as paid", { error: updateItemsError });
+      } else {
+        logStep("Add-ons marked as paid successfully");
+      }
+    }
 
     return new Response(JSON.stringify({ 
       success: true, 
-      order: updatedOrder,
-      verified: true 
+      order: order 
     }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
       status: 200,
@@ -141,7 +136,7 @@ serve(async (req) => {
 
   } catch (error) {
     const errorMessage = error instanceof Error ? error.message : String(error);
-    logStep("ERROR in payment verification", { message: errorMessage });
+    logStep("ERROR in verify-payment", { message: errorMessage });
     return new Response(JSON.stringify({ 
       success: false, 
       error: errorMessage 

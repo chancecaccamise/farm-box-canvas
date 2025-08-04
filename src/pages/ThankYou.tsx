@@ -22,6 +22,12 @@ const ThankYou = () => {
 
         if (!sessionId) {
           console.log('No session_id found in URL');
+          toast({
+            title: "Missing session information",
+            description: "Redirecting to your bag...",
+            variant: "default",
+          });
+          setTimeout(() => navigate('/my-bag'), 2000);
           setLoading(false);
           return;
         }
@@ -108,8 +114,9 @@ const ThankYou = () => {
           console.log('No order found for session ID after retries');
           toast({
             title: "Order not found",
-            description: "Your order may still be processing. Please check your email for confirmation.",
+            description: "Your order may still be processing. Redirecting to your bag...",
           });
+          setTimeout(() => navigate('/my-bag'), 3000);
         }
       } catch (error) {
         console.error('Error loading order details:', error);
@@ -119,9 +126,10 @@ const ThankYou = () => {
         }
         toast({
           title: "Error loading order",
-          description: "Please check your email for order confirmation or contact support.",
+          description: "Redirecting to your bag. Check your email for confirmation.",
           variant: "destructive",
         });
+        setTimeout(() => navigate('/my-bag'), 3000);
       } finally {
         if (attempt > 3 || orderDetails) {
           setLoading(false);
