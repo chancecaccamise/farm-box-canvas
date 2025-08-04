@@ -5,7 +5,7 @@ import { Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Package, ShoppingBag, Users, Fish, Flower, MapPin } from 'lucide-react';
+import { Package, ShoppingBag, Users, Fish, Flower, MapPin, UserCheck } from 'lucide-react';
 import { AdminProducts } from '@/components/admin/AdminProducts';
 import { AdminBoxTemplates } from '@/components/admin/AdminBoxTemplates';
 import { EnhancedOrderManagement } from '@/components/admin/EnhancedOrderManagement';
@@ -13,6 +13,7 @@ import { AdminFreshCatch } from '@/components/admin/AdminFreshCatch';
 import { AdminBouquetRequests } from '@/components/admin/AdminBouquetRequests';
 import { AdminFreshFishAlerts } from '@/components/admin/AdminFreshFishAlerts';
 import { AdminDeliveryAreas } from '@/components/admin/AdminDeliveryAreas';
+import { AdminPartnerApplications } from '@/components/admin/AdminPartnerApplications';
 
 const Admin = () => {
   const { user, loading } = useAuth();
@@ -72,7 +73,7 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="products" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               Products
@@ -100,6 +101,10 @@ const Admin = () => {
             <TabsTrigger value="delivery-areas" className="flex items-center gap-2">
               <MapPin className="h-4 w-4" />
               Delivery Areas
+            </TabsTrigger>
+            <TabsTrigger value="partner-applications" className="flex items-center gap-2">
+              <UserCheck className="h-4 w-4" />
+              Become a Partner
             </TabsTrigger>
           </TabsList>
 
@@ -160,6 +165,10 @@ const Admin = () => {
                 <AdminDeliveryAreas />
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="partner-applications">
+            <AdminPartnerApplications />
           </TabsContent>
         </Tabs>
       </div>

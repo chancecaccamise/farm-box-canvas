@@ -8,7 +8,6 @@ import {
   Wheat, 
   ChefHat,
   MapPin, 
-  Star, 
   Users,
   Heart,
   Award
@@ -187,26 +186,15 @@ const SupportLocal = () => {
                         onClick={() => navigate(`/partners/${partner.slug}`)}
                       >
                         <CardHeader>
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <CardTitle className="text-xl mb-2">{partner.name}</CardTitle>
-                              <div className="flex items-center space-x-2 text-sm text-muted-foreground mb-3">
-                                <MapPin className="w-4 h-4" />
-                                <span>{partner.location}</span>
-                              </div>
-                              <Badge variant="secondary" className={config.color}>
-                                {config.title.replace(' Partners', '').slice(0, -1)}
-                              </Badge>
+                          <div>
+                            <CardTitle className="text-xl mb-2">{partner.name}</CardTitle>
+                            <div className="flex items-center space-x-2 text-sm text-muted-foreground mb-3">
+                              <MapPin className="w-4 h-4" />
+                              <span>{partner.location}</span>
                             </div>
-                            <div className="text-right">
-                              <div className="flex items-center space-x-1 mb-1">
-                                <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                                <span className="text-sm font-medium">{partner.rating}</span>
-                              </div>
-                              <div className="text-xs text-muted-foreground">
-                                {partner.partnership_duration} with us
-                              </div>
-                            </div>
+                            <Badge variant="secondary" className={config.color}>
+                              {config.title.replace(' Partners', '').slice(0, -1)}
+                            </Badge>
                           </div>
                         </CardHeader>
                         
