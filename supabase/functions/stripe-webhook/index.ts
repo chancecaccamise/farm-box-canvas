@@ -142,7 +142,7 @@ serve(async (req) => {
       // Also confirm the weekly bag if this was an add-on purchase for a subscriber
       // Get weekly_bag_id from order record if not in metadata
       let weeklyBagId = fullSession.metadata?.weekly_bag_id;
-      if (!weeklyBagId || weeklyBagId === 'new-checkout') {
+      if (!weeklyBagId || weeklyBagId === 'checkout-only') {
         // Try to get from the order record we just updated
         const { data: orderRecord } = await supabase
           .from("orders")
@@ -154,7 +154,7 @@ serve(async (req) => {
       
       const hasActiveSubscription = fullSession.metadata?.has_active_subscription === 'true';
       
-      if (weeklyBagId && weeklyBagId !== 'new-checkout' && hasActiveSubscription) {
+      if (weeklyBagId && weeklyBagId !== 'checkout-only' && hasActiveSubscription) {
         logStep("Confirming weekly bag for subscriber add-on purchase", { weeklyBagId });
         
         const { error: bagError } = await supabase

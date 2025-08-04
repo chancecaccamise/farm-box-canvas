@@ -72,7 +72,7 @@ const ThankYou = () => {
           }
 
           // If order is still pending payment, try to verify payment directly with Stripe
-          if (order.payment_status === 'pending' && attempt === 1) {
+          if (order.payment_status === 'pending' && attempt <= 2) {
             console.log('Order payment pending, attempting direct verification...');
             try {
               const { data: verificationResult } = await supabase.functions.invoke('verify-payment', {
@@ -84,9 +84,15 @@ const ThankYou = () => {
                 setOrderDetails(verificationResult.order);
                 setLoading(false);
                 return;
+              } else if (verificationResult?.payment_status && verificationResult.payment_status !== 'paid') {
+                console.log('Payment status from verification:', verificationResult.payment_status);
+                // Show the order with current status for transparency
+                setOrderDetails(order);
+                setLoading(false);
+                return;
               }
             } catch (verifyError) {
-              console.warn('Payment verification failed, showing order as pending:', verifyError);
+              console.warn('Payment verification failed, showing order as is:', verifyError);
             }
           }
 
@@ -160,9 +166,17 @@ const ThankYou = () => {
         </p>
 
         {orderDetails && orderDetails.payment_status === 'pending' && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8 max-w-lg mx-auto">
-            <p className="text-sm text-blue-800">
-              🔄 Your payment is being processed. Your order will be confirmed shortly!
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8 max-w-lg mx-auto">
+            <p className="text-sm text-yellow-800">
+              🔄 Your payment is being processed. Your order will be confirmed shortly! If this persists, please contact support.
+            </p>
+          </div>
+        )}
+
+        {!orderDetails && !loading && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-8 max-w-lg mx-auto">
+            <p className="text-sm text-red-800">
+              ⚠️ We're having trouble loading your order details. Please check your email for confirmation or contact support.
             </p>
           </div>
         )}

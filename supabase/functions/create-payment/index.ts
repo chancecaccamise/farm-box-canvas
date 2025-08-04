@@ -189,7 +189,7 @@ serve(async (req) => {
       },
       metadata: {
         user_id: user.id,
-        weekly_bag_id: weeklyBag?.id || 'new-checkout',
+        weekly_bag_id: weeklyBag?.id || 'checkout-only',
         has_active_subscription: hasActiveSubscription.toString(),
         box_size: checkoutState?.boxSize || weeklyBag?.box_size || 'medium',
       },
