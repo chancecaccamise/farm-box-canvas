@@ -452,6 +452,17 @@ function MyBag() {
       // For subscribers, only checkout unpaid add-ons
       const itemsToCheckout = hasActiveSubscription ? unpaidAddonItems : bagItems;
       
+      // Optimistically mark items as paid for better UX
+      const optimisticUpdate = () => {
+        setBagItems(prevItems => 
+          prevItems.map(item => 
+            item.item_type === 'addon' && !item.is_paid 
+              ? { ...item, is_paid: true }
+              : item
+          )
+        );
+      };
+      
       const { data, error } = await supabase.functions.invoke('create-payment', {
         body: {
           weeklyBag: currentWeekBag,
@@ -471,6 +482,15 @@ function MyBag() {
       }
 
       if (data?.url) {
+        // Apply optimistic update before redirecting
+        if (hasActiveSubscription && unpaidAddonItems.length > 0) {
+          optimisticUpdate();
+          toast({
+            title: "Redirecting to checkout",
+            description: "Complete your payment in the new tab. Add-ons marked as confirmed.",
+          });
+        }
+        
         // Open Stripe checkout in a new tab
         window.open(data.url, '_blank');
       } else {
