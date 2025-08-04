@@ -54,8 +54,36 @@ serve(async (req) => {
       throw new Error("Missing order data");
     }
 
+    // For subscribers, ensure we have a weekly bag if we don't have one
+    let actualWeeklyBag = weeklyBag;
+    if (hasActiveSubscription && !weeklyBag) {
+      logStep("Fetching current week bag for subscriber");
+      const { data: currentBag, error: bagError } = await supabaseClient
+        .rpc('get_or_create_current_week_bag_with_size', {
+          user_uuid: user.id,
+          box_size_name: checkoutState?.boxSize || 'medium'
+        });
+      
+      if (bagError) {
+        logStep("Error getting current week bag", { error: bagError });
+        throw new Error(`Failed to get weekly bag: ${bagError.message}`);
+      }
+
+      if (currentBag) {
+        // Fetch the full bag details
+        const { data: bagDetails } = await supabaseClient
+          .from('weekly_bags')
+          .select('*')
+          .eq('id', currentBag)
+          .single();
+        
+        actualWeeklyBag = bagDetails;
+        logStep("Retrieved current week bag for subscriber", { bagId: currentBag });
+      }
+    }
+
     logStep("Request data received", { 
-      weeklyBagId: weeklyBag?.id || 'checkout-only', 
+      weeklyBagId: actualWeeklyBag?.id || 'checkout-only', 
       itemsCount: bagItems?.length || 0,
       hasActiveSubscription 
     });
@@ -77,9 +105,9 @@ serve(async (req) => {
     let addonsTotal = 0;
     let addOnProducts = [];
 
-    if (weeklyBag && bagItems) {
+    if (actualWeeklyBag && bagItems) {
       // Existing bag-based flow
-      boxPrice = hasActiveSubscription ? 0 : (weeklyBag.box_price || 0);
+      boxPrice = hasActiveSubscription ? 0 : (actualWeeklyBag.box_price || 0);
       // For subscribers, we only process add-on items for payment
       addonsTotal = bagItems.reduce((total: number, item: any) => 
         total + (item.quantity * item.price_at_time), 0
@@ -126,8 +154,8 @@ serve(async (req) => {
 
     // Add box if not subscription
     if (!hasActiveSubscription && boxPrice > 0) {
-      const boxName = weeklyBag ? 
-        `${weeklyBag.box_size || 'Medium'} Farm Box - Week of ${new Date(weeklyBag.week_start_date).toLocaleDateString()}` :
+      const boxName = actualWeeklyBag ? 
+        `${actualWeeklyBag.box_size || 'Medium'} Farm Box - Week of ${new Date(actualWeeklyBag.week_start_date).toLocaleDateString()}` :
         `${checkoutState.boxSize?.charAt(0).toUpperCase() + checkoutState.boxSize?.slice(1) || 'Medium'} Farm Box`;
       
       lineItems.push({
@@ -189,9 +217,9 @@ serve(async (req) => {
       },
       metadata: {
         user_id: user.id,
-        weekly_bag_id: weeklyBag?.id || 'checkout-only',
+        weekly_bag_id: actualWeeklyBag?.id || 'checkout-only',
         has_active_subscription: hasActiveSubscription.toString(),
-        box_size: checkoutState?.boxSize || weeklyBag?.box_size || 'medium',
+        box_size: checkoutState?.boxSize || actualWeeklyBag?.box_size || 'medium',
       },
     });
 
@@ -201,7 +229,7 @@ serve(async (req) => {
     const orderData = {
       user_id: user.id,
       stripe_session_id: session.id,
-      weekly_bag_id: weeklyBag?.id || null, // Include weekly_bag_id for webhook processing
+      weekly_bag_id: actualWeeklyBag?.id || null, // Include weekly_bag_id for webhook processing
       total_amount: totalAmount,
       payment_status: 'pending',
       customer_email: user.email,
@@ -213,13 +241,13 @@ serve(async (req) => {
       shipping_address_state: null, // Will be filled from Stripe checkout
       shipping_address_zip: null, // Will be filled from Stripe checkout
       delivery_instructions: null, // Will be filled from Stripe checkout
-      box_size: checkoutState?.boxSize || weeklyBag?.box_size || 'medium',
+      box_size: checkoutState?.boxSize || actualWeeklyBag?.box_size || 'medium',
       box_price: boxPrice,
       addons_total: addonsTotal,
       delivery_fee: deliveryFee,
       has_active_subscription: hasActiveSubscription,
-      week_start_date: weeklyBag?.week_start_date || null,
-      week_end_date: weeklyBag?.week_end_date || null,
+      week_start_date: actualWeeklyBag?.week_start_date || null,
+      week_end_date: actualWeeklyBag?.week_end_date || null,
       order_type: 'subscription',
       status: 'pending'
     };
@@ -242,8 +270,8 @@ serve(async (req) => {
 
     // Add box item if not subscription
     if (!hasActiveSubscription && boxPrice > 0) {
-      const boxName = weeklyBag ? 
-        `${weeklyBag.box_size || 'Medium'} Farm Box` :
+      const boxName = actualWeeklyBag ? 
+        `${actualWeeklyBag.box_size || 'Medium'} Farm Box` :
         `${checkoutState.boxSize?.charAt(0).toUpperCase() + checkoutState.boxSize?.slice(1) || 'Medium'} Farm Box`;
       
       orderItems.push({
