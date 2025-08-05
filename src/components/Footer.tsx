@@ -6,6 +6,7 @@ import { Instagram, Facebook, Mail, Phone, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import billysLogo from "@/assets/billysBotanicals-Logo-v1.png";
 
 const Footer = () => {
   const [email, setEmail] = useState("");
@@ -23,26 +24,27 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-primary text-primary-foreground">
-      <div className="max-w-7xl mx-auto px-4 py-16">
-        <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-8">
+    <footer className="bg-gradient-subtle border-t">
+      <div className="max-w-7xl mx-auto px-4 py-20">
+        <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-12">
           {/* Brand & Description */}
           <div className="lg:col-span-1">
-            <Link to="/" className="flex items-center space-x-2 mb-6">
-              <div className="w-10 h-10 bg-accent rounded-full flex items-center justify-center">
-                <span className="text-white font-bold">BB</span>
-              </div>
-              <span className="text-2xl font-bold">Billy's Botanicals</span>
+            <Link to="/" className="inline-block mb-8">
+              <img 
+                src={billysLogo} 
+                alt="Billy's Botanicals Logo" 
+                className="h-16 w-auto object-contain transition-smooth hover:opacity-80"
+              />
             </Link>
-            <p className="text-primary-foreground/80 mb-6 leading-relaxed">
+            <p className="text-muted-foreground mb-8 leading-relaxed text-lg">
               Family-owned since 2018. Fresh, hydroponic produce grown with love and 
               delivered weekly to your doorstep. Supporting sustainable agriculture in our community.
             </p>
             <div className="flex space-x-4">
-              <Button variant="ghost" size="sm" className="text-primary-foreground hover:text-accent hover:bg-primary-foreground/10">
+              <Button variant="outline" size="icon" className="border-primary/20 hover:bg-primary hover:text-primary-foreground">
                 <Instagram className="w-5 h-5" />
               </Button>
-              <Button variant="ghost" size="sm" className="text-primary-foreground hover:text-accent hover:bg-primary-foreground/10">
+              <Button variant="outline" size="icon" className="border-primary/20 hover:bg-primary hover:text-primary-foreground">
                 <Facebook className="w-5 h-5" />
               </Button>
             </div>
@@ -50,36 +52,36 @@ const Footer = () => {
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-semibold mb-6">Quick Links</h3>
-            <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-              <Link to="/how-we-grow" className="block text-primary-foreground/80 hover:text-accent transition-colors">
+            <h3 className="text-xl font-bold mb-8 text-foreground">Quick Links</h3>
+            <div className="grid grid-cols-2 gap-x-4 gap-y-4">
+              <Link to="/how-we-grow" className="block text-muted-foreground hover:text-primary transition-colors text-base">
                 How We Grow
               </Link>
-              <Link to="/how-farm-bags-work" className="block text-primary-foreground/80 hover:text-accent transition-colors">
+              <Link to="/how-farm-bags-work" className="block text-muted-foreground hover:text-primary transition-colors text-base">
                 How Farm Bags Work
               </Link>
-              <Link to="/meet-farmers" className="block text-primary-foreground/80 hover:text-accent transition-colors">
+              <Link to="/meet-farmers" className="block text-muted-foreground hover:text-primary transition-colors text-base">
                 Meet the Farmers
               </Link>
-              <Link to="/faqs" className="block text-primary-foreground/80 hover:text-accent transition-colors">
+              <Link to="/faqs" className="block text-muted-foreground hover:text-primary transition-colors text-base">
                 FAQs
               </Link>
-              <Link to="/support-local" className="block text-primary-foreground/80 hover:text-accent transition-colors">
+              <Link to="/support-local" className="block text-muted-foreground hover:text-primary transition-colors text-base">
                 Support Local
               </Link>
-              <Link to="/fresh-catch" className="block text-primary-foreground/80 hover:text-accent transition-colors">
+              <Link to="/fresh-catch" className="block text-muted-foreground hover:text-primary transition-colors text-base">
                 Fresh Catch
               </Link>
-              <Link to="/anas-flowers" className="block text-primary-foreground/80 hover:text-accent transition-colors">
+              <Link to="/anas-flowers" className="block text-muted-foreground hover:text-primary transition-colors text-base">
                 Ana's Arrangements
               </Link>
-              <Link to="/our-mission" className="block text-primary-foreground/80 hover:text-accent transition-colors">
+              <Link to="/our-mission" className="block text-muted-foreground hover:text-primary transition-colors text-base">
                 Our Mission
               </Link>
-              <Link to="/gift-cards" className="block text-primary-foreground/80 hover:text-accent transition-colors">
+              <Link to="/gift-cards" className="block text-muted-foreground hover:text-primary transition-colors text-base">
                 Gift Cards
               </Link>
-              <Link to="/become-a-partner" className="block text-primary-foreground/80 hover:text-accent transition-colors">
+              <Link to="/become-a-partner" className="block text-muted-foreground hover:text-primary transition-colors text-base">
                 Become a Partner
               </Link>
             </div>
@@ -87,42 +89,69 @@ const Footer = () => {
 
           {/* Contact Info */}
           <div>
-            <h3 className="text-lg font-semibold mb-6">Contact Us</h3>
-            <div className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <Phone className="w-5 h-5 text-accent" />
-                <span className="text-primary-foreground/80">(555) 789-GROW</span>
+            <h3 className="text-xl font-bold mb-8 text-foreground">Contact Us</h3>
+            <div className="space-y-6">
+              <div className="flex items-center space-x-4">
+                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                  <Phone className="w-5 h-5 text-primary" />
+                </div>
+                <span className="text-muted-foreground text-base">(555) 789-GROW</span>
               </div>
-              <div className="flex items-center space-x-3">
-                <Mail className="w-5 h-5 text-accent" />
-                <span className="text-primary-foreground/80">hello@billysbotanicals.com</span>
+              <div className="flex items-center space-x-4">
+                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                  <Mail className="w-5 h-5 text-primary" />
+                </div>
+                <span className="text-muted-foreground text-base">hello@billysbotanicals.com</span>
               </div>
-              <div className="flex items-start space-x-3">
-                <MapPin className="w-5 h-5 text-accent mt-1" />
-                <span className="text-primary-foreground/80">
+              <div className="flex items-start space-x-4">
+                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mt-1">
+                  <MapPin className="w-5 h-5 text-primary" />
+                </div>
+                <span className="text-muted-foreground text-base leading-relaxed">
                   456 Greenhouse Lane<br />
                   Botanical Valley, CA 95420
                 </span>
               </div>
             </div>
           </div>
+
+          {/* Newsletter Signup */}
+          <div>
+            <h3 className="text-xl font-bold mb-8 text-foreground">Stay Fresh</h3>
+            <p className="text-muted-foreground mb-6 text-base">
+              Get weekly updates about our freshest harvests and seasonal offerings.
+            </p>
+            <form onSubmit={handleNewsletterSubmit} className="space-y-4">
+              <Input
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="bg-background/50 border-border focus:border-primary"
+                required
+              />
+              <Button type="submit" className="w-full bg-gradient-fresh hover:opacity-90 transition-opacity">
+                Subscribe to Newsletter
+              </Button>
+            </form>
+          </div>
         </div>
 
-        <Separator className="my-8 bg-primary-foreground/20" />
+        <Separator className="my-12 bg-border/50" />
 
         {/* Bottom Section */}
-        <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-          <p className="text-primary-foreground/60 text-sm">
+        <div className="flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
+          <p className="text-muted-foreground text-base">
             © 2024 Billy's Botanicals. All rights reserved. | Family-owned since 2018
           </p>
-          <div className="flex space-x-6 text-sm">
-            <Link to="/privacy" className="text-primary-foreground/60 hover:text-accent transition-colors">
+          <div className="flex space-x-8 text-base">
+            <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors">
               Privacy Policy
             </Link>
-            <Link to="/terms" className="text-primary-foreground/60 hover:text-accent transition-colors">
+            <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors">
               Terms of Service
             </Link>
-            <Link to="/support-local" className="text-primary-foreground/60 hover:text-accent transition-colors">
+            <Link to="/support-local" className="text-muted-foreground hover:text-primary transition-colors">
               Support Local
             </Link>
           </div>

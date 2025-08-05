@@ -86,21 +86,13 @@ const Navbar = () => {
               FAQs
             </Link>
 
-            {/* Services Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center space-x-1 text-foreground hover:text-primary transition-smooth font-medium">
-                <span>Our Services</span>
-                <ChevronDown className="w-4 h-4" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-background/95 backdrop-blur-sm border border-border/50">
-                <DropdownMenuItem asChild>
-                  <Link to="/fresh-catch" className="transition-smooth">Fresh Catch</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/anas-arrangements" className="transition-smooth">Ana's Arrangements</Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Link to="/fresh-catch" className="text-foreground hover:text-primary transition-smooth font-medium">
+              Fresh Catch
+            </Link>
+
+            <Link to="/anas-flowers" className="text-foreground hover:text-primary transition-smooth font-medium">
+              Ana's Arrangements
+            </Link>
 
             <Link to="/support-local" className="text-foreground hover:text-primary transition-smooth font-medium">
               Support Local
@@ -168,21 +160,17 @@ const Navbar = () => {
                       </Link>
                     </Button>
 
-                    <div className="pt-2">
-                      <p className="text-sm font-medium text-muted-foreground mb-3">Our Services</p>
-                      <div className="space-y-1 pl-4">
-                        <Button variant="ghost" size="sm" className="w-full justify-start" asChild>
-                          <Link to="/fresh-catch" onClick={() => setMobileMenuOpen(false)}>
-                            Fresh Catch
-                          </Link>
-                        </Button>
-                        <Button variant="ghost" size="sm" className="w-full justify-start" asChild>
-                          <Link to="/anas-arrangements" onClick={() => setMobileMenuOpen(false)}>
-                            Ana's Arrangements
-                          </Link>
-                        </Button>
-                      </div>
-                    </div>
+                    <Button variant="ghost" className="w-full justify-start" asChild>
+                      <Link to="/fresh-catch" onClick={() => setMobileMenuOpen(false)}>
+                        Fresh Catch
+                      </Link>
+                    </Button>
+
+                    <Button variant="ghost" className="w-full justify-start" asChild>
+                      <Link to="/anas-flowers" onClick={() => setMobileMenuOpen(false)}>
+                        Ana's Arrangements
+                      </Link>
+                    </Button>
 
                     <Button variant="ghost" className="w-full justify-start" asChild>
                       <Link to="/support-local" onClick={() => setMobileMenuOpen(false)}>
