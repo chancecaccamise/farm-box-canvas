@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, Leaf, Truck, Users, Star } from "lucide-react";
 import { Link } from "react-router-dom";
-import heroImage from "@/assets/billys-botanicals-hero.jpg";
+import heroImage from "@/assets/billys-botanicals-hero.png";
 import rainbowCarrots from "@/assets/rainbow-carrots.jpg";
 import leafyGreens from "@/assets/leafy-greens.jpg";
 import tomatoes from "@/assets/tomatoes.jpg";
