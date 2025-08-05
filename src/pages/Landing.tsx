@@ -169,9 +169,11 @@ const Landing = () => {
             </div>
             
             <div className="relative">
-              <div className="aspect-square bg-gradient-to-br from-accent/30 to-accent/10 rounded-2xl flex items-center justify-center text-8xl">
-                <Leaf className="w-32 h-32 text-accent/60" />
-              </div>
+              <img 
+                src={heroImage} 
+                alt="Billy's hydroponic greenhouse operation" 
+                className="w-full h-full object-cover rounded-2xl shadow-lg"
+              />
             </div>
           </div>
         </div>

@@ -51,7 +51,7 @@ const Footer = () => {
           {/* Quick Links */}
           <div>
             <h3 className="text-lg font-semibold mb-6">Quick Links</h3>
-            <div className="space-y-3">
+            <div className="grid grid-cols-2 gap-x-4 gap-y-3">
               <Link to="/how-we-grow" className="block text-primary-foreground/80 hover:text-accent transition-colors">
                 How We Grow
               </Link>
@@ -82,31 +82,6 @@ const Footer = () => {
               <Link to="/become-a-partner" className="block text-primary-foreground/80 hover:text-accent transition-colors">
                 Become a Partner
               </Link>
-            </div>
-          </div>
-
-          {/* Contact Info */}
-          <div>
-            <h3 className="text-lg font-semibold mb-6">Stay Connected</h3>
-            <p className="text-primary-foreground/80 mb-4 text-sm">
-              Join our newsletter for weekly harvest updates and exclusive offers.
-            </p>
-            <div className="space-y-4">
-              <div className="flex items-center space-x-3">
-                <Phone className="w-5 h-5 text-accent" />
-                <span className="text-primary-foreground/80">(555) 789-GROW</span>
-              </div>
-              <div className="flex items-center space-x-3">
-                <Mail className="w-5 h-5 text-accent" />
-                <span className="text-primary-foreground/80">hello@billysbotanicals.com</span>
-              </div>
-              <div className="flex items-start space-x-3">
-                <MapPin className="w-5 h-5 text-accent mt-1" />
-                <span className="text-primary-foreground/80">
-                  456 Greenhouse Lane<br />
-                  Botanical Valley, CA 95420
-                </span>
-              </div>
             </div>
           </div>
 

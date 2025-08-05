@@ -203,46 +203,11 @@ const HowFarmBagsWork = () => {
               </div>
             </div>
             
-            <div className="bg-gradient-to-br from-accent/20 to-accent/10 rounded-2xl p-8">
-              <div className="text-center">
-                <h3 className="text-2xl font-bold mb-6">Your Box Includes</h3>
-                <div className="grid grid-cols-3 gap-4 mb-6">
-                  <div className="text-center">
-                    <img src={leafyGreens} alt="Fresh leafy greens" className="w-full h-24 object-cover rounded-lg mb-2" />
-                    <span className="text-sm font-medium">Leafy Greens</span>
-                  </div>
-                  <div className="text-center">
-                    <img src={tomatoes} alt="Fresh tomatoes" className="w-full h-24 object-cover rounded-lg mb-2" />
-                    <span className="text-sm font-medium">Tomatoes</span>
-                  </div>
-                  <div className="text-center">
-                    <img src={bellPeppers} alt="Fresh bell peppers" className="w-full h-24 object-cover rounded-lg mb-2" />
-                    <span className="text-sm font-medium">Bell Peppers</span>
-                  </div>
-                </div>
-                <div className="space-y-3 text-left">
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="w-5 h-5 text-accent" />
-                    <span>5-8 seasonal vegetables</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="w-5 h-5 text-accent" />
-                    <span>2-3 fresh fruits</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="w-5 h-5 text-accent" />
-                    <span>Fresh herbs & greens</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="w-5 h-5 text-accent" />
-                    <span>Recipe cards & storage tips</span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <CheckCircle className="w-5 h-5 text-accent" />
-                    <span>Producer information</span>
-                  </div>
-                </div>
-              </div>
+            <div 
+              className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-cover bg-center"
+              style={{ backgroundImage: `url(${greenhouse})` }}
+            >
+              <div className="absolute inset-0 bg-black/20"></div>
             </div>
           </div>
         </div>
