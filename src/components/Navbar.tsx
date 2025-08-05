@@ -47,55 +47,63 @@ const Navbar = () => {
             <img 
               src={billysLogo} 
               alt="Billy's Botanicals Logo" 
-              className="h-20 w-auto object-contain"
+              className="h-16 w-auto object-contain transition-smooth hover:opacity-80"
             />
           </Link>
 
           {/* Center Navigation */}
-          <div className="hidden lg:flex items-center space-x-4 xl:space-x-6">
+          <div className="hidden lg:flex items-center space-x-8">
             {/* About Us Dropdown */}
             <DropdownMenu>
-              <DropdownMenuTrigger className="flex items-center space-x-1 text-foreground hover:text-primary transition-colors">
+              <DropdownMenuTrigger className="flex items-center space-x-1 text-foreground hover:text-primary transition-smooth font-medium">
                 <span>About Us</span>
                 <ChevronDown className="w-4 h-4" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent>
+              <DropdownMenuContent className="bg-background/95 backdrop-blur-sm border border-border/50">
                 <DropdownMenuItem asChild>
-                  <Link to="/how-we-grow">How We Grow</Link>
+                  <Link to="/how-we-grow" className="transition-smooth">How We Grow</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/how-farm-bags-work">How Farm Bags Work</Link>
+                  <Link to="/how-farm-bags-work" className="transition-smooth">How Farm Bags Work</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/meet-farmers">Meet the Farmers</Link>
+                  <Link to="/meet-farmers" className="transition-smooth">Meet the Farmers</Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Link to="/faqs" className="text-foreground hover:text-primary transition-colors">
-              FAQs
-            </Link>
-
             {/* My Bag - positioned after About Us */}
             {user && (
-              <Button variant="ghost" className="flex items-center space-x-2" asChild>
-                <Link to="/my-bag">
-                  <ShoppingBag className="w-5 h-5" />
+              <Button variant="ghost" className="text-foreground hover:text-primary transition-smooth font-medium" asChild>
+                <Link to="/my-bag" className="flex items-center space-x-2">
+                  <ShoppingBag className="w-4 h-4" />
                   <span>My Bag</span>
                 </Link>
               </Button>
             )}
 
-            <Link to="/support-local" className="text-foreground hover:text-primary transition-colors">
+            <Link to="/faqs" className="text-foreground hover:text-primary transition-smooth font-medium">
+              FAQs
+            </Link>
+
+            {/* Services Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center space-x-1 text-foreground hover:text-primary transition-smooth font-medium">
+                <span>Our Services</span>
+                <ChevronDown className="w-4 h-4" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="bg-background/95 backdrop-blur-sm border border-border/50">
+                <DropdownMenuItem asChild>
+                  <Link to="/fresh-catch" className="transition-smooth">Fresh Catch</Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/anas-arrangements" className="transition-smooth">Ana's Arrangements</Link>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Link to="/support-local" className="text-foreground hover:text-primary transition-smooth font-medium">
               Support Local
-            </Link>
-
-            <Link to="/fresh-catch" className="text-foreground hover:text-primary transition-colors">
-              Fresh Catch
-            </Link>
-
-            <Link to="/anas-arrangements" className="text-foreground hover:text-primary transition-colors">
-              Ana's Arrangements
             </Link>
           </div>
 
@@ -145,12 +153,6 @@ const Navbar = () => {
                       </div>
                     </div>
 
-                    <Button variant="ghost" className="w-full justify-start" asChild>
-                      <Link to="/faqs" onClick={() => setMobileMenuOpen(false)}>
-                        FAQs
-                      </Link>
-                    </Button>
-
                     {user && (
                       <Button variant="ghost" className="w-full justify-start" asChild>
                         <Link to="/my-bag" onClick={() => setMobileMenuOpen(false)}>
@@ -161,18 +163,30 @@ const Navbar = () => {
                     )}
 
                     <Button variant="ghost" className="w-full justify-start" asChild>
+                      <Link to="/faqs" onClick={() => setMobileMenuOpen(false)}>
+                        FAQs
+                      </Link>
+                    </Button>
+
+                    <div className="pt-2">
+                      <p className="text-sm font-medium text-muted-foreground mb-3">Our Services</p>
+                      <div className="space-y-1 pl-4">
+                        <Button variant="ghost" size="sm" className="w-full justify-start" asChild>
+                          <Link to="/fresh-catch" onClick={() => setMobileMenuOpen(false)}>
+                            Fresh Catch
+                          </Link>
+                        </Button>
+                        <Button variant="ghost" size="sm" className="w-full justify-start" asChild>
+                          <Link to="/anas-arrangements" onClick={() => setMobileMenuOpen(false)}>
+                            Ana's Arrangements
+                          </Link>
+                        </Button>
+                      </div>
+                    </div>
+
+                    <Button variant="ghost" className="w-full justify-start" asChild>
                       <Link to="/support-local" onClick={() => setMobileMenuOpen(false)}>
                         Support Local
-                      </Link>
-                    </Button>
-                    <Button variant="ghost" className="w-full justify-start" asChild>
-                      <Link to="/fresh-catch" onClick={() => setMobileMenuOpen(false)}>
-                        Fresh Catch
-                      </Link>
-                    </Button>
-                    <Button variant="ghost" className="w-full justify-start" asChild>
-                      <Link to="/anas-arrangements" onClick={() => setMobileMenuOpen(false)}>
-                        Ana's Arrangements
                       </Link>
                     </Button>
                   </div>
@@ -244,29 +258,29 @@ const Navbar = () => {
                     <span className="hidden sm:inline">{getDisplayName()}</span>
                     <ChevronDown className="w-4 h-4" />
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
+                  <DropdownMenuContent align="end" className="bg-background/95 backdrop-blur-sm border border-border/50">
                     <DropdownMenuItem asChild>
-                      <Link to="/my-plan" className="flex items-center space-x-2">
+                      <Link to="/my-plan" className="flex items-center space-x-2 transition-smooth">
                         <Calendar className="w-4 h-4" />
                         <span>My Plan</span>
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/account" className="flex items-center space-x-2">
+                      <Link to="/account" className="flex items-center space-x-2 transition-smooth">
                         <Settings className="w-4 h-4" />
                         <span>Account Settings</span>
                       </Link>
                     </DropdownMenuItem>
                     {isAdmin && (
                       <DropdownMenuItem asChild>
-                        <Link to="/admin" className="flex items-center space-x-2">
+                        <Link to="/admin" className="flex items-center space-x-2 transition-smooth">
                           <Shield className="w-4 h-4" />
                           <span>Admin Dashboard</span>
                         </Link>
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuItem 
-                      className="flex items-center space-x-2 text-destructive cursor-pointer"
+                      className="flex items-center space-x-2 text-destructive cursor-pointer transition-smooth hover:bg-destructive/10"
                       onClick={() => signOut()}
                     >
                       <LogOut className="w-4 h-4" />
