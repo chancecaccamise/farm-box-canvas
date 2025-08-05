@@ -52,27 +52,17 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-6">Quick Links</h3>
             <div className="space-y-3">
+              <Link to="/how-we-grow" className="block text-primary-foreground/80 hover:text-accent transition-colors">
+                How We Grow
+              </Link>
               <Link to="/how-farm-bags-work" className="block text-primary-foreground/80 hover:text-accent transition-colors">
-                How It Works
+                How Farm Bags Work
               </Link>
               <Link to="/meet-farmers" className="block text-primary-foreground/80 hover:text-accent transition-colors">
                 Meet the Farmers
               </Link>
-              <Link to="/anas-flowers" className="block text-primary-foreground/80 hover:text-accent transition-colors">
-                Ana's Flowers
-              </Link>
               <Link to="/faqs" className="block text-primary-foreground/80 hover:text-accent transition-colors">
-                FAQ
-              </Link>
-            </div>
-          </div>
-
-          {/* Partners & Services */}
-          <div>
-            <h3 className="text-lg font-semibold mb-6">Partners & Services</h3>
-            <div className="space-y-3">
-              <Link to="/become-a-partner" className="block text-primary-foreground/80 hover:text-accent transition-colors">
-                Partner Sign-Up
+                FAQs
               </Link>
               <Link to="/support-local" className="block text-primary-foreground/80 hover:text-accent transition-colors">
                 Support Local
@@ -80,9 +70,43 @@ const Footer = () => {
               <Link to="/fresh-catch" className="block text-primary-foreground/80 hover:text-accent transition-colors">
                 Fresh Catch
               </Link>
+              <Link to="/anas-flowers" className="block text-primary-foreground/80 hover:text-accent transition-colors">
+                Ana's Arrangements
+              </Link>
+              <Link to="/our-mission" className="block text-primary-foreground/80 hover:text-accent transition-colors">
+                Our Mission
+              </Link>
               <Link to="/gift-cards" className="block text-primary-foreground/80 hover:text-accent transition-colors">
                 Gift Cards
               </Link>
+              <Link to="/become-a-partner" className="block text-primary-foreground/80 hover:text-accent transition-colors">
+                Become a Partner
+              </Link>
+            </div>
+          </div>
+
+          {/* Contact Info */}
+          <div>
+            <h3 className="text-lg font-semibold mb-6">Stay Connected</h3>
+            <p className="text-primary-foreground/80 mb-4 text-sm">
+              Join our newsletter for weekly harvest updates and exclusive offers.
+            </p>
+            <div className="space-y-4">
+              <div className="flex items-center space-x-3">
+                <Phone className="w-5 h-5 text-accent" />
+                <span className="text-primary-foreground/80">(555) 789-GROW</span>
+              </div>
+              <div className="flex items-center space-x-3">
+                <Mail className="w-5 h-5 text-accent" />
+                <span className="text-primary-foreground/80">hello@billysbotanicals.com</span>
+              </div>
+              <div className="flex items-start space-x-3">
+                <MapPin className="w-5 h-5 text-accent mt-1" />
+                <span className="text-primary-foreground/80">
+                  456 Greenhouse Lane<br />
+                  Botanical Valley, CA 95420
+                </span>
+              </div>
             </div>
           </div>
 

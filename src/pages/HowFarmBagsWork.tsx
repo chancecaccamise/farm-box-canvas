@@ -3,20 +3,28 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Package, Calendar, Truck, Settings, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
+import greenhouse from "@/assets/greenhouse.jpg";
+import leafyGreens from "@/assets/leafy-greens.jpg";
+import tomatoes from "@/assets/tomatoes.jpg";
+import bellPeppers from "@/assets/bell-peppers.jpg";
 
 const HowFarmBagsWork = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="relative py-20 px-4 bg-gradient-primary text-white">
-        <div className="max-w-6xl mx-auto text-center">
-          <h1 className="text-5xl font-bold mb-6">How Billy's Boxes Work</h1>
-          <p className="text-xl mb-8 max-w-3xl mx-auto opacity-90">
+      <section 
+        className="relative py-20 px-4 bg-cover bg-center"
+        style={{ backgroundImage: `url(${greenhouse})` }}
+      >
+        <div className="absolute inset-0 bg-black opacity-50"></div>
+        <div className="relative z-10 max-w-6xl mx-auto text-center">
+          <h1 className="text-5xl font-bold mb-6 text-white">How Billy's Boxes Work</h1>
+          <p className="text-xl mb-8 max-w-3xl mx-auto text-white/90">
             From Billy's hydroponic greenhouse to your doorstep, discover how we bring the freshest produce 
             directly to your kitchen every week with love and care.
           </p>
           <div className="flex justify-center">
-            <Badge variant="secondary" className="text-lg px-6 py-2">
+            <Badge variant="outline" className="text-lg px-6 py-2 bg-white/10 text-white border-white">
               🌱 Fresh • Hydroponic • Family-Owned Since 2018
             </Badge>
           </div>
@@ -197,8 +205,21 @@ const HowFarmBagsWork = () => {
             
             <div className="bg-gradient-to-br from-accent/20 to-accent/10 rounded-2xl p-8">
               <div className="text-center">
-                <div className="text-6xl mb-6">📦</div>
-                <h3 className="text-2xl font-bold mb-4">Your Box Includes</h3>
+                <h3 className="text-2xl font-bold mb-6">Your Box Includes</h3>
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  <div className="text-center">
+                    <img src={leafyGreens} alt="Fresh leafy greens" className="w-full h-24 object-cover rounded-lg mb-2" />
+                    <span className="text-sm font-medium">Leafy Greens</span>
+                  </div>
+                  <div className="text-center">
+                    <img src={tomatoes} alt="Fresh tomatoes" className="w-full h-24 object-cover rounded-lg mb-2" />
+                    <span className="text-sm font-medium">Tomatoes</span>
+                  </div>
+                  <div className="text-center">
+                    <img src={bellPeppers} alt="Fresh bell peppers" className="w-full h-24 object-cover rounded-lg mb-2" />
+                    <span className="text-sm font-medium">Bell Peppers</span>
+                  </div>
+                </div>
                 <div className="space-y-3 text-left">
                   <div className="flex items-center space-x-3">
                     <CheckCircle className="w-5 h-5 text-accent" />
@@ -264,7 +285,7 @@ const HowFarmBagsWork = () => {
           
           <div className="mt-12">
             <Button asChild variant="organic" size="xl">
-              <Link to="/zip-code">Start Your Farm Bag Today</Link>
+              <Link to="/auth">Start Your Farm Bag Today</Link>
             </Button>
           </div>
         </div>

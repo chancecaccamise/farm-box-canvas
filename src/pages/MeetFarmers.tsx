@@ -155,16 +155,11 @@ const MeetFarmers = () => {
               </div>
             </div>
             
-            <div className="space-y-4">
+            <div className="flex justify-center">
               <img 
                 src={mtf1} 
                 alt="Team working in hydroponic greenhouse" 
-                className="rounded-lg shadow-soft w-full h-48 object-cover"
-              />
-              <img 
-                src={mtf2}  
-                alt="Team harvesting fresh produce" 
-                className="rounded-lg shadow-soft w-full h-48 object-cover"
+                className="rounded-lg shadow-soft w-full max-w-lg h-96 object-cover"
               />
             </div>
           </div>
