@@ -31,7 +31,7 @@ const getCategoryTitle = (category: string): string => {
     case 'bakery':
       return 'Our Bakery Partners';
     case 'fisherman':
-      return 'Our Fishing Partners';
+      return 'Our Fishing and Farm Partners';
     default:
       return 'Our Partners';
   }

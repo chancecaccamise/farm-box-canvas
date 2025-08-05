@@ -20,12 +20,14 @@ import {
   Calendar,
   Palette
 } from "lucide-react";
-import weddingBouquet from "@/assets/wedding-bouquet.jpg";
-import babyShowerFlowers from "@/assets/baby-shower-flowers.jpg";
-import birthdayFlowers from "@/assets/birthday-flowers.jpg";
-import seasonalBouquet from "@/assets/seasonal-bouquet.jpg";
-import anaPortrait from "@/assets/ana-portrait.jpg";
-import anaFlowersHero from "@/assets/ana-flowers-hero.jpg";
+import weddingBouquet from "@/assets/weddingBouquet.png";
+import babyShowerFlowers from "@/assets/Large on table.jpg";
+import birthdayFlowers from "@/assets/Happy Birthday Centerpeice.jpeg";
+import seasonalBouquet from "@/assets/Christmas1.jpg";
+import anaPortrait from "@/assets/anaPortrait.png";
+
+
+import meganCenterpiece from "@/assets/meganCenterpiece.png";
 
 const AnasFlowers = () => {
   const [formData, setFormData] = useState({
@@ -179,11 +181,11 @@ const AnasFlowers = () => {
       {/* Hero Section */}
       <section 
         className="relative py-32 bg-cover bg-center"
-        style={{ backgroundImage: `url(${anaFlowersHero})` }}
+        style={{ backgroundImage: `url(${meganCenterpiece})` }}
       >
         <div className="absolute inset-0 bg-black/40"></div>
         <div className="relative z-10 max-w-6xl mx-auto px-4 text-center text-white">
-          <h1 className="text-5xl font-bold mb-6 animate-fade-in">Ana's Flowers</h1>
+          <h1 className="text-5xl font-bold mb-6 animate-fade-in">Ana's Arrangements</h1>
           <p className="text-xl mb-8 max-w-3xl mx-auto opacity-90 animate-fade-in">
             Creating beautiful, custom floral arrangements for life's most special moments. 
             From intimate bouquets to grand celebrations, every arrangement tells your unique story.

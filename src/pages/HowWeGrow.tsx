@@ -1,6 +1,12 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Droplets, Leaf, Lightbulb, Recycle } from "lucide-react";
+import howWeGrowBanner from '@/assets/howWeGrowBanner.png';
+import hydroFarm from '@/assets/leftHydroFarm.jpeg';
+import hydroFarmHorizontal from '@/assets/hydroFarmHorizontal.jpeg';
+import greenhouse from '@/assets/greenhouse.jpg';
+import farmPond from '@/assets/farmPond.jpeg';
+import hydroFarm2 from '@/assets/hydroFarm2.jpeg';
 
 const HowWeGrow = () => {
   return (
@@ -9,7 +15,7 @@ const HowWeGrow = () => {
       <div className="relative h-[60vh] bg-gradient-fresh overflow-hidden">
         <div className="absolute inset-0 bg-black/20"></div>
         <img 
-          src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1200&h=600&fit=crop" 
+          src={howWeGrowBanner} 
           alt="Hydroponic growing system" 
           className="w-full h-full object-cover"
         />
@@ -69,17 +75,17 @@ const HowWeGrow = () => {
             
             <div className="grid grid-cols-2 gap-4">
               <img 
-                src="https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=300&h=300&fit=crop" 
+                src={hydroFarm}
                 alt="Hydroponic lettuce growing" 
                 className="rounded-lg shadow-soft w-full h-48 object-cover"
               />
               <img 
-                src="https://images.unsplash.com/photo-1501854140801-50d01698950b?w=300&h=300&fit=crop" 
+                src={farmPond}
                 alt="LED grow lights" 
                 className="rounded-lg shadow-soft w-full h-48 object-cover"
               />
               <img 
-                src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=300&h=300&fit=crop" 
+                src={hydroFarmHorizontal} 
                 alt="Nutrient monitoring system" 
                 className="rounded-lg shadow-soft w-full h-48 object-cover col-span-2"
               />
@@ -96,7 +102,7 @@ const HowWeGrow = () => {
           
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <img 
-              src="https://images.unsplash.com/photo-1472396961693-142e6e269027?w=600&h=400&fit=crop" 
+              src={hydroFarm2} 
               alt="Sustainable farming practices" 
               className="rounded-lg shadow-soft w-full h-80 object-cover"
             />

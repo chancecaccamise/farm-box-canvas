@@ -5,7 +5,7 @@ import { CheckCircle, Leaf, Truck, Users, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import heroImage from "@/assets/billys-botanicals-hero.jpg";
+import heroImage from "@/assets/billysBotanicals-hero.png";
 import BoxComparison from "@/components/BoxComparison";
 import FreshAddOns from "@/components/FreshAddOns";
 
@@ -38,7 +38,7 @@ const Landing = () => {
         className="relative h-screen flex items-center justify-center bg-cover bg-center"
         style={{ backgroundImage: `url(${heroImage})` }}
       >
-        <div className="absolute inset-0 bg-gradient-hero opacity-60"></div>
+        <div className="absolute inset-0 bg-black opacity-30"></div>
         <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
           <h1 className="text-6xl font-bold mb-6 tracking-tight">
             Fresh from the Farm. <span className="text-accent">Delivered to Your Door.</span>

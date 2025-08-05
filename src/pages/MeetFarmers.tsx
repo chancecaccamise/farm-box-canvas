@@ -1,14 +1,18 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Calendar, Heart } from "lucide-react";
-import farmersMarketImage from "@/assets/farmers-market-couple.jpg";
+import billyAna2 from "@/assets/billyanna2.png";
+import billyPortrait from "@/assets/billyPortrait.png";
+import AnaPortrait from "@/assets/anaPortrait.png";
+import mtf1 from "@/assets/mtf1.jpg";
+import mtf2 from "@/assets/mtf2.jpg";
 
 const MeetFarmers = () => {
   const teamMembers = [
   {
     name: "Billy",
     title: "Co-Founder & Head Grower",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face",
+    image: billyPortrait,
     bio: "Billy co-founded Billy's Botanicals and can be found every weekend working the farmers market stand at Forsyth Park. With a deep passion for sustainable growing, he leads all the planting, harvesting, and behind-the-scenes operations that keep the farm thriving.",
     funFact: "Billy knows nearly every regular customer by name and starts each market day with a cup of black coffee and a weather check — he swears he can feel the rain before it hits.",
     experience: "18 years"
@@ -16,7 +20,7 @@ const MeetFarmers = () => {
   {
     name: "Ana",
     title: "Co-Founder & Floral Artist",
-    image: "https://images.unsplash.com/photo-1494790108755-2616c333fb2c?w=300&h=300&fit=crop&crop=face",
+    image: AnaPortrait,
     bio: "Ana is the creative heart of Billy's Botanicals and co-runs the stand with Billy at Forsyth Park. In addition to farming, she operates her own flower business, designing custom bouquets for weddings, events, and local deliveries — always using fresh, seasonal blooms.",
     funFact: "Ana has a signature flower for every month of the year and once built an entire wedding arch using only wildflowers and reclaimed driftwood.",
     experience: "15 years"
@@ -29,7 +33,7 @@ const MeetFarmers = () => {
       <div className="relative h-[60vh] bg-gradient-fresh overflow-hidden">
         <div className="absolute inset-0 bg-black/20"></div>
         <img 
-          src={farmersMarketImage} 
+          src={billyAna2} 
           alt="Billy and Maria Thompson at their farmers market stand" 
           className="w-full h-full object-cover"
         />
@@ -153,12 +157,12 @@ const MeetFarmers = () => {
             
             <div className="space-y-4">
               <img 
-                src="https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=600&h=300&fit=crop" 
+                src={mtf1} 
                 alt="Team working in hydroponic greenhouse" 
                 className="rounded-lg shadow-soft w-full h-48 object-cover"
               />
               <img 
-                src="https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07?w=600&h=300&fit=crop" 
+                src={mtf2}  
                 alt="Team harvesting fresh produce" 
                 className="rounded-lg shadow-soft w-full h-48 object-cover"
               />
