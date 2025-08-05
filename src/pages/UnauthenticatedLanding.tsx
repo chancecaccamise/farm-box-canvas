@@ -7,6 +7,7 @@ import rainbowCarrots from "@/assets/rainbow-carrots.jpg";
 import leafyGreens from "@/assets/leafy-greens.jpg";
 import tomatoes from "@/assets/tomatoes.jpg";
 import bellPeppers from "@/assets/bell-peppers.jpg";
+import greenhouse from "@/assets/greenhouse.jpg";
 import BoxComparison from "@/components/BoxComparison";
 
 const UnauthenticatedLanding = () => {
@@ -14,12 +15,12 @@ const UnauthenticatedLanding = () => {
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <section 
-        className="relative h-screen flex items-center justify-center bg-cover bg-center"
+        className="relative h-screen flex items-center justify-center bg-cover bg-center md:bg-center bg-[position:center_20%]"
         style={{ backgroundImage: `url(${heroImage})` }}
       >
         <div className="absolute inset-0 bg-black opacity-30"></div>
         <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
-          <h1 className="text-6xl font-bold mb-6 tracking-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight">
             Get Started with Weekly <span className="text-accent">Farm-Fresh Deliveries</span>
           </h1>
           <p className="text-xl mb-8 max-w-2xl mx-auto leading-relaxed">
@@ -173,8 +174,12 @@ const UnauthenticatedLanding = () => {
             </div>
             
             <div className="relative">
-              <div className="aspect-square bg-gradient-to-br from-accent/30 to-accent/10 rounded-2xl flex items-center justify-center text-8xl">
-                🌱
+              <div className="aspect-square rounded-2xl overflow-hidden">
+                <img 
+                  src={greenhouse} 
+                  alt="Billy's hydroponic greenhouse" 
+                  className="w-full h-full object-cover"
+                />
               </div>
             </div>
           </div>
@@ -241,7 +246,7 @@ const UnauthenticatedLanding = () => {
           </p>
           <div className="flex gap-4 justify-center">
             <Button asChild variant="organic" size="xl">
-              <Link to="/auth">Start Your Free Trial</Link>
+              <Link to="/auth">Sign Up</Link>
             </Button>
             <Button asChild variant="outline" size="xl" className="bg-white/10 border-white text-white hover:bg-white hover:text-foreground">
               <Link to="/auth">Already a Member? Sign In</Link>

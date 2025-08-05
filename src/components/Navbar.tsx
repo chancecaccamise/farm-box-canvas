@@ -72,6 +72,10 @@ const Navbar = () => {
               </DropdownMenuContent>
             </DropdownMenu>
 
+            <Link to="/faqs" className="text-foreground hover:text-primary transition-colors">
+              FAQs
+            </Link>
+
             {/* My Bag - positioned after About Us */}
             {user && (
               <Button variant="ghost" className="flex items-center space-x-2" asChild>
@@ -140,6 +144,12 @@ const Navbar = () => {
                         </Button>
                       </div>
                     </div>
+
+                    <Button variant="ghost" className="w-full justify-start" asChild>
+                      <Link to="/faqs" onClick={() => setMobileMenuOpen(false)}>
+                        FAQs
+                      </Link>
+                    </Button>
 
                     {user && (
                       <Button variant="ghost" className="w-full justify-start" asChild>
