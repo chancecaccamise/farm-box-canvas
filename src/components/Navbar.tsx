@@ -86,16 +86,16 @@ const Navbar = () => {
               FAQs
             </Link>
 
+            <Link to="/support-local" className="text-foreground hover:text-primary transition-smooth font-medium">
+              Support Local
+            </Link>
+
             <Link to="/fresh-catch" className="text-foreground hover:text-primary transition-smooth font-medium">
               Fresh Catch
             </Link>
 
             <Link to="/anas-flowers" className="text-foreground hover:text-primary transition-smooth font-medium">
               Ana's Arrangements
-            </Link>
-
-            <Link to="/support-local" className="text-foreground hover:text-primary transition-smooth font-medium">
-              Support Local
             </Link>
           </div>
 
@@ -161,6 +161,12 @@ const Navbar = () => {
                     </Button>
 
                     <Button variant="ghost" className="w-full justify-start" asChild>
+                      <Link to="/support-local" onClick={() => setMobileMenuOpen(false)}>
+                        Support Local
+                      </Link>
+                    </Button>
+
+                    <Button variant="ghost" className="w-full justify-start" asChild>
                       <Link to="/fresh-catch" onClick={() => setMobileMenuOpen(false)}>
                         Fresh Catch
                       </Link>
@@ -169,12 +175,6 @@ const Navbar = () => {
                     <Button variant="ghost" className="w-full justify-start" asChild>
                       <Link to="/anas-flowers" onClick={() => setMobileMenuOpen(false)}>
                         Ana's Arrangements
-                      </Link>
-                    </Button>
-
-                    <Button variant="ghost" className="w-full justify-start" asChild>
-                      <Link to="/support-local" onClick={() => setMobileMenuOpen(false)}>
-                        Support Local
                       </Link>
                     </Button>
                   </div>

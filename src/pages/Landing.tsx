@@ -2,27 +2,11 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, Leaf, Truck, Users, Star } from "lucide-react";
-import { Link } from "react-router-dom";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
 import heroImage from "@/assets/billysBotanicals-hero.png";
 import BoxComparison from "@/components/BoxComparison";
 import FreshAddOns from "@/components/FreshAddOns";
 
 const Landing = () => {
-  const [email, setEmail] = useState("");
-  const { toast } = useToast();
-
-  const handleEmailSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email) {
-      toast({
-        title: "Thank you for subscribing!",
-        description: "You'll receive weekly updates and fresh catch alerts.",
-      });
-      setEmail("");
-    }
-  };
 
   const scrollToBoxes = () => {
     const boxSection = document.getElementById('box-comparison');
@@ -227,36 +211,6 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Email Capture Section */}
-      <section className="py-20 px-4 bg-secondary/30">
-        <div className="max-w-4xl mx-auto">
-          <div className="bg-gradient-to-br from-accent/20 to-accent/10 rounded-2xl p-12 text-center">
-            <h2 className="text-4xl font-bold mb-4">Want to know when fresh fish comes in?</h2>
-            <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              Get weekly updates, recipes, and fresh catch alerts straight to your inbox.
-            </p>
-            
-            <form onSubmit={handleEmailSubmit} className="max-w-md mx-auto">
-              <div className="flex gap-3">
-                <input
-                  type="email"
-                  placeholder="Enter your email address"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="flex-1 px-4 py-3 rounded-lg border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                  required
-                />
-                <Button type="submit" size="lg" className="px-8">
-                  Subscribe
-                </Button>
-              </div>
-              <p className="text-sm text-muted-foreground mt-3">
-                Join 1,500+ families getting fresh updates. Unsubscribe anytime.
-              </p>
-            </form>
-          </div>
-        </div>
-      </section>
 
       {/* CTA Section */}
       <section className="py-20 px-4 bg-gradient-primary text-white">

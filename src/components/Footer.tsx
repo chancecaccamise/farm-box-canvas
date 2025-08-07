@@ -1,32 +1,16 @@
 
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Instagram, Facebook, Mail, Phone, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
 import billysLogo from "@/assets/billysBotanicals-Logo-v1.png";
 
 const Footer = () => {
-  const [email, setEmail] = useState("");
-  const { toast } = useToast();
-
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (email) {
-      toast({
-        title: "Thank you for subscribing!",
-        description: "You'll receive fresh updates about our weekly harvests.",
-      });
-      setEmail("");
-    }
-  };
 
   return (
     <footer className="bg-gradient-subtle border-t">
       <div className="max-w-7xl mx-auto px-4 py-20">
-        <div className="grid lg:grid-cols-4 md:grid-cols-2 gap-12">
+        <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-12">
           {/* Brand & Description */}
           <div className="lg:col-span-1">
             <Link to="/" className="inline-block mb-8">
@@ -113,27 +97,6 @@ const Footer = () => {
                 </span>
               </div>
             </div>
-          </div>
-
-          {/* Newsletter Signup */}
-          <div>
-            <h3 className="text-xl font-bold mb-8 text-foreground">Stay Fresh</h3>
-            <p className="text-muted-foreground mb-6 text-base">
-              Get weekly updates about our freshest harvests and seasonal offerings.
-            </p>
-            <form onSubmit={handleNewsletterSubmit} className="space-y-4">
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-background/50 border-border focus:border-primary"
-                required
-              />
-              <Button type="submit" className="w-full bg-gradient-fresh hover:opacity-90 transition-opacity">
-                Subscribe to Newsletter
-              </Button>
-            </form>
           </div>
         </div>
 
