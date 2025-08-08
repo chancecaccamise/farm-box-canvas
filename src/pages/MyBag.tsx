@@ -72,6 +72,7 @@ function MyBag() {
   const [subscription, setSubscription] = useState<any>(null);
   const [showUnconfirmDialog, setShowUnconfirmDialog] = useState(false);
   const [unconfirmLoading, setUnconfirmLoading] = useState(false);
+  const [recentOrders, setRecentOrders] = useState<any[]>([]);
 
   useEffect(() => {
     if (user) {
@@ -90,6 +91,39 @@ function MyBag() {
       window.history.replaceState({}, '', '/my-bag');
     }
   }, [user, toast]);
+
+  const checkRecentOrders = async () => {
+    try {
+      // Check for recent orders from the last 7 days that are confirmed
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+
+      const { data: orders, error } = await supabase
+        .from("orders")
+        .select("*")
+        .eq("user_id", user?.id)
+        .eq("payment_status", "paid")
+        .gte("created_at", weekAgo.toISOString())
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching recent orders:", error);
+        return;
+      }
+
+      if (orders && orders.length > 0) {
+        setRecentOrders(orders);
+        // Show notification for recent successful orders
+        toast({
+          title: "Recent Purchase Confirmed",
+          description: `You have ${orders.length} confirmed order${orders.length > 1 ? 's' : ''} from the past week.`,
+          variant: "default",
+        });
+      }
+    } catch (error) {
+      console.error("Error checking recent orders:", error);
+    }
+  };
 
   const checkSubscriptionAndInitialize = async () => {
     try {
@@ -114,6 +148,9 @@ function MyBag() {
       if (isActiveSubscription) {
         await initializeCurrentWeekBag();
       }
+
+      // Check for recent confirmed orders
+      await checkRecentOrders();
     } catch (error) {
       console.error("Error checking subscription:", error);
       
@@ -499,12 +536,12 @@ function MyBag() {
           optimisticUpdate();
           toast({
             title: "Redirecting to checkout",
-            description: "Complete your payment in the new tab. Add-ons marked as confirmed.",
+            description: "You'll be redirected to Stripe to complete your payment. Add-ons marked as confirmed.",
           });
         }
         
-        // Open Stripe checkout in a new tab
-        window.open(data.url, '_blank');
+        // Redirect to Stripe checkout in the same window
+        window.location.href = data.url;
       } else {
         throw new Error("No checkout URL received");
       }

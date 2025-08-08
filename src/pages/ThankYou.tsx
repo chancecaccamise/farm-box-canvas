@@ -72,7 +72,7 @@ const ThankYou = () => {
           }
 
           // If order is still pending payment, try to verify payment directly with Stripe
-          if (order.payment_status === 'pending' && attempt <= 2) {
+          if (order.payment_status === 'pending' && attempt <= 3) {
             console.log('Order payment pending, attempting direct verification...');
             try {
               const { data: verificationResult } = await supabase.functions.invoke('verify-payment', {
@@ -86,6 +86,16 @@ const ThankYou = () => {
                 return;
               } else if (verificationResult?.payment_status && verificationResult.payment_status !== 'paid') {
                 console.log('Payment status from verification:', verificationResult.payment_status);
+                // If payment failed, show appropriate message
+                if (verificationResult.payment_status === 'requires_payment_method') {
+                  toast({
+                    title: "Payment Issue",
+                    description: "There was an issue with your payment method. Please try again.",
+                    variant: "destructive",
+                  });
+                  setTimeout(() => navigate('/my-bag'), 3000);
+                  return;
+                }
                 // Show the order with current status for transparency
                 setOrderDetails(order);
                 setLoading(false);
