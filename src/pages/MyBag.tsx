@@ -473,7 +473,7 @@ function MyBag() {
                   )}
                 </div>
                 {hasBoxItems() ? (
-                  <div className="space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {getBoxItems().map((item) => (
                       <ReadOnlyBagItem
                         key={item.id}
@@ -509,7 +509,7 @@ function MyBag() {
               {getConfirmedAddons().length > 0 && (
                 <div>
                   <h2 className="text-xl font-semibold mb-4">Your Add-ons</h2>
-                  <div className="space-y-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {getConfirmedAddons().map((item) => (
                       <BagItemCard
                         key={item.id}

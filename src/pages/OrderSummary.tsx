@@ -17,11 +17,30 @@ const OrderSummary = () => {
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [addOnProducts, setAddOnProducts] = useState<any[]>([]);
   const [boxPrice, setBoxPrice] = useState(0);
+  const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
   const { checkoutState } = useCheckout();
 
   useEffect(() => {
     fetchCheckoutData();
+    checkSubscriptionStatus();
   }, [checkoutState]);
+
+  const checkSubscriptionStatus = async () => {
+    if (!user) return;
+    
+    try {
+      const { data: subscriptionsData } = await supabase
+        .from("user_subscriptions")
+        .select("*")
+        .eq("user_id", user.id)
+        .eq("status", "active")
+        .limit(1);
+      
+      setHasActiveSubscription(subscriptionsData && subscriptionsData.length > 0);
+    } catch (error) {
+      console.error('Error checking subscription status:', error);
+    }
+  };
 
   const fetchCheckoutData = async () => {
     try {
@@ -113,7 +132,7 @@ const OrderSummary = () => {
       
       const requestBody = {
         checkoutState,
-        hasActiveSubscription: false, // New customers don't have active subscriptions
+        hasActiveSubscription,
       };
       console.log('📦 Request body:', JSON.stringify(requestBody, null, 2));
 
@@ -225,7 +244,8 @@ const OrderSummary = () => {
   }, 0);
 
   const deliveryFee = 0; // Free delivery
-  const totalAmount = boxPrice + addOnTotal + deliveryFee;
+  const effectiveBoxPrice = hasActiveSubscription ? 0 : boxPrice;
+  const totalAmount = effectiveBoxPrice + addOnTotal + deliveryFee;
 
   return (
     <div className="min-h-screen bg-background py-8 px-4">
@@ -312,9 +332,13 @@ const OrderSummary = () => {
                     <h3 className="font-medium">
                       {checkoutState.boxSize?.charAt(0).toUpperCase() + checkoutState.boxSize?.slice(1)} Box
                     </h3>
-                    <p className="text-sm text-muted-foreground">Fresh seasonal produce</p>
+                    <p className="text-sm text-muted-foreground">
+                      {hasActiveSubscription ? "Fresh seasonal produce (subscription)" : "Fresh seasonal produce"}
+                    </p>
                   </div>
-                  <span className="font-medium">${boxPrice.toFixed(2)}</span>
+                  <span className="font-medium">
+                    {hasActiveSubscription ? "Included" : `$${boxPrice.toFixed(2)}`}
+                  </span>
                 </div>
               </CardContent>
             </Card>
@@ -362,7 +386,7 @@ const OrderSummary = () => {
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Box Price:</span>
-                    <span>${boxPrice.toFixed(2)}</span>
+                    <span>{hasActiveSubscription ? "Included" : `$${boxPrice.toFixed(2)}`}</span>
                   </div>
                   {addOnProducts.length > 0 && (
                     <div className="flex justify-between">
