@@ -1,30 +1,58 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle, Calendar, Truck, ArrowRight, Home } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "@/components/AuthProvider";
-import { supabase } from "@/integrations/supabase/client";
 import { useEffect, useState } from "react";
+import { useSearchParams, Link, useNavigate } from "react-router-dom";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { CheckCircle, Package, MapPin, Calendar, Clock, Receipt, DollarSign, Truck, ArrowRight, Home } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/components/AuthProvider";
 import { useToast } from "@/hooks/use-toast";
+
+interface OrderData {
+  id: string;
+  order_date: string;
+  total_amount: number;
+  status: string;
+  payment_status: string;
+  customer_name: string;
+  customer_email: string;
+  shipping_address_street: string;
+  shipping_address_apartment?: string;
+  shipping_address_city: string;
+  shipping_address_state: string;
+  shipping_address_zip: string;
+  delivery_instructions?: string;
+  box_size: string;
+  box_price: number;
+  addons_total: number;
+  delivery_fee: number;
+  order_confirmation_number: string;
+  order_items?: Array<{
+    id: string;
+    product_name: string;
+    quantity: number;
+    price: number;
+    item_type: string;
+  }>;
+}
 
 const ThankYou = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const [orderDetails, setOrderDetails] = useState<any>(null);
+  const [searchParams] = useSearchParams();
+  const [orderData, setOrderData] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadOrderDetails = async (attempt = 1) => {
+    const loadOrderDetails = async () => {
       try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const sessionId = urlParams.get('session_id');
+        const sessionId = searchParams.get('session_id');
 
         if (!sessionId) {
-          console.log('No session_id found in URL');
           toast({
             title: "Missing session information",
-            description: "Redirecting to your bag...",
+            description: "Redirecting to your orders...",
             variant: "default",
           });
           setTimeout(() => navigate('/my-bag'), 2000);
@@ -32,11 +60,9 @@ const ThankYou = () => {
           return;
         }
 
-        console.log(`Loading order details for session: ${sessionId} (attempt ${attempt})`);
-
-        // Try to fetch order details using just session ID first (for unauthenticated users)
-        const { data: order, error } = await supabase
-          .from('orders')
+        // Fetch order details using session ID
+        const { data: orderDetails, error } = await supabase
+          .from("orders")
           .select(`
             *,
             order_items (
@@ -47,114 +73,45 @@ const ThankYou = () => {
               item_type
             )
           `)
-          .eq('stripe_session_id', sessionId)
+          .eq("stripe_session_id", sessionId)
           .maybeSingle();
 
         if (error) {
-          console.error('Error fetching order:', error);
-          if (attempt <= 3) {
-            console.log(`Retrying in ${attempt * 2} seconds...`);
-            setTimeout(() => loadOrderDetails(attempt + 1), attempt * 2000);
-            return;
-          }
+          console.error("Error fetching order:", error);
           toast({
             title: "Unable to load order details",
-            description: "Please check your email for order confirmation or contact support.",
+            description: "Please check your email for order confirmation.",
             variant: "destructive",
           });
-        } else if (order) {
+        } else if (orderDetails) {
           // If user is authenticated, verify it's their order
-          if (user && order.user_id !== user.id) {
-            console.log('Order belongs to different user');
-            setOrderDetails(null);
+          if (user && orderDetails.user_id !== user.id) {
+            setOrderData(null);
             setLoading(false);
             return;
           }
 
-          // If order is still pending payment, try to verify payment directly with Stripe
-          if (order.payment_status === 'pending' && attempt <= 3) {
-            console.log('Order payment pending, attempting direct verification...');
-            try {
-              const { data: verificationResult } = await supabase.functions.invoke('verify-payment', {
-                body: { sessionId }
-              });
-
-              if (verificationResult?.success && verificationResult?.order) {
-                console.log('Payment verified successfully via fallback');
-                setOrderDetails(verificationResult.order);
-                setLoading(false);
-                return;
-              } else if (verificationResult?.payment_status && verificationResult.payment_status !== 'paid') {
-                console.log('Payment status from verification:', verificationResult.payment_status);
-                // If payment failed, show appropriate message
-                if (verificationResult.payment_status === 'requires_payment_method') {
-                  toast({
-                    title: "Payment Issue",
-                    description: "There was an issue with your payment method. Please try again.",
-                    variant: "destructive",
-                  });
-                  setTimeout(() => navigate('/my-bag'), 3000);
-                  return;
-                }
-                // Show the order with current status for transparency
-                setOrderDetails(order);
-                setLoading(false);
-                return;
-              }
-            } catch (verifyError) {
-              console.warn('Payment verification failed, showing order as is:', verifyError);
-            }
-          }
-
-          if (order.payment_status === 'pending' && attempt <= 2) {
-            console.log(`Order still pending payment, retrying in ${attempt * 2} seconds...`);
-            setTimeout(() => loadOrderDetails(attempt + 1), attempt * 2000);
-            return;
-          }
-
-          // Show order even if payment is still pending after brief retry
-          if (order.payment_status === 'pending') {
-            console.log('Showing order despite pending payment status - webhook may be delayed');
-          }
-
-          console.log('Order details loaded successfully');
-          setOrderDetails(order);
+          setOrderData(orderDetails as OrderData);
         } else {
-          // If order not found and we haven't tried many times, retry
-          if (attempt <= 3) {
-            console.log(`Order not found, retrying in ${attempt * 2} seconds...`);
-            setTimeout(() => loadOrderDetails(attempt + 1), attempt * 2000);
-            return;
-          }
-          
-          console.log('No order found for session ID after retries');
           toast({
             title: "Order not found",
-            description: "Your order may still be processing. Redirecting to your bag...",
+            description: "Your order may still be processing.",
           });
-          setTimeout(() => navigate('/my-bag'), 3000);
         }
       } catch (error) {
-        console.error('Error loading order details:', error);
-        if (attempt <= 3) {
-          setTimeout(() => loadOrderDetails(attempt + 1), attempt * 2000);
-          return;
-        }
+        console.error("Error loading order details:", error);
         toast({
           title: "Error loading order",
-          description: "Redirecting to your bag. Check your email for confirmation.",
+          description: "Please check your email for confirmation.",
           variant: "destructive",
         });
-        setTimeout(() => navigate('/my-bag'), 3000);
       } finally {
-        if (attempt > 3 || orderDetails) {
-          setLoading(false);
-        }
+        setLoading(false);
       }
     };
 
     loadOrderDetails();
-  }, [user, toast]);
+  }, [searchParams, user, toast, navigate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/30 flex items-center justify-center px-4">
@@ -167,23 +124,13 @@ const ThankYou = () => {
         {/* Main Message */}
         <h1 className="text-4xl font-bold mb-4">Thank You for Your Order!</h1>
         <p className="text-xl text-muted-foreground mb-12 max-w-lg mx-auto">
-          {orderDetails ? 
-            orderDetails.has_active_subscription ? 
-              `Your add-ons have been ${orderDetails.payment_status === 'paid' ? 'confirmed' : 'received'} and will be delivered with your weekly subscription box to ${orderDetails.shipping_address_street || 'your address'}.` :
-              `Your order has been ${orderDetails.payment_status === 'paid' ? 'confirmed' : 'received'} and will be delivered to ${orderDetails.shipping_address_street || 'your address'}.` :
+          {orderData ? 
+            `Your order has been confirmed and will be delivered to your address.` :
             'Your payment has been processed successfully! Your order details are being finalized.'
           }
         </p>
 
-        {orderDetails && orderDetails.payment_status === 'pending' && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8 max-w-lg mx-auto">
-            <p className="text-sm text-yellow-800">
-              🔄 Your payment is being processed. Your order will be confirmed shortly! If this persists, please contact support.
-            </p>
-          </div>
-        )}
-
-        {!orderDetails && !loading && (
+        {!orderData && !loading && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-8 max-w-lg mx-auto">
             <p className="text-sm text-red-800">
               ⚠️ We're having trouble loading your order details. Please check your email for confirmation or contact support.
@@ -196,7 +143,7 @@ const ThankYou = () => {
           <CardHeader>
             <CardTitle>Order Confirmation</CardTitle>
             <CardDescription>
-              {orderDetails ? `Order #${orderDetails.id.slice(0, 8)}` : 'Order details'}
+              {orderData ? `Order #${orderData.order_confirmation_number || orderData.id.slice(0, 8)}` : 'Order details'}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-6">

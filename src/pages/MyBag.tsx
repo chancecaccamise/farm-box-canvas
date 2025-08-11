@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ShoppingCart, AlertCircle, Package, Calendar, RefreshCw, CheckCircle } from "lucide-react";
@@ -73,10 +73,11 @@ function MyBag() {
   const [showUnconfirmDialog, setShowUnconfirmDialog] = useState(false);
   const [unconfirmLoading, setUnconfirmLoading] = useState(false);
   const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [hasPaidOrder, setHasPaidOrder] = useState<boolean>(false);
 
   useEffect(() => {
     if (user) {
-      checkSubscriptionAndInitialize();
+      checkUserOrderStatus();
     }
     
     // Check for cancelled checkout
@@ -125,7 +126,44 @@ function MyBag() {
     }
   };
 
-  const checkSubscriptionAndInitialize = async () => {
+  const checkUserOrderStatus = async () => {
+    try {
+      // Check if user has any paid orders
+      const { data: paidOrders, error: orderError } = await supabase
+        .from("orders")
+        .select("id, payment_status, created_at, total_amount, status, order_confirmation_number")
+        .eq("user_id", user?.id)
+        .eq("payment_status", "paid")
+        .order("created_at", { ascending: false });
+
+      if (orderError) {
+        throw orderError;
+      }
+
+      const hasExistingOrder = paidOrders && paidOrders.length > 0;
+      setHasPaidOrder(hasExistingOrder);
+      
+      if (hasExistingOrder) {
+        setRecentOrders(paidOrders);
+        // Also check for subscriptions if they have orders
+        await checkSubscriptionStatus();
+      } else {
+        // If no paid orders, they might still have subscription setup
+        await checkSubscriptionStatus();
+      }
+    } catch (error) {
+      console.error("Error checking user order status:", error);
+      toast({
+        title: "Connection Error",
+        description: "Having trouble loading your account. Please refresh the page.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const checkSubscriptionStatus = async () => {
     try {
       // Check if user has an active subscription - get the most recent active one
       const { data: subscriptionsData, error: subError } = await supabase
@@ -148,27 +186,9 @@ function MyBag() {
       if (isActiveSubscription) {
         await initializeCurrentWeekBag();
       }
-
-      // Check for recent confirmed orders
-      await checkRecentOrders();
     } catch (error) {
       console.error("Error checking subscription:", error);
-      
-      // More specific error handling
-      if (error.message?.includes('PGRST116')) {
-        console.log("No subscription found, user needs to start one");
-        setHasActiveSubscription(false);
-      } else {
-        // For other errors, show user-friendly message
-        toast({
-          title: "Connection Error",
-          description: "Having trouble loading your subscription. Please refresh the page.",
-          variant: "destructive",
-        });
-        setHasActiveSubscription(false);
-      }
-    } finally {
-      setLoading(false);
+      setHasActiveSubscription(false);
     }
   };
 
@@ -619,7 +639,93 @@ function MyBag() {
     );
   }
 
-  if (hasActiveSubscription === false) {
+  // Show different content based on user status
+  if (hasPaidOrder) {
+    // User has a paid order - show order status
+    return (
+      <div className="min-h-screen bg-background">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="space-y-8">
+            {/* Import and use the OrderStatusDisplay component */}
+            <div className="text-center mb-8">
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                Your Farm Box Orders
+              </h1>
+              <p className="text-gray-600">
+                Track your orders and manage your deliveries
+              </p>
+            </div>
+
+            {recentOrders.map((order) => (
+              <Card key={order.id} className="border-l-4 border-l-green-500">
+                <CardHeader>
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="text-lg font-semibold flex items-center space-x-2">
+                        <Package className="w-5 h-5" />
+                        <span>Order #{order.order_confirmation_number || order.id.slice(0, 8).toUpperCase()}</span>
+                      </h3>
+                      <p className="text-sm text-gray-600 mt-1">
+                        Placed on {new Date(order.created_at).toLocaleDateString('en-US', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric'
+                        })}
+                      </p>
+                    </div>
+                    <Badge className="bg-green-100 text-green-800">
+                      <CheckCircle className="w-4 h-4 mr-1" />
+                      Paid
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                      <CheckCircle className="w-5 h-5 text-green-600" />
+                      <div>
+                        <p className="font-medium text-gray-900">Order confirmed - preparing your fresh produce</p>
+                        <p className="text-sm text-gray-600">
+                          Expected delivery: Tuesday - Friday of next week
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-gray-900">Order Total</h4>
+                        <p className="text-2xl font-bold text-green-600">
+                          ${order.total_amount.toFixed(2)}
+                        </p>
+                      </div>
+                      <div className="space-y-2">
+                        <h4 className="font-medium text-gray-900">Status</h4>
+                        <Badge variant="default">
+                          {order.status === 'pending' ? 'Processing' : order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+
+            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
+              <Button asChild size="lg">
+                <Link to="/box-selection">Order Another Box</Link>
+              </Button>
+              <Button variant="outline" asChild size="lg">
+                <Link to="/">Browse Products</Link>
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (hasActiveSubscription === false && !hasPaidOrder) {
+    // User has no subscription and no paid orders - show start journey
     return (
       <div className="min-h-screen bg-background">
         <div className="max-w-7xl mx-auto px-4 py-8">
@@ -921,7 +1027,7 @@ function MyBag() {
               {/* Subscription Management */}
               <SubscriptionManager 
                 subscription={subscription}
-                onSubscriptionUpdate={checkSubscriptionAndInitialize}
+                onSubscriptionUpdate={checkUserOrderStatus}
               />
             </div>
           </div>

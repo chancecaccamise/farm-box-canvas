@@ -498,6 +498,7 @@ export type Database = {
           delivery_instructions: string | null
           has_active_subscription: boolean | null
           id: string
+          order_confirmation_number: string | null
           order_date: string
           order_type: string
           payment_status: string | null
@@ -528,6 +529,7 @@ export type Database = {
           delivery_instructions?: string | null
           has_active_subscription?: boolean | null
           id?: string
+          order_confirmation_number?: string | null
           order_date?: string
           order_type?: string
           payment_status?: string | null
@@ -558,6 +560,7 @@ export type Database = {
           delivery_instructions?: string | null
           has_active_subscription?: boolean | null
           id?: string
+          order_confirmation_number?: string | null
           order_date?: string
           order_type?: string
           payment_status?: string | null
@@ -1222,6 +1225,10 @@ export type Database = {
       assign_admin_role: {
         Args: { user_email: string }
         Returns: undefined
+      }
+      generate_order_confirmation_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
       }
       get_next_cutoff_time: {
         Args: { input_date?: string }
