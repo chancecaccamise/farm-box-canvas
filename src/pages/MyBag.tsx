@@ -57,22 +57,6 @@ function MyBag() {
 
   const initializeUserData = async () => {
     try {
-      // Check if user has any paid orders (this blocks further bag creation)
-      const { data: paidOrders, error: orderError } = await supabase
-        .from("orders")
-        .select("id, payment_status")
-        .eq("user_id", user?.id)
-        .eq("payment_status", "paid")
-        .limit(1);
-
-      if (orderError) throw orderError;
-
-      // If user has paid orders, don't show bag functionality
-      if (paidOrders && paidOrders.length > 0) {
-        setLoading(false);
-        return;
-      }
-
       // Check subscription status
       const { data: subscriptionsData, error: subError } = await supabase
         .from("user_subscriptions")
