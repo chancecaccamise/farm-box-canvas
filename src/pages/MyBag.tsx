@@ -8,6 +8,7 @@ import { BagItemCard } from "@/components/BagItemCard";
 import { ReadOnlyBagItem } from "@/components/ReadOnlyBagItem";
 import { AddOnsGrid } from "@/components/AddOnsGrid";
 import { StartFarmBoxJourney } from "@/components/StartFarmBoxJourney";
+import { Badge } from "@/components/ui/badge";
 
 interface WeeklyBag {
   id: string;
@@ -50,6 +51,7 @@ function MyBag() {
   const [hasActiveSubscription, setHasActiveSubscription] = useState<boolean>(false);
   const [isLocked, setIsLocked] = useState<boolean>(false);
   const [hasPaidForThisWeek, setHasPaidForThisWeek] = useState<boolean>(false);
+  const [templateStatus, setTemplateStatus] = useState<{hasTemplates: boolean, isConfirmed: boolean}>({hasTemplates: false, isConfirmed: false});
 
   useEffect(() => {
     if (user) {
@@ -114,6 +116,19 @@ function MyBag() {
 
       setCurrentWeekBag(bagData);
       await fetchBagItems(bagData.id);
+      
+      // Check template status for this week
+      const { data: templateData, error: templateError } = await supabase
+        .from('box_templates')
+        .select('is_confirmed')
+        .eq('week_start_date', bagData.week_start_date)
+        .eq('box_size', bagData.box_size);
+
+      if (!templateError) {
+        const hasTemplates = templateData && templateData.length > 0;
+        const isConfirmed = hasTemplates && templateData.every(t => t.is_confirmed);
+        setTemplateStatus({ hasTemplates, isConfirmed });
+      }
       
       // Check if cutoff time has passed
       const cutoffTime = new Date(bagData.cutoff_time);
@@ -408,7 +423,15 @@ function MyBag() {
             <div className="lg:col-span-2 space-y-6">
               {/* Box Items Section */}
               <div>
-                <h2 className="text-xl font-semibold mb-4">Your Box Contents</h2>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-semibold">Your Box Contents</h2>
+                  {hasBoxItems() && !templateStatus.isConfirmed && templateStatus.hasTemplates && (
+                    <Badge variant="secondary">Preview - Not Confirmed</Badge>
+                  )}
+                  {hasBoxItems() && templateStatus.isConfirmed && (
+                    <Badge variant="default" className="bg-green-100 text-green-800">Confirmed</Badge>
+                  )}
+                </div>
                 {hasBoxItems() ? (
                   <div className="space-y-3">
                     {getBoxItems().map((item) => (
@@ -421,8 +444,23 @@ function MyBag() {
                 ) : (
                   <div className="border-2 border-dashed border-muted-foreground/20 rounded-lg p-8 text-center text-muted-foreground">
                     <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>Your box contents are being curated by our farmers.</p>
-                    <p className="text-sm">Check back soon to see what's included!</p>
+                    {!templateStatus.hasTemplates ? (
+                      <div>
+                        <p className="font-medium mb-2">Box Contents Coming Soon</p>
+                        <p className="text-sm">Our team is still preparing the contents for this week's {currentWeekBag.box_size} box.</p>
+                        <p className="text-sm">Check back soon to see what fresh, local products will be included!</p>
+                      </div>
+                    ) : !templateStatus.isConfirmed ? (
+                      <div>
+                        <p className="font-medium mb-2">Contents Being Finalized</p>
+                        <p className="text-sm">The contents are being finalized. You'll see a preview shortly and the final contents will be confirmed soon.</p>
+                      </div>
+                    ) : (
+                      <div>
+                        <p className="font-medium mb-2">No Items Available</p>
+                        <p className="text-sm">No items are currently available for this box size.</p>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
