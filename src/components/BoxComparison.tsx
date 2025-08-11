@@ -8,13 +8,16 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useCheckout } from "@/contexts/CheckoutContext";
 import { useAuth } from "@/components/AuthProvider";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 const BoxComparison = () => {
   const navigate = useNavigate();
-  const { updateBoxSize } = useCheckout();
+  const { updateBoxSize, updateBoxType } = useCheckout();
   const { user } = useAuth();
   const [boxOptions, setBoxOptions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [isSubscription, setIsSubscription] = useState(true);
 
   useEffect(() => {
     const fetchBoxSizes = async () => {
@@ -30,6 +33,7 @@ const BoxComparison = () => {
         const formattedBoxes = boxSizes.map((box, index) => ({
           size: box.name,
           name: box.display_name,
+          basePrice: box.base_price,
           price: `$${box.base_price}`,
           items: box.item_count_range,
           serves: box.serves_text,
@@ -45,7 +49,8 @@ const BoxComparison = () => {
           {
             size: "small",
             name: "Small Box",
-            price: "$24.99",
+            basePrice: 35,
+            price: "$35",
             items: "8-10 items",
             serves: "Perfect for 1-2 people",
             sampleItems: ["Rainbow Carrots", "Leafy Greens", "Heritage Tomatoes", "Fresh Herbs"],
@@ -54,7 +59,8 @@ const BoxComparison = () => {
           {
             size: "medium", 
             name: "Medium Box",
-            price: "$34.99",
+            basePrice: 50,
+            price: "$50",
             items: "12-15 items",
             serves: "Great for 2-4 people",
             sampleItems: ["Rainbow Carrots", "Leafy Greens", "Heritage Tomatoes", "Bell Peppers", "Fresh Fish", "Artisan Bread"],
@@ -62,8 +68,9 @@ const BoxComparison = () => {
           },
           {
             size: "large",
-            name: "Large Box", 
-            price: "$44.99",
+            name: "Large Box",
+            basePrice: 70,
+            price: "$70",
             items: "18-22 items",
             serves: "Ideal for 4+ people",
             sampleItems: ["Rainbow Carrots", "Leafy Greens", "Heritage Tomatoes", "Bell Peppers", "Fresh Fish", "Artisan Bread", "Seasonal Herbs", "Local Honey"],
@@ -92,11 +99,24 @@ const BoxComparison = () => {
 
   const handleSelectPlan = (boxSize) => {
     updateBoxSize(boxSize);
+    updateBoxType(isSubscription ? 'subscription' : 'one-time');
     if (user) {
       navigate('/zip-code');
     } else {
       navigate('/auth');
     }
+  };
+
+  const getDisplayPrice = (basePrice) => {
+    const price = isSubscription ? basePrice : basePrice + 5;
+    return `$${price}`;
+  };
+
+  const getSavingsText = (basePrice) => {
+    if (isSubscription) {
+      return `Save $5 vs one-time purchase!`;
+    }
+    return null;
   };
 
   if (loading) {
@@ -113,9 +133,32 @@ const BoxComparison = () => {
     <section className="py-20 px-4 bg-secondary/30">
       <div className="max-w-6xl mx-auto">
         <h2 className="text-4xl font-bold text-center mb-4">Choose Your Weekly Box</h2>
-        <p className="text-xl text-muted-foreground text-center mb-16 max-w-2xl mx-auto">
+        <p className="text-xl text-muted-foreground text-center mb-8 max-w-2xl mx-auto">
           Each box is carefully curated with the freshest local produce, sustainable seafood, and artisan goods
         </p>
+        
+        {/* Subscription Toggle */}
+        <div className="flex items-center justify-center gap-4 mb-12">
+          <div className="flex items-center gap-3 bg-card rounded-lg p-4 border shadow-sm">
+            <Label htmlFor="subscription-toggle" className="text-sm font-medium">
+              One-time purchase
+            </Label>
+            <Switch
+              id="subscription-toggle"
+              checked={isSubscription}
+              onCheckedChange={setIsSubscription}
+              className="data-[state=checked]:bg-accent"
+            />
+            <Label htmlFor="subscription-toggle" className="text-sm font-medium">
+              Weekly subscription
+            </Label>
+            {isSubscription && (
+              <Badge variant="secondary" className="ml-2 bg-accent/10 text-accent">
+                Save $5/week
+              </Badge>
+            )}
+          </div>
+        </div>
         
         <div className="grid md:grid-cols-3 gap-8">
           {boxOptions.map((box) => (
@@ -128,8 +171,15 @@ const BoxComparison = () => {
               
               <CardHeader className="pb-4">
                 <CardTitle className="text-2xl mb-2">{box.name}</CardTitle>
-                <div className="text-4xl font-bold text-primary mb-2">{box.price}</div>
-                <div className="text-sm text-muted-foreground mb-1">per week</div>
+                <div className="text-4xl font-bold text-primary mb-2">{getDisplayPrice(box.basePrice)}</div>
+                <div className="text-sm text-muted-foreground mb-1">
+                  {isSubscription ? 'per week' : 'per delivery'}
+                </div>
+                {getSavingsText(box.basePrice) && (
+                  <div className="text-xs text-accent font-medium mb-2">
+                    {getSavingsText(box.basePrice)}
+                  </div>
+                )}
                 <CardDescription className="text-base font-medium">{box.serves}</CardDescription>
                 <div className="text-sm text-accent font-medium">{box.items}</div>
               </CardHeader>
@@ -161,7 +211,10 @@ const BoxComparison = () => {
         
         <div className="text-center mt-8">
           <p className="text-muted-foreground">
-            All subscriptions include free delivery • Skip or pause anytime • Cancel without fees
+            {isSubscription 
+              ? "All subscriptions include free delivery • Skip or pause anytime • Cancel without fees"
+              : "One-time purchases include free delivery • No commitment required"
+            }
           </p>
         </div>
       </div>
