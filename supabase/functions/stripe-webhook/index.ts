@@ -40,13 +40,15 @@ serve(async (req) => {
     });
     logStep("Stripe client initialized");
 
-    const body = await req.arrayBuffer();
+    const body = await req.text();
     const signature = req.headers.get("stripe-signature");
 
     logStep("Request details", { 
       bodyLength: body.length,
+      bodyPreview: body.substring(0, 100) + "...",
       hasSignature: !!signature,
-      signatureStart: signature?.substring(0, 20) + "..."
+      signatureStart: signature?.substring(0, 20) + "...",
+      webhookSecretFormat: webhookSecret?.substring(0, 8) + "..."
     });
 
     if (!signature) {
@@ -60,10 +62,15 @@ serve(async (req) => {
     // Verify webhook signature
     let event;
     try {
-      event = await stripe.webhooks.constructEventAsync(body, signature, webhookSecret);
+      event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
       logStep("Event verified and constructed", { type: event.type, id: event.id });
     } catch (err) {
-      logStep("ERROR: Webhook signature verification failed", { error: err.message });
+      logStep("ERROR: Webhook signature verification failed", { 
+        error: err.message, 
+        bodyLength: body.length,
+        signaturePresent: !!signature,
+        webhookSecretPresent: !!webhookSecret
+      });
       return new Response(JSON.stringify({ error: "Webhook signature verification failed" }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
         status: 400,
