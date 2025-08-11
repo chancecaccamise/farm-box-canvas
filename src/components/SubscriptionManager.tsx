@@ -27,6 +27,26 @@ export function SubscriptionManager({ subscription, onSubscriptionUpdate }: Subs
   const [pauseReason, setPauseReason] = useState("");
   const [cancelReason, setCancelReason] = useState("");
   const [resumeDate, setResumeDate] = useState("");
+
+  const handleCustomerPortal = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('customer-portal');
+
+      if (error) throw error;
+
+      window.open(data.url, '_blank');
+    } catch (error) {
+      console.error('Error accessing customer portal:', error);
+      toast({
+        title: "Error",
+        description: "Failed to access customer portal. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -37,20 +57,12 @@ export function SubscriptionManager({ subscription, onSubscriptionUpdate }: Subs
   const handlePauseSubscription = async () => {
     setLoading(true);
     try {
-      const updateData: any = {
-        status: 'paused',
-        paused_at: new Date().toISOString(),
-        pause_reason: pauseReason || 'User requested pause'
-      };
-
-      if (resumeDate) {
-        updateData.auto_resume_date = resumeDate;
-      }
-
-      const { error } = await supabase
-        .from('user_subscriptions')
-        .update(updateData)
-        .eq('id', subscription.id);
+      const { error } = await supabase.functions.invoke('pause-subscription', {
+        body: {
+          reason: pauseReason || 'User requested pause',
+          autoResumeDate: resumeDate || null
+        }
+      });
 
       if (error) throw error;
 
@@ -77,15 +89,7 @@ export function SubscriptionManager({ subscription, onSubscriptionUpdate }: Subs
   const handleResumeSubscription = async () => {
     setLoading(true);
     try {
-      const { error } = await supabase
-        .from('user_subscriptions')
-        .update({
-          status: 'active',
-          paused_at: null,
-          pause_reason: null,
-          auto_resume_date: null
-        })
-        .eq('id', subscription.id);
+      const { error } = await supabase.functions.invoke('resume-subscription');
 
       if (error) throw error;
 
@@ -110,14 +114,11 @@ export function SubscriptionManager({ subscription, onSubscriptionUpdate }: Subs
   const handleCancelSubscription = async () => {
     setLoading(true);
     try {
-      const { error } = await supabase
-        .from('user_subscriptions')
-        .update({
-          status: 'cancelled',
-          cancelled_at: new Date().toISOString(),
-          cancellation_reason: cancelReason || 'User requested cancellation'
-        })
-        .eq('id', subscription.id);
+      const { error } = await supabase.functions.invoke('cancel-subscription', {
+        body: {
+          reason: cancelReason || 'User requested cancellation'
+        }
+      });
 
       if (error) throw error;
 
@@ -291,11 +292,22 @@ export function SubscriptionManager({ subscription, onSubscriptionUpdate }: Subs
               <p className="text-sm text-muted-foreground">
                 To change your subscription, you'll need to start a new one.
               </p>
-              <Button onClick={() => navigate('/')} size="sm" variant="outline">
-                <ShoppingCart className="h-4 w-4 mr-2" />
-                Start New Subscription
-              </Button>
+              <div className="flex gap-2">
+                <Button onClick={() => navigate('/')} size="sm" variant="outline">
+                  <ShoppingCart className="h-4 w-4 mr-2" />
+                  Start New Subscription
+                </Button>
+                <Button onClick={handleCustomerPortal} size="sm" variant="secondary" disabled={loading}>
+                  Manage via Stripe
+                </Button>
+              </div>
             </div>
+          )}
+
+          {(subscription.status === 'active' || subscription.status === 'paused') && (
+            <Button onClick={handleCustomerPortal} size="sm" variant="secondary" disabled={loading}>
+              Manage via Stripe
+            </Button>
           )}
         </div>
       </CardContent>

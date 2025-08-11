@@ -82,6 +82,11 @@ serve(async (req) => {
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
       logStep("Processing checkout session completed", { sessionId: session.id });
+      
+      // If this was a subscription checkout, create the subscription record
+      if (session.mode === 'subscription' && session.subscription) {
+        await handleSubscriptionCreated(session, supabase);
+      }
 
       // Create Supabase client with service role key
       const supabase = createClient(
@@ -194,6 +199,18 @@ serve(async (req) => {
           logStep("Add-ons marked as paid successfully", { weeklyBagId });
         }
       }
+    } else if (event.type === "customer.subscription.created") {
+      const subscription = event.data.object as Stripe.Subscription;
+      logStep("Processing subscription created", { subscriptionId: subscription.id });
+      await handleSubscriptionUpdate(subscription, supabase, 'active');
+    } else if (event.type === "customer.subscription.updated") {
+      const subscription = event.data.object as Stripe.Subscription;
+      logStep("Processing subscription updated", { subscriptionId: subscription.id, status: subscription.status });
+      await handleSubscriptionUpdate(subscription, supabase, subscription.status);
+    } else if (event.type === "customer.subscription.deleted") {
+      const subscription = event.data.object as Stripe.Subscription;
+      logStep("Processing subscription deleted", { subscriptionId: subscription.id });
+      await handleSubscriptionUpdate(subscription, supabase, 'cancelled');
     } else {
       logStep("Unhandled event type", { type: event.type });
     }
@@ -211,3 +228,71 @@ serve(async (req) => {
     });
   }
 });
+
+// Helper function to handle subscription creation from checkout
+async function handleSubscriptionCreated(session: Stripe.Checkout.Session, supabase: any) {
+  try {
+    const userId = session.metadata?.user_id;
+    if (!userId) {
+      logStep("WARNING: No user_id in session metadata");
+      return;
+    }
+
+    // Create subscription record
+    const { error } = await supabase
+      .from("user_subscriptions")
+      .insert({
+        user_id: userId,
+        stripe_subscription_id: session.subscription,
+        stripe_customer_id: session.customer,
+        status: 'active',
+        subscription_type: 'weekly',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      });
+
+    if (error) {
+      logStep("ERROR: Failed to create subscription record", { error });
+    } else {
+      logStep("Subscription record created successfully", { userId, subscriptionId: session.subscription });
+    }
+  } catch (error) {
+    logStep("ERROR in handleSubscriptionCreated", { error });
+  }
+}
+
+// Helper function to handle subscription status updates
+async function handleSubscriptionUpdate(subscription: Stripe.Subscription, supabase: any, status: string) {
+  try {
+    let subscriptionStatus = status;
+    
+    // Map Stripe statuses to our enum values
+    if (status === 'active') subscriptionStatus = 'active';
+    else if (status === 'canceled') subscriptionStatus = 'cancelled';
+    else if (status === 'past_due') subscriptionStatus = 'paused';
+    else if (status === 'incomplete') subscriptionStatus = 'paused';
+    else if (status === 'unpaid') subscriptionStatus = 'paused';
+
+    const updateData: any = {
+      status: subscriptionStatus,
+      updated_at: new Date().toISOString()
+    };
+
+    if (subscriptionStatus === 'cancelled') {
+      updateData.cancelled_at = new Date().toISOString();
+    }
+
+    const { error } = await supabase
+      .from("user_subscriptions")
+      .update(updateData)
+      .eq("stripe_subscription_id", subscription.id);
+
+    if (error) {
+      logStep("ERROR: Failed to update subscription", { error, subscriptionId: subscription.id });
+    } else {
+      logStep("Subscription updated successfully", { subscriptionId: subscription.id, status: subscriptionStatus });
+    }
+  } catch (error) {
+    logStep("ERROR in handleSubscriptionUpdate", { error });
+  }
+}

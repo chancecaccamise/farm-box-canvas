@@ -350,7 +350,8 @@ function MyBag() {
           weeklyBag: currentWeekBag,
           bagItems: itemsToCheckout,
           hasActiveSubscription: hasActiveSubscription,
-          hasPaidForThisWeek: hasPaidForThisWeek
+          hasPaidForThisWeek: hasPaidForThisWeek,
+          isSubscription: false // MyBag is always one-time payments for add-ons
         }
       });
 

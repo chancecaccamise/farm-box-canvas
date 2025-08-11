@@ -1045,6 +1045,8 @@ export type Database = {
           pause_reason: string | null
           paused_at: string | null
           status: Database["public"]["Enums"]["subscription_status"]
+          stripe_customer_id: string | null
+          stripe_subscription_id: string | null
           subscription_type: string
           updated_at: string
           user_id: string
@@ -1058,6 +1060,8 @@ export type Database = {
           pause_reason?: string | null
           paused_at?: string | null
           status?: Database["public"]["Enums"]["subscription_status"]
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           subscription_type?: string
           updated_at?: string
           user_id: string
@@ -1071,6 +1075,8 @@ export type Database = {
           pause_reason?: string | null
           paused_at?: string | null
           status?: Database["public"]["Enums"]["subscription_status"]
+          stripe_customer_id?: string | null
+          stripe_subscription_id?: string | null
           subscription_type?: string
           updated_at?: string
           user_id?: string

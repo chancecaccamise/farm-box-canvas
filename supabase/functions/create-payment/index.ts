@@ -53,7 +53,8 @@ serve(async (req) => {
       weeklyBag, 
       bagItems, 
       hasActiveSubscription,
-      checkoutState // New checkout state with add-ons
+      checkoutState, // New checkout state with add-ons
+      isSubscription = false // New flag for subscription vs one-time payment
     } = requestData;
 
     if (!weeklyBag && !checkoutState) {
@@ -216,7 +217,7 @@ serve(async (req) => {
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
       line_items: lineItems,
-      mode: "payment",
+      mode: isSubscription ? "subscription" : "payment",
       success_url: `${origin}/?stripe_redirect=thank-you&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/?stripe_redirect=my-bag&cancelled=true`,
       shipping_address_collection: {
@@ -230,6 +231,7 @@ serve(async (req) => {
         weekly_bag_id: actualWeeklyBag?.id || 'checkout-only',
         has_active_subscription: hasActiveSubscription.toString(),
         box_size: checkoutState?.boxSize || actualWeeklyBag?.box_size || 'medium',
+        is_subscription: isSubscription.toString(),
       },
     });
 

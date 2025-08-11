@@ -141,6 +141,7 @@ const OrderSummary = () => {
       const requestBody = {
         checkoutState,
         hasActiveSubscription,
+        isSubscription: checkoutState.boxType === 'subscription',
       };
       console.log('📦 Request body:', JSON.stringify(requestBody, null, 2));
 
