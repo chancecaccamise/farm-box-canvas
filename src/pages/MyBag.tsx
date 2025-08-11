@@ -48,6 +48,8 @@ function MyBag() {
   const [bagItems, setBagItems] = useState<WeeklyBagItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasActiveSubscription, setHasActiveSubscription] = useState<boolean>(false);
+  const [isLocked, setIsLocked] = useState<boolean>(false);
+  const [hasPaidForThisWeek, setHasPaidForThisWeek] = useState<boolean>(false);
 
   useEffect(() => {
     if (user) {
@@ -67,6 +69,22 @@ function MyBag() {
 
       if (subError) throw subError;
       setHasActiveSubscription(subscriptionsData && subscriptionsData.length > 0);
+
+      // Check if user has already paid for this week
+      const currentWeekStart = new Date();
+      currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay() + 1); // Monday
+      const currentWeekStartString = currentWeekStart.toISOString().split('T')[0];
+
+      const { data: paidOrders, error: orderError } = await supabase
+        .from("orders")
+        .select("id")
+        .eq("user_id", user?.id)
+        .eq("payment_status", "paid")
+        .eq("week_start_date", currentWeekStartString)
+        .limit(1);
+
+      if (orderError) throw orderError;
+      setHasPaidForThisWeek(paidOrders && paidOrders.length > 0);
 
       // Initialize current week bag
       await initializeCurrentWeekBag();
@@ -96,6 +114,11 @@ function MyBag() {
 
       setCurrentWeekBag(bagData);
       await fetchBagItems(bagData.id);
+      
+      // Check if cutoff time has passed
+      const cutoffTime = new Date(bagData.cutoff_time);
+      const now = new Date();
+      setIsLocked(now > cutoffTime);
     } catch (error) {
       console.error("Error initializing weekly bag:", error);
     } finally {
@@ -132,7 +155,7 @@ function MyBag() {
   };
 
   const updateItemQuantity = async (productId: string, newQuantity: number) => {
-    if (!currentWeekBag) return;
+    if (!currentWeekBag || isLocked || currentWeekBag.is_confirmed) return;
 
     try {
       if (newQuantity <= 0) {
@@ -208,9 +231,21 @@ function MyBag() {
   };
 
   const handleCheckout = async () => {
-    if (!currentWeekBag || !bagItems) return;
+    if (!currentWeekBag || !bagItems || isLocked || currentWeekBag.is_confirmed) return;
 
-    const addonItems = bagItems.filter(item => item.item_type === 'addon');
+    const addonItems = bagItems.filter(item => item.item_type === 'addon' && !item.is_paid);
+    const unpaidAddons = addonItems.filter(item => !item.is_paid);
+    
+    // If user already paid for this week and is a subscriber, only allow addon checkout
+    if (hasPaidForThisWeek && hasActiveSubscription) {
+      if (unpaidAddons.length === 0) {
+        toast({
+          title: "No new items to checkout",
+          description: "All your items have already been paid for.",
+        });
+        return;
+      }
+    }
     
     if (hasActiveSubscription && addonItems.length === 0) {
       // Subscriber with only box items - confirm without payment
@@ -242,13 +277,25 @@ function MyBag() {
 
     setLoading(true);
     try {
-      const itemsToCheckout = hasActiveSubscription ? addonItems : bagItems;
+      // Determine what items to checkout based on user status
+      let itemsToCheckout;
+      if (hasPaidForThisWeek && hasActiveSubscription) {
+        // Only charge for new unpaid add-ons
+        itemsToCheckout = unpaidAddons;
+      } else if (hasActiveSubscription) {
+        // Charge for add-ons only (subscription covers box)
+        itemsToCheckout = addonItems;
+      } else {
+        // Charge for everything (new customer)
+        itemsToCheckout = bagItems;
+      }
       
       const { data, error } = await supabase.functions.invoke('create-payment', {
         body: {
           weeklyBag: currentWeekBag,
           bagItems: itemsToCheckout,
-          hasActiveSubscription: hasActiveSubscription
+          hasActiveSubscription: hasActiveSubscription,
+          hasPaidForThisWeek: hasPaidForThisWeek
         }
       });
 
@@ -390,7 +437,7 @@ function MyBag() {
                         key={item.id}
                         item={item}
                         onUpdateQuantity={updateItemQuantity}
-                        isLocked={false}
+                        isLocked={isLocked || currentWeekBag.is_confirmed}
                       />
                     ))}
                   </div>
@@ -403,7 +450,7 @@ function MyBag() {
                 <AddOnsGrid
                   bagItems={getAddonQuantities()}
                   onUpdateQuantity={updateItemQuantity}
-                  isLocked={false}
+                  isLocked={isLocked || currentWeekBag.is_confirmed}
                   confirmedAddons={getConfirmedAddonIds()}
                 />
               </div>
@@ -416,10 +463,10 @@ function MyBag() {
                   weeklyBag={currentWeekBag}
                   itemCount={bagItems.length}
                   onCheckout={handleCheckout}
-                  isLocked={false}
+                  isLocked={isLocked}
                   hasActiveSubscription={hasActiveSubscription}
                   loading={loading}
-                  unpaidAddonsTotal={bagItems.filter(item => item.item_type === 'addon').reduce((sum, item) => sum + (item.price_at_time * item.quantity), 0)}
+                  unpaidAddonsTotal={bagItems.filter(item => item.item_type === 'addon' && !item.is_paid).reduce((sum, item) => sum + (item.price_at_time * item.quantity), 0)}
                 />
               </div>
             </div>
