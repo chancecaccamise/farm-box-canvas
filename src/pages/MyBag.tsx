@@ -1,22 +1,21 @@
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { ShoppingCart, AlertCircle, Package, Calendar, RefreshCw, CheckCircle } from "lucide-react";
+import { Package, Calendar, RefreshCw, CheckCircle, ShoppingCart } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { CountdownTimer } from "@/components/CountdownTimer";
 import { WeeklyBagSummary } from "@/components/WeeklyBagSummary";
-import { EmptyBagState } from "@/components/EmptyBagState";
 import { BagItemCard } from "@/components/BagItemCard";
 import { ReadOnlyBagItem } from "@/components/ReadOnlyBagItem";
 import { AddOnsGrid } from "@/components/AddOnsGrid";
 import { SubscriptionManager } from "@/components/SubscriptionManager";
 import { UnconfirmBagDialog } from "@/components/UnconfirmBagDialog";
-import { useCheckout } from "@/contexts/CheckoutContext";
+import { StartFarmBoxJourney } from "@/components/StartFarmBoxJourney";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface WeeklyBag {
   id: string;
@@ -53,17 +52,7 @@ function MyBag() {
   const { user } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { checkoutState, updateAddOns } = useCheckout();
-
-  const handleNonSubscriberAddOnUpdate = (productId: string, quantity: number) => {
-    const currentAddOns = checkoutState.addOns || {};
-    if (quantity <= 0) {
-      const { [productId]: removed, ...rest } = currentAddOns;
-      updateAddOns(rest);
-    } else {
-      updateAddOns({ ...currentAddOns, [productId]: quantity });
-    }
-  };
+  
   const [currentWeekBag, setCurrentWeekBag] = useState<WeeklyBag | null>(null);
   const [bagItems, setBagItems] = useState<WeeklyBagItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,12 +61,11 @@ function MyBag() {
   const [subscription, setSubscription] = useState<any>(null);
   const [showUnconfirmDialog, setShowUnconfirmDialog] = useState(false);
   const [unconfirmLoading, setUnconfirmLoading] = useState(false);
-  const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [hasPaidOrder, setHasPaidOrder] = useState<boolean>(false);
 
   useEffect(() => {
     if (user) {
-      checkUserOrderStatus();
+      checkForExistingOrder();
     }
     
     // Check for cancelled checkout
@@ -93,79 +81,43 @@ function MyBag() {
     }
   }, [user, toast]);
 
-  const checkRecentOrders = async () => {
+  const checkForExistingOrder = async () => {
     try {
-      // Check for recent orders from the last 7 days that are confirmed
-      const weekAgo = new Date();
-      weekAgo.setDate(weekAgo.getDate() - 7);
-
-      const { data: orders, error } = await supabase
-        .from("orders")
-        .select("*")
-        .eq("user_id", user?.id)
-        .eq("payment_status", "paid")
-        .gte("created_at", weekAgo.toISOString())
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        console.error("Error fetching recent orders:", error);
-        return;
-      }
-
-      if (orders && orders.length > 0) {
-        setRecentOrders(orders);
-        // Show notification for recent successful orders
-        toast({
-          title: "Recent Purchase Confirmed",
-          description: `You have ${orders.length} confirmed order${orders.length > 1 ? 's' : ''} from the past week.`,
-          variant: "default",
-        });
-      }
-    } catch (error) {
-      console.error("Error checking recent orders:", error);
-    }
-  };
-
-  const checkUserOrderStatus = async () => {
-    try {
-      // Check if user has any paid orders
+      // First check if user has any paid orders (this blocks further bag creation)
       const { data: paidOrders, error: orderError } = await supabase
         .from("orders")
-        .select("id, payment_status, created_at, total_amount, status, order_confirmation_number")
+        .select("id, payment_status, created_at, order_confirmation_number")
         .eq("user_id", user?.id)
         .eq("payment_status", "paid")
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(1);
 
       if (orderError) {
         throw orderError;
       }
 
-      const hasExistingOrder = paidOrders && paidOrders.length > 0;
-      setHasPaidOrder(hasExistingOrder);
-      
-      if (hasExistingOrder) {
-        setRecentOrders(paidOrders);
-        // Also check for subscriptions if they have orders
-        await checkSubscriptionStatus();
-      } else {
-        // If no paid orders, they might still have subscription setup
-        await checkSubscriptionStatus();
+      if (paidOrders && paidOrders.length > 0) {
+        setHasPaidOrder(true);
+        setLoading(false);
+        return;
       }
+
+      // If no paid orders, proceed to check subscription status and initialize bag
+      await checkSubscriptionStatus();
     } catch (error) {
-      console.error("Error checking user order status:", error);
+      console.error("Error checking existing order:", error);
       toast({
         title: "Connection Error",
         description: "Having trouble loading your account. Please refresh the page.",
         variant: "destructive",
       });
-    } finally {
       setLoading(false);
     }
   };
 
   const checkSubscriptionStatus = async () => {
     try {
-      // Check if user has an active subscription - get the most recent active one
+      // Check if user has an active subscription
       const { data: subscriptionsData, error: subError } = await supabase
         .from("user_subscriptions")
         .select("*")
@@ -176,19 +128,18 @@ function MyBag() {
         throw subError;
       }
 
-      // Find the most recent active subscription
       const activeSubscription = subscriptionsData?.find(sub => sub.status === 'active');
       const isActiveSubscription = !!activeSubscription;
       
       setSubscription(activeSubscription || null);
       setHasActiveSubscription(isActiveSubscription);
 
-      if (isActiveSubscription) {
-        await initializeCurrentWeekBag();
-      }
+      // Initialize bag regardless of subscription status
+      await initializeCurrentWeekBag();
     } catch (error) {
       console.error("Error checking subscription:", error);
       setHasActiveSubscription(false);
+      setLoading(false);
     }
   };
 
@@ -641,180 +592,50 @@ function MyBag() {
 
   // Show different content based on user status
   if (hasPaidOrder) {
-    // User has a paid order - show order status
+    // User has a paid order - show simple message with contact info
     return (
       <div className="min-h-screen bg-background">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="space-y-8">
-            {/* Import and use the OrderStatusDisplay component */}
-            <div className="text-center mb-8">
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                Your Farm Box Orders
-              </h1>
-              <p className="text-gray-600">
-                Track your orders and manage your deliveries
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <div className="text-center space-y-8">
+            <div className="space-y-4">
+              <CheckCircle className="w-16 h-16 text-green-600 mx-auto" />
+              <h1 className="text-3xl font-bold text-foreground">Order Confirmed!</h1>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Your farm box order has been confirmed and is being prepared for delivery.
+                You'll receive an email with tracking information once your order ships.
               </p>
             </div>
-
-            {recentOrders.map((order) => (
-              <Card key={order.id} className="border-l-4 border-l-green-500">
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="text-lg font-semibold flex items-center space-x-2">
-                        <Package className="w-5 h-5" />
-                        <span>Order #{order.order_confirmation_number || order.id.slice(0, 8).toUpperCase()}</span>
-                      </h3>
-                      <p className="text-sm text-gray-600 mt-1">
-                        Placed on {new Date(order.created_at).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'long',
-                          day: 'numeric'
-                        })}
-                      </p>
-                    </div>
-                    <Badge className="bg-green-100 text-green-800">
-                      <CheckCircle className="w-4 h-4 mr-1" />
-                      Paid
-                    </Badge>
+            
+            <Card className="max-w-md mx-auto">
+              <CardContent className="pt-6">
+                <div className="space-y-4">
+                  <h3 className="font-semibold">Need to make changes?</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Contact our support team to modify your order or start planning your next delivery.
+                  </p>
+                  <div className="space-y-2">
+                    <Button className="w-full" onClick={() => navigate('/box-selection')}>
+                      Start Next Week's Box
+                    </Button>
+                    <Button variant="outline" className="w-full" asChild>
+                      <a href="mailto:support@billysbotanicals.com">Contact Support</a>
+                    </Button>
                   </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
-                      <CheckCircle className="w-5 h-5 text-green-600" />
-                      <div>
-                        <p className="font-medium text-gray-900">Order confirmed - preparing your fresh produce</p>
-                        <p className="text-sm text-gray-600">
-                          Expected delivery: Tuesday - Friday of next week
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="grid md:grid-cols-2 gap-4">
-                      <div className="space-y-2">
-                        <h4 className="font-medium text-gray-900">Order Total</h4>
-                        <p className="text-2xl font-bold text-green-600">
-                          ${order.total_amount.toFixed(2)}
-                        </p>
-                      </div>
-                      <div className="space-y-2">
-                        <h4 className="font-medium text-gray-900">Status</h4>
-                        <Badge variant="default">
-                          {order.status === 'pending' ? 'Processing' : order.status.charAt(0).toUpperCase() + order.status.slice(1)}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-6">
-              <Button asChild size="lg">
-                <Link to="/box-selection">Order Another Box</Link>
-              </Button>
-              <Button variant="outline" asChild size="lg">
-                <Link to="/">Browse Products</Link>
-              </Button>
-            </div>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </div>
     );
   }
 
-  if (hasActiveSubscription === false && !hasPaidOrder) {
-    // User has no subscription and no paid orders - show start journey
+  // No subscription and no paid order - show start journey
+  if (hasActiveSubscription === false) {
     return (
       <div className="min-h-screen bg-background">
         <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="space-y-8">
-            <div>
-              <h1 className="text-4xl font-bold text-foreground mb-4">My Bag</h1>
-              <p className="text-muted-foreground">
-                Shop add-ons or start your farm box subscription
-              </p>
-            </div>
-
-            {/* No subscription - offer to start one */}
-            <Card className="border-dashed border-2 border-muted-foreground/20">
-              <CardContent className="pt-12 pb-12">
-                <div className="text-center space-y-6">
-                  <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center">
-                    <ShoppingCart className="w-12 h-12 text-muted-foreground" />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <h2 className="text-2xl font-semibold text-foreground">
-                      Start Your Farm Box Journey
-                    </h2>
-                    <p className="text-muted-foreground max-w-md mx-auto">
-                      Purchase your first farm box to start customizing your weekly delivery 
-                      of fresh, local produce and artisanal goods.
-                    </p>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <Button size="lg" className="px-8" onClick={() => navigate('/zip-code')}>
-                      <ShoppingCart className="w-4 h-4 mr-2" />
-                      Purchase Your First Box
-                    </Button>
-                    <Button variant="outline" size="lg" className="px-8" asChild>
-                      <Link to="/how-farm-bags-work">
-                        Learn More About Our Boxes
-                      </Link>
-                    </Button>
-                  </div>
-
-                  <div className="bg-muted/50 p-4 rounded-lg max-w-md mx-auto">
-                    <div className="flex items-start gap-3">
-                      <AlertCircle className="w-5 h-5 text-primary mt-0.5" />
-                      <div className="text-left">
-                        <p className="text-sm font-medium text-foreground">
-                          What you'll get:
-                        </p>
-                        <ul className="text-sm text-muted-foreground mt-1 space-y-1">
-                          <li>• Fresh, locally-sourced produce</li>
-                          <li>• Artisanal pantry items</li>
-                          <li>• Weekly customization options</li>
-                          <li>• Flexible delivery schedule</li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Add-ons for non-subscribers */}
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-2xl font-semibold mb-2">Or Shop Add-Ons</h2>
-                <p className="text-muted-foreground">
-                  Browse our premium products and artisanal goods available for individual purchase
-                </p>
-              </div>
-              
-              <AddOnsGrid 
-                bagItems={checkoutState.addOns || {}} 
-                onUpdateQuantity={handleNonSubscriberAddOnUpdate}
-                isLocked={false}
-              />
-              
-              {Object.keys(checkoutState.addOns || {}).length > 0 && (
-                <div className="text-center pt-6">
-                  <Button 
-                    onClick={() => navigate('/delivery')}
-                    size="lg"
-                    className="px-8"
-                  >
-                    Continue to Checkout
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
+          <StartFarmBoxJourney />
         </div>
       </div>
     );
@@ -1027,7 +848,7 @@ function MyBag() {
               {/* Subscription Management */}
               <SubscriptionManager 
                 subscription={subscription}
-                onSubscriptionUpdate={checkUserOrderStatus}
+                onSubscriptionUpdate={checkForExistingOrder}
               />
             </div>
           </div>
