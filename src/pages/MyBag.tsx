@@ -59,6 +59,46 @@ function MyBag() {
     }
   }, [user]);
 
+  // Real-time subscriptions for template and bag changes
+  useEffect(() => {
+    if (!currentWeekBag) return;
+
+    const channel = supabase
+      .channel('box-template-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'box_templates',
+          filter: `week_start_date=eq.${currentWeekBag.week_start_date}`,
+        },
+        () => {
+          // Refetch bag items and template status when templates change
+          initializeCurrentWeekBag();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'weekly_bag_items',
+          filter: `weekly_bag_id=eq.${currentWeekBag.id}`,
+        },
+        () => {
+          // Refetch bag items when they change
+          fetchBagItems(currentWeekBag.id);
+          updateBagTotals();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [currentWeekBag?.id, currentWeekBag?.week_start_date]);
+
   const initializeUserData = async () => {
     try {
       // Check subscription status

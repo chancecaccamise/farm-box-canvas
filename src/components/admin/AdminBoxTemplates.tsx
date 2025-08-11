@@ -47,7 +47,7 @@ export const AdminBoxTemplates = () => {
 
   useEffect(() => {
     fetchData();
-    setSelectedWeek(getCurrentWeekStart());
+    setSelectedWeek(getNextDeliveryWeekStart());
   }, []);
 
   useEffect(() => {
@@ -61,6 +61,12 @@ export const AdminBoxTemplates = () => {
     const monday = new Date(today);
     monday.setDate(today.getDate() - today.getDay() + 1);
     return monday.toISOString().split('T')[0];
+  };
+
+  const getNextDeliveryWeekStart = () => {
+    // Templates should be created for the week that users will receive deliveries
+    // Users create bags for current week, so templates should match
+    return getCurrentWeekStart();
   };
 
   const fetchData = async () => {
@@ -121,6 +127,8 @@ export const AdminBoxTemplates = () => {
 
   const addProductToBox = async (productId: string) => {
     try {
+      console.log(`Adding product ${productId} to template for week: ${selectedWeek}, box_size: ${selectedBoxSize}`);
+      
       const { error } = await supabase
         .from('box_templates')
         .insert([{
@@ -130,17 +138,21 @@ export const AdminBoxTemplates = () => {
           quantity: 1
         }]);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Insert error details:', error);
+        throw error;
+      }
+      
       toast({
         title: "Success",
         description: "Product added to box template"
       });
       fetchTemplates();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding product:', error);
       toast({
         title: "Error",
-        description: "Failed to add product to box",
+        description: error.message || "Failed to add product to box. Check console for details.",
         variant: "destructive"
       });
     }
@@ -177,17 +189,21 @@ export const AdminBoxTemplates = () => {
         .delete()
         .eq('id', templateId);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Delete error details:', error);
+        throw error;
+      }
+      
       toast({
         title: "Success",
         description: "Product removed from box template"
       });
       fetchTemplates();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error removing product:', error);
       toast({
         title: "Error",
-        description: "Failed to remove product",
+        description: error.message || "Failed to remove product. Check console for details.",
         variant: "destructive"
       });
     }
@@ -284,16 +300,22 @@ export const AdminBoxTemplates = () => {
         .eq('box_size', selectedBoxSize)
         .eq('is_confirmed', false);
 
+      console.log(`Confirming templates for week: ${selectedWeek}, box_size: ${selectedBoxSize}, affected_bags: ${affectedBagsCount}`);
+
       const { error } = await supabase
         .from('box_templates')
         .update({ 
           is_confirmed: true,
-          confirmed_at: new Date().toISOString()
+          confirmed_at: new Date().toISOString(),
+          confirmed_by: (await supabase.auth.getUser()).data.user?.id
         })
         .eq('week_start_date', selectedWeek)
         .eq('box_size', selectedBoxSize);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Confirmation error details:', error);
+        throw error;
+      }
 
       toast({
         title: "Success",
@@ -301,11 +323,11 @@ export const AdminBoxTemplates = () => {
       });
       
       fetchTemplates();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error confirming template:', error);
       toast({
         title: "Error",
-        description: "Failed to confirm template",
+        description: error.message || "Failed to confirm template. Check console for details.",
         variant: "destructive"
       });
     }
