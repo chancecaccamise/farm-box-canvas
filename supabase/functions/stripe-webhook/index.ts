@@ -36,7 +36,7 @@ serve(async (req) => {
     logStep("Webhook secret found");
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
-      apiVersion: "2025-06-30",
+      apiVersion: "2024-10-28",
     });
     logStep("Stripe client initialized");
 
