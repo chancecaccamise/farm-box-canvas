@@ -196,6 +196,7 @@ const MyPlan = () => {
             <SubscriptionManager 
               subscription={subscription} 
               onSubscriptionUpdate={loadUserData}
+              boxSize={weeklyBag?.box_size || undefined}
             />
 
 

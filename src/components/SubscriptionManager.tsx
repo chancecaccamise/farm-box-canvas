@@ -20,13 +20,16 @@ interface SubscriptionManagerProps {
     auto_resume_date?: string | null;
   } | null;
   onSubscriptionUpdate: () => void;
+  boxSize?: string | null;
 }
 
-export function SubscriptionManager({ subscription, onSubscriptionUpdate }: SubscriptionManagerProps) {
+export function SubscriptionManager({ subscription, onSubscriptionUpdate, boxSize }: SubscriptionManagerProps) {
   const [loading, setLoading] = useState(false);
   const [pauseReason, setPauseReason] = useState("");
   const [cancelReason, setCancelReason] = useState("");
   const [resumeDate, setResumeDate] = useState("");
+  const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleCustomerPortal = async () => {
     setLoading(true);
@@ -47,11 +50,68 @@ export function SubscriptionManager({ subscription, onSubscriptionUpdate }: Subs
       setLoading(false);
     }
   };
-  const { toast } = useToast();
-  const navigate = useNavigate();
+
+  const handleUpgradeToSubscription = async () => {
+    setLoading(true);
+    try {
+      const box_size = (typeof (subscription as any)?.box_size === 'string' ? (subscription as any).box_size : undefined) || (typeof (window as any)?.currentBoxSize === 'string' ? (window as any).currentBoxSize : undefined) || (typeof (null) === 'string' ? null : undefined);
+      const payload = { box_size: (boxSize || box_size || 'medium').toLowerCase() } as { box_size: string };
+      const { data, error } = await supabase.functions.invoke('create-checkout', { body: payload });
+      if (error) throw error;
+      if (!data?.url) throw new Error('No checkout URL returned');
+      window.open(data.url, '_blank');
+      toast({ title: 'Redirecting to Stripe', description: 'Complete checkout to start your subscription.' });
+    } catch (error) {
+      console.error('Error starting subscription:', error);
+      toast({ title: 'Error', description: 'Failed to start subscription. Please try again.', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRefreshStatus = async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.functions.invoke('check-subscription');
+      if (error) throw error;
+      await onSubscriptionUpdate();
+      toast({ title: 'Subscription status refreshed' });
+    } catch (error) {
+      console.error('Error refreshing status:', error);
+      toast({ title: 'Error', description: 'Failed to refresh status.', variant: 'destructive' });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (!subscription) {
-    return null;
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <span className="flex items-center gap-2">
+              <Calendar className="h-5 w-5" />
+              Subscription Management
+            </span>
+            <Badge variant="outline">No subscription</Badge>
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            You currently don't have an active subscription. Upgrade your one-time purchase to receive a weekly box automatically.
+          </p>
+          <div className="flex gap-2">
+            <Button onClick={handleUpgradeToSubscription} size="sm" disabled={loading}>
+              <ShoppingCart className="h-4 w-4 mr-2" />
+              {loading ? 'Starting…' : 'Upgrade to subscription'}
+            </Button>
+            <Button onClick={handleRefreshStatus} size="sm" variant="outline" disabled={loading}>
+              Refresh status
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    );
   }
 
   const handlePauseSubscription = async () => {
@@ -293,21 +353,29 @@ export function SubscriptionManager({ subscription, onSubscriptionUpdate }: Subs
                 To change your subscription, you'll need to start a new one.
               </p>
               <div className="flex gap-2">
-                <Button onClick={() => navigate('/')} size="sm" variant="outline">
+                <Button onClick={handleUpgradeToSubscription} size="sm" variant="default" disabled={loading}>
                   <ShoppingCart className="h-4 w-4 mr-2" />
-                  Start New Subscription
+                  Upgrade to subscription
                 </Button>
                 <Button onClick={handleCustomerPortal} size="sm" variant="secondary" disabled={loading}>
                   Manage via Stripe
+                </Button>
+                <Button onClick={handleRefreshStatus} size="sm" variant="outline" disabled={loading}>
+                  Refresh status
                 </Button>
               </div>
             </div>
           )}
 
           {(subscription.status === 'active' || subscription.status === 'paused') && (
-            <Button onClick={handleCustomerPortal} size="sm" variant="secondary" disabled={loading}>
-              Manage via Stripe
-            </Button>
+            <>
+              <Button onClick={handleCustomerPortal} size="sm" variant="secondary" disabled={loading}>
+                Manage via Stripe
+              </Button>
+              <Button onClick={handleRefreshStatus} size="sm" variant="outline" disabled={loading}>
+                Refresh status
+              </Button>
+            </>
           )}
         </div>
       </CardContent>
