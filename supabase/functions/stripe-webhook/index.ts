@@ -40,7 +40,7 @@ serve(async (req) => {
     });
     logStep("Stripe client initialized");
 
-    const body = await req.text();
+    const body = await req.arrayBuffer();
     const signature = req.headers.get("stripe-signature");
 
     logStep("Request details", { 
