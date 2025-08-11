@@ -25,6 +25,14 @@ const OrderSummary = () => {
     checkSubscriptionStatus();
   }, [checkoutState]);
 
+  // Redirect subscribers back to MyBag if they shouldn't be here
+  useEffect(() => {
+    if (hasActiveSubscription && user) {
+      console.log('Subscriber detected on OrderSummary, redirecting to MyBag');
+      navigate('/my-bag');
+    }
+  }, [hasActiveSubscription, user, navigate]);
+
   const checkSubscriptionStatus = async () => {
     if (!user) return;
     
@@ -262,34 +270,41 @@ const OrderSummary = () => {
 
         {/* Title */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold mb-4">Review Your Order</h1>
+          <h1 className="text-4xl font-bold mb-4">
+            {hasActiveSubscription ? "Review Your Add-ons" : "Review Your Order"}
+          </h1>
           <p className="text-xl text-muted-foreground">
-            Double-check your selections before we prepare your farm box
+            {hasActiveSubscription 
+              ? "Review your add-on selections before checkout"
+              : "Double-check your selections before we prepare your farm box"
+            }
           </p>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Order Details */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Box Configuration */}
-            <Card className="shadow-soft">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Package className="w-5 h-5" />
-                  Box Configuration
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Box Type:</span>
-                  <span className="font-medium">{checkoutState.boxType === 'subscription' ? 'Subscription' : 'One-Time'}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Box Size:</span>
-                  <span className="font-medium">{checkoutState.boxSize?.charAt(0).toUpperCase() + checkoutState.boxSize?.slice(1)} Box</span>
-                </div>
-              </CardContent>
-            </Card>
+            {/* Box Configuration - Hide for subscribers */}
+            {!hasActiveSubscription && (
+              <Card className="shadow-soft">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Package className="w-5 h-5" />
+                    Box Configuration
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Box Type:</span>
+                    <span className="font-medium">{checkoutState.boxType === 'subscription' ? 'Subscription' : 'One-Time'}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Box Size:</span>
+                    <span className="font-medium">{checkoutState.boxSize?.charAt(0).toUpperCase() + checkoutState.boxSize?.slice(1)} Box</span>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Delivery Details */}
             <Card className="shadow-soft">
@@ -315,33 +330,60 @@ const OrderSummary = () => {
               </CardContent>
             </Card>
 
-            {/* Box Details */}
-            <Card className="shadow-soft">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Package className="w-5 h-5" />
-                  Box Contents
-                </CardTitle>
-                <CardDescription>
-                  Your {checkoutState.boxSize} box selection
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h3 className="font-medium">
-                      {checkoutState.boxSize?.charAt(0).toUpperCase() + checkoutState.boxSize?.slice(1)} Box
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      {hasActiveSubscription ? "Fresh seasonal produce (subscription)" : "Fresh seasonal produce"}
-                    </p>
+            {/* Box Details - Show different info for subscribers */}
+            {!hasActiveSubscription && (
+              <Card className="shadow-soft">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Package className="w-5 h-5" />
+                    Box Contents
+                  </CardTitle>
+                  <CardDescription>
+                    Your {checkoutState.boxSize} box selection
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="font-medium">
+                        {checkoutState.boxSize?.charAt(0).toUpperCase() + checkoutState.boxSize?.slice(1)} Box
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        Fresh seasonal produce
+                      </p>
+                    </div>
+                    <span className="font-medium">${boxPrice.toFixed(2)}</span>
                   </div>
-                  <span className="font-medium">
-                    {hasActiveSubscription ? "Included" : `$${boxPrice.toFixed(2)}`}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+            )}
+
+            {hasActiveSubscription && (
+              <Card className="shadow-soft border-green-200 bg-green-50">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-green-800">
+                    <Package className="w-5 h-5" />
+                    Your Subscription Box
+                  </CardTitle>
+                  <CardDescription className="text-green-700">
+                    Already included in your active subscription
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <h3 className="font-medium text-green-800">
+                        {checkoutState.boxSize?.charAt(0).toUpperCase() + checkoutState.boxSize?.slice(1)} Box
+                      </h3>
+                      <p className="text-sm text-green-700">
+                        Fresh seasonal produce (subscription active)
+                      </p>
+                    </div>
+                    <span className="font-medium text-green-800">Included</span>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Add-Ons */}
             {addOnProducts.length > 0 && (
@@ -380,17 +422,23 @@ const OrderSummary = () => {
           <div className="lg:col-span-1">
             <Card className="sticky top-8 shadow-medium">
               <CardHeader>
-                <CardTitle>Order Summary</CardTitle>
+                <CardTitle>
+                  {hasActiveSubscription ? "Add-on Summary" : "Order Summary"}
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Box Price:</span>
-                    <span>{hasActiveSubscription ? "Included" : `$${boxPrice.toFixed(2)}`}</span>
-                  </div>
+                  {!hasActiveSubscription && (
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Box Price:</span>
+                      <span>${boxPrice.toFixed(2)}</span>
+                    </div>
+                  )}
                   {addOnProducts.length > 0 && (
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">Add-ons Total:</span>
+                      <span className="text-muted-foreground">
+                        {hasActiveSubscription ? "Add-ons Total:" : "Add-ons Total:"}
+                      </span>
                       <span>${addOnTotal.toFixed(2)}</span>
                     </div>
                   )}
@@ -398,6 +446,12 @@ const OrderSummary = () => {
                     <span className="text-muted-foreground">Delivery Fee:</span>
                     <span className="text-accent">Free</span>
                   </div>
+                  {hasActiveSubscription && (
+                    <div className="flex justify-between text-green-700">
+                      <span>Subscription Box:</span>
+                      <span>Included</span>
+                    </div>
+                  )}
                 </div>
 
                 <Separator />
@@ -416,12 +470,20 @@ const OrderSummary = () => {
                   className="w-full"
                   disabled={isCheckingOut || totalAmount <= 0}
                 >
-                  {isCheckingOut ? "Creating Checkout..." : `Checkout - $${totalAmount.toFixed(2)}`}
+                  {isCheckingOut 
+                    ? "Creating Checkout..." 
+                    : hasActiveSubscription 
+                      ? `Checkout Add-ons - $${totalAmount.toFixed(2)}`
+                      : `Checkout - $${totalAmount.toFixed(2)}`
+                  }
                 </Button>
 
                 <div className="text-center">
                   <p className="text-xs text-muted-foreground">
-                    You'll be redirected to secure checkout to complete your order.
+                    {hasActiveSubscription 
+                      ? "You'll be redirected to secure checkout to purchase your add-ons."
+                      : "You'll be redirected to secure checkout to complete your order."
+                    }
                   </p>
                 </div>
               </CardContent>
