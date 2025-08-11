@@ -114,9 +114,9 @@ serve(async (req) => {
 
       logStep("Found existing order", { orderId: existingOrder.id, currentStatus: existingOrder.payment_status });
 
-      // Retrieve full session details with customer and shipping info
+      // Retrieve full session details with customer info
       const fullSession = await stripe.checkout.sessions.retrieve(session.id, {
-        expand: ['customer', 'shipping_details']
+        expand: ['customer']
       });
       logStep("Retrieved full session details", { 
         customerId: fullSession.customer,
