@@ -201,14 +201,18 @@ serve(async (req) => {
 
     logStep("Created line items", { itemCount: lineItems.length });
 
+    // Get the correct origin URL for redirects
+    const origin = req.headers.get("origin") || req.headers.get("referer")?.split('/').slice(0, 3).join('/') || "https://f78f5142-250a-4339-adfa-6897bce152ea.lovableproject.com";
+    logStep("Using origin for redirects", { origin });
+
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
       line_items: lineItems,
       mode: "payment",
-      success_url: `${req.headers.get("origin")}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.get("origin")}/my-bag?cancelled=true`,
+      success_url: `${origin}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/my-bag?cancelled=true`,
       shipping_address_collection: {
         allowed_countries: ['US'],
       },
