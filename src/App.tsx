@@ -38,6 +38,7 @@ import PartnerProfile from "./pages/PartnerProfile";
 import NotFound from "./pages/NotFound";
 import Admin from "./pages/Admin";
 import ScrollToTop from "./components/ScrollToTop";
+import RedirectAfterStripe from "./components/RedirectAfterStripe";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -91,7 +92,12 @@ const AppRoutes = () => {
         <Route path="/order-confirmation" element={<ThankYou />} />
         
         {/* Conditional landing page */}
-        <Route path="/" element={user ? <Landing /> : <UnauthenticatedLanding />} />
+        <Route path="/" element={
+          <>
+            <RedirectAfterStripe />
+            {user ? <Landing /> : <UnauthenticatedLanding />}
+          </>
+        } />
         
         {/* Protected routes */}
         {user ? (

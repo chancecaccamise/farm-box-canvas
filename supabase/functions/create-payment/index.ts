@@ -211,8 +211,8 @@ serve(async (req) => {
       customer_email: customerId ? undefined : user.email,
       line_items: lineItems,
       mode: "payment",
-      success_url: `${origin}/thank-you?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/my-bag?cancelled=true`,
+      success_url: `${origin}/?stripe_redirect=thank-you&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${origin}/?stripe_redirect=my-bag&cancelled=true`,
       shipping_address_collection: {
         allowed_countries: ['US'],
       },
