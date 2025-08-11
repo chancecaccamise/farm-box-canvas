@@ -36,16 +36,17 @@ serve(async (req) => {
     logStep("Webhook secret found");
 
     const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") || "", {
-      apiVersion: "2023-10-16",
+      apiVersion: "2025-06-30",
     });
     logStep("Stripe client initialized");
 
-    const body = await req.text();
+    // Get raw body as Uint8Array to preserve original signature
+    const rawBody = new Uint8Array(await req.arrayBuffer());
     const signature = req.headers.get("stripe-signature");
 
     logStep("Request details", { 
-      bodyLength: body.length,
-      bodyPreview: body.substring(0, 100) + "...",
+      bodyLength: rawBody.length,
+      bodyPreview: new TextDecoder().decode(rawBody.slice(0, 100)) + "...",
       hasSignature: !!signature,
       signatureStart: signature?.substring(0, 20) + "...",
       webhookSecretFormat: webhookSecret?.substring(0, 8) + "..."
@@ -59,15 +60,16 @@ serve(async (req) => {
       });
     }
 
-    // Verify webhook signature
+    // Verify webhook signature using async method for Deno compatibility
     let event;
     try {
-      event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
+      event = await stripe.webhooks.constructEventAsync(rawBody, signature, webhookSecret);
       logStep("Event verified and constructed", { type: event.type, id: event.id });
     } catch (err) {
       logStep("ERROR: Webhook signature verification failed", { 
         error: err.message, 
-        bodyLength: body.length,
+        bodyLength: rawBody.length,
+        bodyType: typeof rawBody,
         signaturePresent: !!signature,
         webhookSecretPresent: !!webhookSecret
       });
