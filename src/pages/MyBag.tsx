@@ -1,21 +1,13 @@
-
 import { useState, useEffect } from "react";
-import { Package, Calendar, RefreshCw, CheckCircle, ShoppingCart } from "lucide-react";
+import { Package } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
-import { CountdownTimer } from "@/components/CountdownTimer";
 import { WeeklyBagSummary } from "@/components/WeeklyBagSummary";
 import { BagItemCard } from "@/components/BagItemCard";
 import { ReadOnlyBagItem } from "@/components/ReadOnlyBagItem";
 import { AddOnsGrid } from "@/components/AddOnsGrid";
-import { SubscriptionManager } from "@/components/SubscriptionManager";
-import { UnconfirmBagDialog } from "@/components/UnconfirmBagDialog";
 import { StartFarmBoxJourney } from "@/components/StartFarmBoxJourney";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 
 interface WeeklyBag {
   id: string;
@@ -51,156 +43,65 @@ interface WeeklyBagItem {
 function MyBag() {
   const { user } = useAuth();
   const { toast } = useToast();
-  const navigate = useNavigate();
   
   const [currentWeekBag, setCurrentWeekBag] = useState<WeeklyBag | null>(null);
   const [bagItems, setBagItems] = useState<WeeklyBagItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [isLocked, setIsLocked] = useState(false);
-  const [hasActiveSubscription, setHasActiveSubscription] = useState<boolean | null>(null);
-  const [subscription, setSubscription] = useState<any>(null);
-  const [showUnconfirmDialog, setShowUnconfirmDialog] = useState(false);
-  const [unconfirmLoading, setUnconfirmLoading] = useState(false);
-  const [hasPaidOrder, setHasPaidOrder] = useState<boolean>(false);
+  const [hasActiveSubscription, setHasActiveSubscription] = useState<boolean>(false);
 
   useEffect(() => {
     if (user) {
-      checkForExistingOrder();
+      initializeUserData();
     }
-    
-    // Check for cancelled checkout
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get('cancelled') === 'true') {
-      toast({
-        title: "Checkout cancelled",
-        description: "No worries! Your items are still in your bag.",
-        variant: "default",
-      });
-      // Clean up URL
-      window.history.replaceState({}, '', '/my-bag');
-    }
-  }, [user, toast]);
+  }, [user]);
 
-  const checkForExistingOrder = async () => {
+  const initializeUserData = async () => {
     try {
-      // First check if user has any paid orders (this blocks further bag creation)
+      // Check if user has any paid orders (this blocks further bag creation)
       const { data: paidOrders, error: orderError } = await supabase
         .from("orders")
-        .select("id, payment_status, created_at, order_confirmation_number")
+        .select("id, payment_status")
         .eq("user_id", user?.id)
         .eq("payment_status", "paid")
-        .order("created_at", { ascending: false })
         .limit(1);
 
-      if (orderError) {
-        throw orderError;
-      }
+      if (orderError) throw orderError;
 
+      // If user has paid orders, don't show bag functionality
       if (paidOrders && paidOrders.length > 0) {
-        setHasPaidOrder(true);
         setLoading(false);
         return;
       }
 
-      // If no paid orders, proceed to check subscription status and initialize bag
-      await checkSubscriptionStatus();
-    } catch (error) {
-      console.error("Error checking existing order:", error);
-      toast({
-        title: "Connection Error",
-        description: "Having trouble loading your account. Please refresh the page.",
-        variant: "destructive",
-      });
-      setLoading(false);
-    }
-  };
-
-  const checkSubscriptionStatus = async () => {
-    try {
-      // Check if user has an active subscription
+      // Check subscription status
       const { data: subscriptionsData, error: subError } = await supabase
         .from("user_subscriptions")
         .select("*")
         .eq("user_id", user?.id)
-        .order("created_at", { ascending: false });
+        .eq("status", "active")
+        .limit(1);
 
-      if (subError) {
-        throw subError;
-      }
+      if (subError) throw subError;
+      setHasActiveSubscription(subscriptionsData && subscriptionsData.length > 0);
 
-      const activeSubscription = subscriptionsData?.find(sub => sub.status === 'active');
-      const isActiveSubscription = !!activeSubscription;
-      
-      setSubscription(activeSubscription || null);
-      setHasActiveSubscription(isActiveSubscription);
-
-      // Initialize bag regardless of subscription status
+      // Initialize current week bag
       await initializeCurrentWeekBag();
     } catch (error) {
-      console.error("Error checking subscription:", error);
-      setHasActiveSubscription(false);
+      console.error("Error initializing user data:", error);
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (currentWeekBag) {
-      checkIfLocked();
-      const interval = setInterval(checkIfLocked, 1000);
-      return () => clearInterval(interval);
-    }
-  }, [currentWeekBag]);
-
-  // Set up real-time subscription for bag item changes
-  useEffect(() => {
-    if (!user || !currentWeekBag?.id) return;
-
-    const channel = supabase
-      .channel('weekly-bag-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'weekly_bag_items',
-          filter: `weekly_bag_id=eq.${currentWeekBag.id}`
-        },
-        (payload) => {
-          console.log('Bag items updated:', payload);
-          // Refresh the bag when items change
-          initializeCurrentWeekBag();
-          
-          // Show notification if it's an update from template confirmation
-          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
-            toast({
-              title: "Bag Updated",
-              description: "Your bag contents have been updated based on this week's confirmed selections.",
-            });
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user, currentWeekBag?.id]);
-
   const initializeCurrentWeekBag = async () => {
     try {
-      // Use the new function that handles box size and templates
       const { data: bagIdData, error: bagError } = await supabase
         .rpc('get_or_create_current_week_bag_with_size', { 
           user_uuid: user?.id,
-          box_size_name: 'medium' // Default to medium, user can change later
+          box_size_name: 'medium'
         });
 
-      if (bagError) {
-        console.error("Database function error:", bagError);
-        throw bagError;
-      }
+      if (bagError) throw bagError;
 
-      // Fetch the bag details
       const { data: bagData, error: fetchError } = await supabase
         .from("weekly_bags")
         .select("*")
@@ -213,11 +114,8 @@ function MyBag() {
       await fetchBagItems(bagData.id);
     } catch (error) {
       console.error("Error initializing weekly bag:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load your bag. Please refresh the page.",
-        variant: "destructive",
-      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -249,84 +147,11 @@ function MyBag() {
     }
   };
 
-  const checkIfLocked = () => {
-    if (!currentWeekBag) return;
-    const now = new Date();
-    const cutoff = new Date(currentWeekBag.cutoff_time);
-    setIsLocked(now > cutoff);
-  };
-
-  const canUnconfirmBag = () => {
-    if (!currentWeekBag) return false;
-    const now = new Date();
-    const cutoff = new Date(currentWeekBag.cutoff_time);
-    return currentWeekBag.is_confirmed && now <= cutoff;
-  };
-
-  const handleUnconfirmBag = async () => {
-    if (!currentWeekBag) return;
-    
-    setUnconfirmLoading(true);
-    try {
-      // Update the weekly bag to unconfirmed status
-      const { error: updateError } = await supabase
-        .from("weekly_bags")
-        .update({ 
-          is_confirmed: false, 
-          confirmed_at: null 
-        })
-        .eq("id", currentWeekBag.id);
-
-      if (updateError) throw updateError;
-
-      // Repopulate with latest template items (this preserves add-ons)
-      const { error: populateError } = await supabase
-        .rpc('populate_weekly_bag_from_template', {
-          bag_id: currentWeekBag.id,
-          box_size_name: currentWeekBag.box_size,
-          week_start: currentWeekBag.week_start_date
-        });
-
-      if (populateError) {
-        console.error("Error repopulating bag:", populateError);
-        // Continue anyway - the unconfirm still worked
-      }
-
-      // Refresh the bag data
-      await initializeCurrentWeekBag();
-
-      toast({
-        title: "Bag Unconfirmed",
-        description: "Your bag has been unconfirmed and updated with the latest box contents. You can now make changes.",
-      });
-    } catch (error) {
-      console.error("Error unconfirming bag:", error);
-      toast({
-        title: "Error",
-        description: "Failed to unconfirm your bag. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setUnconfirmLoading(false);
-    }
-  };
-
   const updateItemQuantity = async (productId: string, newQuantity: number) => {
-    // Only prevent editing if cutoff time has passed OR bag is confirmed
-    if (!currentWeekBag || isLocked || currentWeekBag.is_confirmed) {
-      toast({
-        title: "Cannot Modify",
-        description: currentWeekBag?.is_confirmed 
-          ? "Your bag is confirmed. Please unconfirm it first to make changes."
-          : "The cutoff time has passed and your bag can no longer be modified.",
-        variant: "destructive",
-      });
-      return;
-    }
+    if (!currentWeekBag) return;
 
     try {
       if (newQuantity <= 0) {
-        // Remove addon item only (box items can't be removed)
         await supabase
           .from("weekly_bag_items")
           .delete()
@@ -334,7 +159,6 @@ function MyBag() {
           .eq("product_id", productId)
           .eq("item_type", "addon");
       } else {
-        // Get current product price
         const { data: productData } = await supabase
           .from("products")
           .select("price")
@@ -343,7 +167,6 @@ function MyBag() {
 
         if (!productData) return;
 
-        // Check if item exists
         const { data: existingItem } = await supabase
           .from("weekly_bag_items")
           .select("*")
@@ -351,17 +174,13 @@ function MyBag() {
           .eq("product_id", productId)
           .maybeSingle();
 
-        if (existingItem) {
-          // Update existing addon only
-          if (existingItem.item_type === 'addon') {
-            await supabase
-              .from("weekly_bag_items")
-              .update({ quantity: newQuantity })
-              .eq("weekly_bag_id", currentWeekBag.id)
-              .eq("product_id", productId);
-          }
-        } else {
-          // Add new addon
+        if (existingItem && existingItem.item_type === 'addon') {
+          await supabase
+            .from("weekly_bag_items")
+            .update({ quantity: newQuantity })
+            .eq("weekly_bag_id", currentWeekBag.id)
+            .eq("product_id", productId);
+        } else if (!existingItem) {
           await supabase
             .from("weekly_bag_items")
             .insert({
@@ -376,18 +195,8 @@ function MyBag() {
 
       await fetchBagItems(currentWeekBag.id);
       await updateBagTotals();
-      
-      toast({
-        title: "Success",
-        description: `${newQuantity > 0 ? 'Added to' : 'Removed from'} your bag`,
-      });
     } catch (error) {
       console.error("Error updating item quantity:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update item. Please try again.",
-        variant: "destructive",
-      });
     }
   };
 
@@ -395,13 +204,11 @@ function MyBag() {
     if (!currentWeekBag) return;
 
     try {
-      // Use the database function to update totals
       const { error } = await supabase
         .rpc('update_weekly_bag_totals', { bag_id: currentWeekBag.id });
 
       if (error) throw error;
 
-      // Refresh the weekly bag data
       const { data: bagData, error: fetchError } = await supabase
         .from("weekly_bags")
         .select("*")
@@ -416,72 +223,42 @@ function MyBag() {
     }
   };
 
-  const confirmBagWithoutPayment = async () => {
-    if (!currentWeekBag) return;
-    
-    setLoading(true);
-    try {
-      const { error } = await supabase
-        .from("weekly_bags")
-        .update({ 
-          is_confirmed: true, 
-          confirmed_at: new Date().toISOString() 
-        })
-        .eq("id", currentWeekBag.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Bag Confirmed!",
-        description: "Your weekly bag has been confirmed and will be delivered automatically.",
-      });
-
-      // Refresh the bag data
-      await initializeCurrentWeekBag();
-    } catch (error) {
-      console.error("Error confirming bag:", error);
-      toast({
-        title: "Error",
-        description: "Failed to confirm your bag. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleCheckout = async () => {
-    if (!currentWeekBag || !bagItems) {
-      toast({
-        title: "Error",
-        description: "Unable to process checkout. Please refresh the page.",
-        variant: "destructive",
-      });
-      return;
-    }
+    if (!currentWeekBag || !bagItems) return;
 
-    // Check if subscriber with no unpaid add-ons - just confirm locally
-    const unpaidAddonItems = getUnpaidAddonItems();
-    if (hasActiveSubscription && unpaidAddonItems.length === 0) {
-      await confirmBagWithoutPayment();
+    const addonItems = bagItems.filter(item => item.item_type === 'addon');
+    
+    if (hasActiveSubscription && addonItems.length === 0) {
+      // Subscriber with only box items - confirm without payment
+      setLoading(true);
+      try {
+        const { error } = await supabase
+          .from("weekly_bags")
+          .update({ 
+            is_confirmed: true, 
+            confirmed_at: new Date().toISOString() 
+          })
+          .eq("id", currentWeekBag.id);
+
+        if (error) throw error;
+
+        toast({
+          title: "Bag Confirmed!",
+          description: "Your weekly bag has been confirmed.",
+        });
+
+        await initializeCurrentWeekBag();
+      } catch (error) {
+        console.error("Error confirming bag:", error);
+      } finally {
+        setLoading(false);
+      }
       return;
     }
 
     setLoading(true);
     try {
-      // For subscribers, only checkout unpaid add-ons
-      const itemsToCheckout = hasActiveSubscription ? unpaidAddonItems : bagItems;
-      
-      // Optimistically mark items as paid for better UX
-      const optimisticUpdate = () => {
-        setBagItems(prevItems => 
-          prevItems.map(item => 
-            item.item_type === 'addon' && !item.is_paid 
-              ? { ...item, is_paid: true }
-              : item
-          )
-        );
-      };
+      const itemsToCheckout = hasActiveSubscription ? addonItems : bagItems;
       
       const { data, error } = await supabase.functions.invoke('create-payment', {
         body: {
@@ -495,35 +272,18 @@ function MyBag() {
         console.error("Payment error:", error);
         toast({
           title: "Payment Error",
-          description: error.message || "Failed to create checkout session. Please try again.",
+          description: "Failed to create checkout session. Please try again.",
           variant: "destructive",
         });
+        setLoading(false);
         return;
       }
 
       if (data?.url) {
-        // Apply optimistic update before redirecting
-        if (hasActiveSubscription && unpaidAddonItems.length > 0) {
-          optimisticUpdate();
-          toast({
-            title: "Redirecting to checkout",
-            description: "You'll be redirected to Stripe to complete your payment. Add-ons marked as confirmed.",
-          });
-        }
-        
-        // Redirect to Stripe checkout in the same window
         window.location.href = data.url;
-      } else {
-        throw new Error("No checkout URL received");
       }
     } catch (error) {
       console.error("Checkout error:", error);
-      toast({
-        title: "Checkout Error",
-        description: "Failed to initiate checkout. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
       setLoading(false);
     }
   };
@@ -532,56 +292,39 @@ function MyBag() {
     return bagItems.filter(item => item.item_type === 'box_item');
   };
 
-  const getAddonItems = () => {
+  const getConfirmedAddons = () => {
     return bagItems.filter(item => item.item_type === 'addon');
   };
 
-  const getConfirmedAddonItems = () => {
-    return bagItems.filter(item => item.item_type === 'addon' && item.is_paid);
+  const getAddonQuantities = () => {
+    const quantities: Record<string, number> = {};
+    bagItems.forEach(item => {
+      if (item.item_type === 'addon') {
+        quantities[item.product_id] = item.quantity;
+      }
+    });
+    return quantities;
   };
 
-  const getUnpaidAddonItems = () => {
-    return bagItems.filter(item => item.item_type === 'addon' && !item.is_paid);
+  const hasBoxItems = () => {
+    return getBoxItems().length > 0;
   };
 
-  const getCurrentBagProducts = () => {
-    return bagItems
-      .filter(item => item.item_type === 'addon')
-      .reduce((acc, item) => {
-        acc[item.product_id] = item.quantity;
-        return acc;
-      }, {} as Record<string, number>);
-  };
-
-  const formatWeekDate = () => {
-    if (!currentWeekBag?.week_start_date) return "";
-    const startDate = new Date(currentWeekBag.week_start_date);
-    const endDate = new Date(currentWeekBag.week_end_date);
-    
-    return `${startDate.toLocaleDateString('en-US', { 
-      month: 'long', 
-      day: 'numeric' 
-    })} - ${endDate.toLocaleDateString('en-US', { 
-      month: 'long', 
-      day: 'numeric' 
-    })}`;
+  const getConfirmedAddonIds = () => {
+    return getConfirmedAddons().map(item => item.product_id);
   };
 
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="animate-pulse space-y-8">
-            <div className="h-8 bg-muted rounded w-1/4"></div>
-            <div className="h-32 bg-muted rounded"></div>
-            <div className="grid lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 space-y-4">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-32 bg-muted rounded"></div>
-                ))}
-              </div>
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="animate-pulse">
+              <div className="h-8 bg-muted rounded w-48 mb-6"></div>
               <div className="space-y-4">
-                <div className="h-64 bg-muted rounded"></div>
+                <div className="h-32 bg-muted rounded"></div>
+                <div className="h-32 bg-muted rounded"></div>
+                <div className="h-32 bg-muted rounded"></div>
               </div>
             </div>
           </div>
@@ -590,52 +333,28 @@ function MyBag() {
     );
   }
 
-  // Show different content based on user status
-  if (hasPaidOrder) {
-    // User has a paid order - show simple message with contact info
+  if (!user) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="max-w-4xl mx-auto px-4 py-8">
-          <div className="text-center space-y-8">
-            <div className="space-y-4">
-              <CheckCircle className="w-16 h-16 text-green-600 mx-auto" />
-              <h1 className="text-3xl font-bold text-foreground">Order Confirmed!</h1>
-              <p className="text-muted-foreground max-w-2xl mx-auto">
-                Your farm box order has been confirmed and is being prepared for delivery.
-                You'll receive an email with tracking information once your order ships.
-              </p>
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">Please log in to view your bag.</p>
             </div>
-            
-            <Card className="max-w-md mx-auto">
-              <CardContent className="pt-6">
-                <div className="space-y-4">
-                  <h3 className="font-semibold">Need to make changes?</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Contact our support team to modify your order or start planning your next delivery.
-                  </p>
-                  <div className="space-y-2">
-                    <Button className="w-full" onClick={() => navigate('/box-selection')}>
-                      Start Next Week's Box
-                    </Button>
-                    <Button variant="outline" className="w-full" asChild>
-                      <a href="mailto:support@billysbotanicals.com">Contact Support</a>
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>
     );
   }
 
-  // No subscription and no paid order - show start journey
-  if (hasActiveSubscription === false) {
+  // Show Start Farm Box Journey if no current bag
+  if (!currentWeekBag) {
     return (
       <div className="min-h-screen bg-background">
-        <div className="max-w-7xl mx-auto px-4 py-8">
-          <StartFarmBoxJourney />
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-7xl mx-auto">
+            <StartFarmBoxJourney />
+          </div>
         </div>
       </div>
     );
@@ -643,226 +362,86 @@ function MyBag() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="space-y-8">
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="text-center">
-            <h1 className="text-4xl font-bold text-foreground mb-2">My Bag</h1>
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-foreground mb-2">My Bag</h1>
             <p className="text-muted-foreground">
-              Your curated {currentWeekBag?.box_size} box with optional add-ons
+              Review your weekly farm box contents and add any extras you'd like.
             </p>
           </div>
 
-          {/* Countdown Timer */}
-          {currentWeekBag && (
-            <CountdownTimer
-              cutoffTime={currentWeekBag.cutoff_time}
-              isConfirmed={currentWeekBag.is_confirmed}
-              hasActiveSubscription={hasActiveSubscription}
-            />
-          )}
-
           <div className="grid lg:grid-cols-3 gap-8">
-            {/* Left Side - Bag Items & Add-ons */}
-            <div className="lg:col-span-2 space-y-8">
-              {/* This Week's Box Section */}
-              <div className="space-y-6">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <Package className="w-6 h-6 text-primary" />
-                    <div>
-                      <h2 className="text-2xl font-semibold">
-                        Your Box for the Week of {formatWeekDate()}
-                      </h2>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        {currentWeekBag?.box_size ? currentWeekBag.box_size.charAt(0).toUpperCase() + currentWeekBag.box_size.slice(1) : ''} Box - Curated by our team
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Bag Status & Unconfirm Button */}
-                  <div className="flex items-center gap-3">
-                    {currentWeekBag?.is_confirmed ? (
-                      <div className="flex items-center gap-2">
-                        <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">
-                          <CheckCircle className="w-3 h-3 mr-1" />
-                          Confirmed
-                        </Badge>
-                        {canUnconfirmBag() && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setShowUnconfirmDialog(true)}
-                            disabled={unconfirmLoading}
-                            className="text-primary border-primary hover:bg-primary/10"
-                          >
-                            <RefreshCw className="w-4 h-4 mr-2" />
-                            Unconfirm
-                          </Button>
-                        )}
-                      </div>
-                    ) : (
-                      <Badge variant="outline" className="bg-amber-50 text-amber-700 border-amber-200">
-                        Open for Changes
-                      </Badge>
-                    )}
-                  </div>
-                </div>
-                
-                {getBoxItems().length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Main content - Bag Items */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Box Items Section */}
+              <div>
+                <h2 className="text-xl font-semibold mb-4">Your Box Contents</h2>
+                {hasBoxItems() ? (
+                  <div className="space-y-3">
                     {getBoxItems().map((item) => (
-                      <ReadOnlyBagItem 
+                      <ReadOnlyBagItem
                         key={item.id}
                         item={item}
-                        partnerName="Billy's Farm" // TODO: Add partner lookup
                       />
                     ))}
                   </div>
                 ) : (
-                  <div className="text-center py-8 text-muted-foreground bg-muted/30 rounded-lg">
-                    <Package className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                    <p className="font-medium">Your box is being curated by our team</p>
-                    <p className="text-sm mt-2">Box contents will appear here once our admin team confirms the {currentWeekBag?.box_size} box template for this week.</p>
-                  </div>
-                )}
-
-                {/* Status Message - Updated to show confirmation and cutoff info */}
-                <div className="bg-primary/5 border border-primary/20 p-4 rounded-lg">
-                  <div className="flex items-start gap-3">
-                    <Calendar className="w-5 h-5 text-primary mt-0.5" />
-                    <div>
-                      {hasActiveSubscription ? (
-                        <div>
-                          <p className="text-sm font-medium text-foreground">
-                            {currentWeekBag?.is_confirmed ? "Your confirmed box will be delivered automatically" : "Your box will be delivered automatically"}
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {currentWeekBag?.is_confirmed
-                              ? canUnconfirmBag() 
-                                ? "You can still unconfirm to make changes until the cutoff time."
-                                : "Your bag is locked for delivery. Changes will apply to next week."
-                              : isLocked 
-                                ? "Cutoff time has passed. No more changes allowed for this week."
-                                : "You can add extras and confirm your bag until the cutoff time."
-                            }
-                          </p>
-                        </div>
-                      ) : (
-                        <div>
-                          <p className="text-sm font-medium text-foreground">
-                            One-time purchase
-                          </p>
-                          <p className="text-xs text-muted-foreground mt-1">
-                            {currentWeekBag?.is_confirmed
-                              ? canUnconfirmBag()
-                                ? "Your bag is confirmed. You can still unconfirm to make changes."
-                                : "Your bag is locked for delivery."
-                              : isLocked 
-                                ? "Cutoff time has passed. No more changes allowed."
-                                : "Complete checkout to receive your box and any add-ons."
-                            }
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Your Confirmed Add-ons Section */}
-                {getConfirmedAddonItems().length > 0 && (
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-3">
-                      <CheckCircle className="w-6 h-6 text-green-600" />
-                      <h3 className="text-xl font-semibold">Your Confirmed Add-ons</h3>
-                      <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">
-                        {getConfirmedAddonItems().length} item{getConfirmedAddonItems().length !== 1 ? 's' : ''} • Paid
-                      </Badge>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {getConfirmedAddonItems().map((item) => (
-                        <div key={item.id} className="relative">
-                          <BagItemCard 
-                            item={item}
-                            onUpdateQuantity={updateItemQuantity}
-                            isLocked={true}
-                          />
-                          <div className="absolute top-2 right-2">
-                            <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200 text-xs">
-                              Paid
-                            </Badge>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Your Pending Add-ons Section */}
-                {getUnpaidAddonItems().length > 0 && (
-                  <div className="space-y-6">
-                    <div className="flex items-center gap-3">
-                      <ShoppingCart className="w-6 h-6 text-primary" />
-                      <h3 className="text-xl font-semibold">Your Add-ons</h3>
-                      <Badge variant="outline" className="bg-primary/10 text-primary border-primary/20">
-                        {getUnpaidAddonItems().length} item{getUnpaidAddonItems().length !== 1 ? 's' : ''} • Needs checkout
-                      </Badge>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {getUnpaidAddonItems().map((item) => (
-                        <BagItemCard 
-                          key={item.id}
-                          item={item}
-                          onUpdateQuantity={updateItemQuantity}
-                          isLocked={isLocked || currentWeekBag?.is_confirmed || false}
-                        />
-                      ))}
-                    </div>
+                  <div className="border-2 border-dashed border-muted-foreground/20 rounded-lg p-8 text-center text-muted-foreground">
+                    <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                    <p>Your box contents are being curated by our farmers.</p>
+                    <p className="text-sm">Check back soon to see what's included!</p>
                   </div>
                 )}
               </div>
 
-              {/* Browse Add-ons Section */}
-              <AddOnsGrid 
-                bagItems={getCurrentBagProducts()} 
-                onUpdateQuantity={updateItemQuantity}
-                isLocked={isLocked || currentWeekBag?.is_confirmed || false}
-                confirmedAddons={getConfirmedAddonItems().map(item => item.product_id)}
-              />
+              {/* Current Add-ons */}
+              {getConfirmedAddons().length > 0 && (
+                <div>
+                  <h2 className="text-xl font-semibold mb-4">Your Add-ons</h2>
+                  <div className="space-y-3">
+                    {getConfirmedAddons().map((item) => (
+                      <BagItemCard
+                        key={item.id}
+                        item={item}
+                        onUpdateQuantity={updateItemQuantity}
+                        isLocked={false}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Add-ons Grid */}
+              <div>
+                <h2 className="text-xl font-semibold mb-4">Or Shop Add-Ons</h2>
+                <AddOnsGrid
+                  bagItems={getAddonQuantities()}
+                  onUpdateQuantity={updateItemQuantity}
+                  isLocked={false}
+                  confirmedAddons={getConfirmedAddonIds()}
+                />
+              </div>
             </div>
 
-            {/* Right Side - Summary */}
-            <div className="space-y-6">
-              <WeeklyBagSummary
-                weeklyBag={currentWeekBag}
-                itemCount={bagItems.length}
-                onCheckout={handleCheckout}
-                isLocked={isLocked}
-                loading={loading}
-                hasActiveSubscription={hasActiveSubscription}
-                unpaidAddonsTotal={getUnpaidAddonItems().reduce((total, item) => total + (item.price_at_time * item.quantity), 0)}
-              />
-              
-              {/* Subscription Management */}
-              <SubscriptionManager 
-                subscription={subscription}
-                onSubscriptionUpdate={checkForExistingOrder}
-              />
+            {/* Sidebar - Summary */}
+            <div className="lg:col-span-1">
+              <div className="sticky top-8">
+                <WeeklyBagSummary
+                  weeklyBag={currentWeekBag}
+                  itemCount={bagItems.length}
+                  onCheckout={handleCheckout}
+                  isLocked={false}
+                  hasActiveSubscription={hasActiveSubscription}
+                  loading={loading}
+                  unpaidAddonsTotal={bagItems.filter(item => item.item_type === 'addon').reduce((sum, item) => sum + (item.price_at_time * item.quantity), 0)}
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Unconfirm Dialog */}
-      <UnconfirmBagDialog
-        isOpen={showUnconfirmDialog}
-        onClose={() => setShowUnconfirmDialog(false)}
-        onConfirm={handleUnconfirmBag}
-        loading={unconfirmLoading}
-        boxSize={currentWeekBag?.box_size || 'medium'}
-      />
     </div>
   );
 }
