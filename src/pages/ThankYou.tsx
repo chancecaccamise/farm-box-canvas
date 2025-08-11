@@ -27,6 +27,7 @@ interface OrderData {
   addons_total: number;
   delivery_fee: number;
   order_confirmation_number: string;
+  week_start_date?: string;
   order_items?: Array<{
     id: string;
     product_name: string;
@@ -152,7 +153,7 @@ const ThankYou = () => {
                 <div className="h-4 bg-muted rounded w-3/4"></div>
                 <div className="h-20 bg-muted rounded"></div>
               </div>
-            ) : orderDetails ? (
+            ) : orderData ? (
               <>
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="flex items-start gap-3">
@@ -162,9 +163,9 @@ const ThankYou = () => {
                     <div>
                       <h3 className="font-semibold mb-1">Delivery Address</h3>
                       <p className="text-sm text-muted-foreground">
-                        {orderDetails.shipping_address_street}
-                        {orderDetails.shipping_address_apartment && `, ${orderDetails.shipping_address_apartment}`}<br />
-                        {orderDetails.shipping_address_city}, {orderDetails.shipping_address_state} {orderDetails.shipping_address_zip}
+                        {orderData.shipping_address_street}
+                        {orderData.shipping_address_apartment && `, ${orderData.shipping_address_apartment}`}<br />
+                        {orderData.shipping_address_city}, {orderData.shipping_address_state} {orderData.shipping_address_zip}
                       </p>
                     </div>
                   </div>
@@ -176,8 +177,8 @@ const ThankYou = () => {
                     <div>
                       <h3 className="font-semibold mb-1">Delivery Window</h3>
                       <p className="text-sm text-muted-foreground">
-                        {orderDetails.week_start_date ? 
-                          `Week of ${new Date(orderDetails.week_start_date).toLocaleDateString()}` : 
+                        {orderData.week_start_date ? 
+                          `Week of ${new Date(orderData.week_start_date).toLocaleDateString()}` : 
                           'Next available delivery window'
                         }<br />
                         Between 8 AM - 12 PM
@@ -189,7 +190,7 @@ const ThankYou = () => {
                 <div className="bg-secondary/50 rounded-lg p-4">
                   <h4 className="font-medium mb-3">📦 Your Order Summary</h4>
                   <div className="space-y-2 text-sm">
-                    {orderDetails.order_items?.map((item: any) => (
+                    {orderData.order_items?.map((item: any) => (
                       <div key={item.id} className="flex justify-between">
                         <span>{item.quantity}x {item.product_name}</span>
                         <span>${(item.price * item.quantity).toFixed(2)}</span>
@@ -197,15 +198,15 @@ const ThankYou = () => {
                     ))}
                     <div className="border-t pt-2 mt-2 font-semibold flex justify-between">
                       <span>Total</span>
-                      <span>${orderDetails.total_amount.toFixed(2)}</span>
+                      <span>${orderData.total_amount.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
 
-                {orderDetails.delivery_instructions && (
+                {orderData.delivery_instructions && (
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <h4 className="font-medium mb-2">📝 Delivery Instructions</h4>
-                    <p className="text-sm text-blue-800">{orderDetails.delivery_instructions}</p>
+                    <p className="text-sm text-blue-800">{orderData.delivery_instructions}</p>
                   </div>
                 )}
               </>
