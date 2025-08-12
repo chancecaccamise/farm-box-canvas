@@ -93,9 +93,9 @@ const HowFarmBagsWork = () => {
       {/* Customization Options */}
       <section className="py-20 px-4 bg-secondary/50">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-4">Customize Your Farm Bag</h2>
+          <h2 className="text-4xl font-bold text-center mb-4">Choose Your Box Size</h2>
           <p className="text-xl text-muted-foreground text-center mb-16">
-            Tailor your Billy's box to match your family's preferences and dietary needs
+            Billy curates each box with the freshest seasonal produce. Simply choose your size and add any extras!
           </p>
           
           <div className="grid md:grid-cols-3 gap-8">
@@ -111,9 +111,9 @@ const HowFarmBagsWork = () => {
                   Choose from Small (2-3 people), Medium (4-5 people), or Large (6+ people) boxes
                 </CardDescription>
                 <div className="space-y-2">
-                  <Badge variant="outline">Small - $25/week</Badge>
-                  <Badge variant="outline">Medium - $40/week</Badge>
-                  <Badge variant="outline">Large - $55/week</Badge>
+                  <Badge variant="outline">Small - $35/week</Badge>
+                  <Badge variant="outline">Medium - $50/week</Badge>
+                  <Badge variant="outline">Large - $70/week</Badge>
                 </div>
               </CardContent>
             </Card>
@@ -123,16 +123,16 @@ const HowFarmBagsWork = () => {
                 <div className="w-16 h-16 bg-gradient-fresh rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-white text-2xl">🍅</span>
                 </div>
-                <CardTitle className="text-2xl">Product Selection</CardTitle>
+                <CardTitle className="text-2xl">Billy's Curation</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base mb-4">
-                  Select your preferences for vegetables, fruits, herbs, and specialty items
+                  Billy personally selects the best seasonal produce from his greenhouse for each box
                 </CardDescription>
                 <div className="space-y-2">
-                  <Badge variant="outline">Vegetables Only</Badge>
-                  <Badge variant="outline">Mixed Produce</Badge>
-                  <Badge variant="outline">Add Proteins</Badge>
+                  <Badge variant="outline">Fresh Vegetables</Badge>
+                  <Badge variant="outline">Seasonal Herbs</Badge>
+                  <Badge variant="outline">Premium Quality</Badge>
                 </div>
               </CardContent>
             </Card>
@@ -142,16 +142,16 @@ const HowFarmBagsWork = () => {
                 <div className="w-16 h-16 bg-gradient-fresh rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-white text-2xl">🌿</span>
                 </div>
-                <CardTitle className="text-2xl">Dietary Preferences</CardTitle>
+                <CardTitle className="text-2xl">Add-On Options</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base mb-4">
-                  Accommodate allergies, dietary restrictions, and personal preferences
+                  Enhance your box with fresh fish, proteins, and other local specialties
                 </CardDescription>
                 <div className="space-y-2">
-                  <Badge variant="outline">Organic Only</Badge>
-                  <Badge variant="outline">No Nightshades</Badge>
-                  <Badge variant="outline">Vegan Options</Badge>
+                  <Badge variant="outline">Fresh Fish</Badge>
+                  <Badge variant="outline">Local Proteins</Badge>
+                  <Badge variant="outline">Extra Produce</Badge>
                 </div>
               </CardContent>
             </Card>

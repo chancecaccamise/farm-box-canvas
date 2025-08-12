@@ -12,7 +12,7 @@ const FAQs = () => {
     {
       id: "1",
       question: "How do farm boxes work?",
-      answer: "Farm boxes are weekly deliveries of fresh, seasonal produce and local products. You customize your preferences, we curate a selection based on what's available from our partner farms, and deliver it fresh to your door every week. You can modify your selections, skip weeks, or pause your subscription anytime.",
+      answer: "Billy's boxes are weekly deliveries of fresh, hydroponically-grown produce. Billy personally curates each box with the best seasonal vegetables and herbs from his greenhouse. You choose your box size (Small $35, Medium $50, or Large $70), and can add optional extras like fresh fish or proteins. You can skip weeks, pause your subscription, or cancel anytime.",
       icon: <Leaf className="w-5 h-5 text-accent" />
     },
     {
@@ -24,13 +24,13 @@ const FAQs = () => {
     {
       id: "7",
       question: "Can I change my preferences?",
-      answer: "Yes! You can update your dietary preferences, box size, and delivery frequency anytime through your account. Changes to preferences will take effect for your next scheduled delivery. You can also customize individual weeks by adding or removing specific items.",
+      answer: "Yes! You can change your box size (Small, Medium, or Large) and delivery frequency anytime through your account. You can also add or remove optional add-ons like fresh fish and proteins for any upcoming delivery. Changes take effect for your next scheduled delivery.",
       icon: <Settings className="w-5 h-5 text-accent" />
     },
     {
       id: "8",
       question: "What if I don't like something in my box?",
-      answer: "We want you to love everything in your box! If you receive something you don't enjoy, let us know and we'll credit your account. You can also rate items in your account to help us better customize future selections based on your preferences.",
+      answer: "Billy stands behind every item! If you receive something you don't enjoy, let us know and we'll credit your account. Since Billy curates each box based on what's fresh and seasonal from his greenhouse, the contents may vary weekly, but quality is always guaranteed.",
       icon: <HelpCircle className="w-5 h-5 text-accent" />
     }
   ];
