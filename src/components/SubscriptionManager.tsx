@@ -54,16 +54,19 @@ export function SubscriptionManager({ subscription, onSubscriptionUpdate, boxSiz
   const handleUpgradeToSubscription = async () => {
     setLoading(true);
     try {
-      const box_size = (typeof (subscription as any)?.box_size === 'string' ? (subscription as any).box_size : undefined) || (typeof (window as any)?.currentBoxSize === 'string' ? (window as any).currentBoxSize : undefined) || (typeof (null) === 'string' ? null : undefined);
-      const payload = { box_size: (boxSize || box_size || 'medium').toLowerCase() } as { box_size: string };
+      const payload = { box_size: (boxSize || 'medium').toLowerCase() } as { box_size: string };
       const { data, error } = await supabase.functions.invoke('create-checkout', { body: payload });
       if (error) throw error;
       if (!data?.url) throw new Error('No checkout URL returned');
       window.open(data.url, '_blank');
       toast({ title: 'Redirecting to Stripe', description: 'Complete checkout to start your subscription.' });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error starting subscription:', error);
-      toast({ title: 'Error', description: 'Failed to start subscription. Please try again.', variant: 'destructive' });
+      toast({
+        title: 'Error',
+        description: error?.error?.message || error?.message || 'Failed to start subscription. Please try again.',
+        variant: 'destructive'
+      });
     } finally {
       setLoading(false);
     }
@@ -357,9 +360,6 @@ export function SubscriptionManager({ subscription, onSubscriptionUpdate, boxSiz
                   <ShoppingCart className="h-4 w-4 mr-2" />
                   Upgrade to subscription
                 </Button>
-                <Button onClick={handleCustomerPortal} size="sm" variant="secondary" disabled={loading}>
-                  Manage via Stripe
-                </Button>
                 <Button onClick={handleRefreshStatus} size="sm" variant="outline" disabled={loading}>
                   Refresh status
                 </Button>
@@ -369,9 +369,6 @@ export function SubscriptionManager({ subscription, onSubscriptionUpdate, boxSiz
 
           {(subscription.status === 'active' || subscription.status === 'paused') && (
             <>
-              <Button onClick={handleCustomerPortal} size="sm" variant="secondary" disabled={loading}>
-                Manage via Stripe
-              </Button>
               <Button onClick={handleRefreshStatus} size="sm" variant="outline" disabled={loading}>
                 Refresh status
               </Button>
