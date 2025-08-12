@@ -257,137 +257,24 @@ const FreshCatch = () => {
               Get Fresh Fish Alerts
             </CardTitle>
             <CardDescription>
-              Join our community of fresh fish enthusiasts! Get notified when your favorite fish come in.
+              For security and spam protection, fresh fish alerts are now managed by our team. 
+              Please contact us directly to join our notification list.
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleSMSSignup} className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="alertName">Full Name *</Label>
-                  <Input
-                    id="alertName"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Your full name"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="email">Email Address *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="your@email.com"
-                    required
-                  />
-                </div>
+          <CardContent className="text-center py-8">
+            <div className="space-y-4">
+              <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                <User className="h-5 w-5" />
+                <span>Contact our team to sign up for fresh fish alerts</span>
               </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="phoneNumber">Phone Number *</Label>
-                  <Input
-                    id="phoneNumber"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    placeholder="(555) 123-4567"
-                    type="tel"
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="zipCode">Zip Code</Label>
-                  <Input
-                    id="zipCode"
-                    value={zipCode}
-                    onChange={(e) => setZipCode(e.target.value)}
-                    placeholder="12345"
-                  />
-                </div>
+              <div className="flex items-center justify-center gap-2 text-muted-foreground">
+                <Phone className="h-5 w-5" />
+                <span>Call us or visit our store for personalized service</span>
               </div>
-
-              <div>
-                <Label htmlFor="preferredFish">Preferred Fish Types</Label>
-                <Input
-                  id="preferredFish"
-                  value={preferredFish}
-                  onChange={(e) => setPreferredFish(e.target.value)}
-                  placeholder="e.g., Red Snapper, Grouper, Mahi Mahi (or leave blank for all types)"
-                />
-                <p className="text-xs text-muted-foreground mt-1">
-                  Separate multiple types with commas
-                </p>
-              </div>
-
-              <div>
-                <Label htmlFor="deliveryPreferences">Delivery Preferences</Label>
-                <Input
-                  id="deliveryPreferences"
-                  value={deliveryPreferences}
-                  onChange={(e) => setDeliveryPreferences(e.target.value)}
-                  placeholder="e.g., Weekday evenings, Saturday mornings"
-                />
-              </div>
-
-              <div>
-                <Label>Communication Preferences</Label>
-                <div className="grid grid-cols-2 gap-4 mt-2">
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={communicationPrefs.includes('SMS')}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setCommunicationPrefs([...communicationPrefs, 'SMS']);
-                        } else {
-                          setCommunicationPrefs(communicationPrefs.filter(p => p !== 'SMS'));
-                        }
-                      }}
-                      className="rounded"
-                    />
-                    <span>SMS/Text Messages</span>
-                  </label>
-                  <label className="flex items-center space-x-2">
-                    <input
-                      type="checkbox"
-                      checked={communicationPrefs.includes('Email')}
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          setCommunicationPrefs([...communicationPrefs, 'Email']);
-                        } else {
-                          setCommunicationPrefs(communicationPrefs.filter(p => p !== 'Email'));
-                        }
-                      }}
-                      className="rounded"
-                    />
-                    <span>Email Notifications</span>
-                  </label>
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="specialRequests">Special Requests or Notes</Label>
-                <Textarea
-                  id="specialRequests"
-                  value={specialRequests}
-                  onChange={(e) => setSpecialRequests(e.target.value)}
-                  placeholder="Any special requirements, preparation preferences, or notes..."
-                  rows={3}
-                />
-              </div>
-
-              <Button type="submit" disabled={alertsSubmitting} className="w-full" size="lg">
-                {alertsSubmitting ? "Signing Up..." : "Join Fresh Fish Alerts"}
-              </Button>
-
-              <p className="text-xs text-center text-muted-foreground">
-                We respect your privacy and will only contact you about fresh fish availability.
-                You can unsubscribe at any time.
+              <p className="text-sm text-muted-foreground mt-4">
+                This change helps us protect customer information and provide better, more personalized service.
               </p>
-            </form>
+            </div>
           </CardContent>
         </Card>
       </div>
