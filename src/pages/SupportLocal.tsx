@@ -99,42 +99,29 @@ const SupportLocal = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-6xl mx-auto px-4 py-12">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <div className="w-16 h-16 bg-gradient-fresh rounded-full flex items-center justify-center mx-auto mb-6">
-            <Heart className="w-8 h-8 text-white" />
-          </div>
-          <h1 className="text-4xl font-bold mb-4">Support Local Partners</h1>
-          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Meet the incredible local businesses we're proud to partner with. Every purchase 
-            supports these hardworking families and strengthens our community.
-          </p>
-        </div>
-
-        {/* Impact Stats */}
-        <Card className="mb-12">
-          <CardContent className="p-8">
-            <div className="grid md:grid-cols-4 gap-8 text-center">
-              <div>
-                <div className="text-3xl font-bold text-accent mb-2">45+</div>
-                <div className="text-sm text-muted-foreground">Local businesses supported</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-accent mb-2">$2.3M</div>
-                <div className="text-sm text-muted-foreground">Paid to local partners annually</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-accent mb-2">150+</div>
-                <div className="text-sm text-muted-foreground">Local jobs supported</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-accent mb-2">50mi</div>
-                <div className="text-sm text-muted-foreground">Average distance from our facility</div>
-              </div>
+      {/* Hero Section */}
+      <div className="relative h-[60vh] bg-gradient-fresh overflow-hidden">
+        <div className="absolute inset-0 bg-black/20"></div>
+        <img 
+          src="/src/assets/farmers-market-couple.jpg"
+          alt="Local partners and community" 
+          className="w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-center text-white max-w-4xl mx-auto px-4">
+            <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-6">
+              <Heart className="w-8 h-8 text-white" />
             </div>
-          </CardContent>
-        </Card>
+            <h1 className="text-5xl md:text-6xl font-bold mb-6">Support Local Partners</h1>
+            <p className="text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed">
+              Meet the incredible local businesses we're proud to partner with. Every purchase 
+              supports these hardworking families and strengthens our community.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4 py-16">
 
         {/* Partner Categories */}
         <div className="space-y-12">
