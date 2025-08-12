@@ -25,11 +25,10 @@ const Landing = () => {
         <div className="absolute inset-0 bg-black opacity-30"></div>
         <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight">
-            Fresh from the Farm. <span className="text-accent">Delivered to Your Door.</span>
+          Subscribe to your <span className="text-accent">sustenance.</span>
           </h1>
           <p className="text-xl mb-8 max-w-2xl mx-auto leading-relaxed">
-            Weekly farm boxes filled with local produce, seafood, and seasonal treats. 
-            Curated by Billy and delivered fresh from our hydroponic greenhouse.
+          Billy&apos;s Botanicals seasonal Pantry Pack is delivered fresh to your door or available for pickup at the Forsyth Farmer&apos;s Market.
           </p>
           <Button onClick={scrollToBoxes} variant="hero" size="xl">
             View Subscription Options
@@ -40,7 +39,7 @@ const Landing = () => {
       {/* How It Works Section */}
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-4">How It Works</h2>
+          <h2 className="text-4xl font-bold text-center mb-4">Simplify your access to community produce</h2>
           <p className="text-xl text-muted-foreground text-center mb-16 max-w-2xl mx-auto">
             Three simple steps to get fresh, curated ingredients delivered weekly
           </p>
@@ -86,7 +85,7 @@ const Landing = () => {
               <CardContent>
                 <CardDescription className="text-base">
                   Your curated box arrives fresh at your doorstep every week. 
-                  Skip, pause, or cancel anytime.
+                  
                 </CardDescription>
               </CardContent>
             </Card>
@@ -105,7 +104,7 @@ const Landing = () => {
       {/* Why Choose Us Section */}
       <section className="py-20 px-4 bg-secondary/30">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-16">Why Choose Billy's Botanicals?</h2>
+          <h2 className="text-4xl font-bold text-center mb-16">What sets Billy&apos;s Botanicals apart?</h2>
           
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -137,7 +136,7 @@ const Landing = () => {
                 <div className="flex items-start gap-4">
                   <CheckCircle className="w-6 h-6 text-accent flex-shrink-0 mt-1" />
                   <div>
-                    <h3 className="text-xl font-semibold mb-2">Skip or Pause Anytime</h3>
+                    
                     <p className="text-muted-foreground">Complete flexibility with your subscription. No long-term commitments or cancellation fees.</p>
                   </div>
                 </div>

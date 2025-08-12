@@ -40,10 +40,10 @@ const MeetFarmers = () => {
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center text-white max-w-4xl mx-auto px-4">
             <h1 className="text-5xl md:text-6xl font-bold mb-6">
-              Meet the Heart Behind Your Food
+            The hearts behind your harvest
             </h1>
             <p className="text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed">
-              Our team is made up of <span className="text-accent font-semibold">passionate farmers</span>, growers, and experts in <span className="text-accent font-semibold">sustainable agriculture</span>. Get to know the faces behind the produce that goes into your <span className="text-accent font-semibold">farm boxes</span>.
+            We empower people to care for themselves and their families with fresh, affordable local produce. When your body is nurtured by clean bounty, good health rewards you — this is our anthem. 
             </p>
           </div>
         </div>
@@ -128,30 +128,22 @@ const MeetFarmers = () => {
         {/* Background Section */}
         <section>
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-8">Our Farmers' Background</h2>
+            <h2 className="text-4xl font-bold mb-8">Generational growth</h2>
           </div>
           
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
               <p className="text-lg leading-relaxed">
-                Our collective farming experience spans generations, with some team members 
-                coming from family farming traditions while others discovered their passion 
-                for sustainable agriculture through education and hands-on experience.
+              Farming runs deep in our family&apos;s roots. Some of us grew up in family fields, learning the rhythms of the land from an early age. Others found our calling through study, curiosity, and the thrill of compassionately cohabitating with the earth. What brings us together is a shared belief in aquaponic farming and the promise it holds. Its farming reimagined, producing efficient, earth-conscious, highest-quality food during every season. 
               </p>
               
-              <p className="text-lg leading-relaxed">
-                What unites us is our commitment to hydroponic farming and <span className="text-accent font-semibold">sustainable practices</span>. We believe this innovative approach to agriculture represents 
-                the future of farming – efficient, environmentally friendly, and capable 
-                of producing the highest quality food year-round.
-              </p>
+              
               
               <div className="bg-primary/10 p-6 rounded-lg">
                 <blockquote className="text-lg italic mb-4">
-                  "I've always been passionate about sustainable food, and hydroponics was 
-                  a natural fit for me. There's something amazing about watching plants 
-                  thrive in our perfectly controlled environment."
+                  "Billy and Ana Quote"
                 </blockquote>
-                <cite className="text-muted-foreground">— Billy Thompson, Co-Founder</cite>
+                <cite className="text-muted-foreground">— Billy and Ana, Owners</cite>
               </div>
             </div>
             
@@ -168,10 +160,7 @@ const MeetFarmers = () => {
             <div className="bg-accent/10 p-8 rounded-lg max-w-3xl mx-auto">
               <h3 className="text-2xl font-bold mb-4">Family-Owned, Community-Focused</h3>
               <p className="text-lg leading-relaxed">
-                While we embrace modern farming technology, we maintain the family values 
-                and community focus that have been the foundation of successful farms for 
-                generations. Every decision we make considers not just our customers, but 
-                our community and our planet.
+              We maintain the family values and community focus that have been the foundation of successful farms for generations. Every decision we make considers not just our customers, but our community and our planet, which includes fellow farmers, foragers, and makers. 
               </p>
             </div>
           </div>

@@ -21,11 +21,10 @@ const UnauthenticatedLanding = () => {
         <div className="absolute inset-0 bg-black opacity-30"></div>
         <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
           <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 tracking-tight">
-            Get Started with Weekly <span className="text-accent">Farm-Fresh Deliveries</span>
+          Subscribe to your  <span className="text-accent">sustenance</span>
           </h1>
           <p className="text-xl mb-8 max-w-2xl mx-auto leading-relaxed">
-            Join Billy's Botanicals family and experience the freshest hydroponic produce 
-            delivered weekly to your doorstep. Sustainable, local, and grown with love since 2018.
+          Billy&apos;s Botanicals seasonal Pantry Pack is delivered fresh to your door or available for pickup at the Forsyth Farmer&apos;s Market.
           </p>
           <div className="flex gap-4 justify-center">
             <Button asChild variant="hero" size="xl">
@@ -41,7 +40,7 @@ const UnauthenticatedLanding = () => {
       {/* How It Works Section */}
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-4">How Billy's Farm Box Works</h2>
+          <h2 className="text-4xl font-bold text-center mb-4">Simplify your access to community produce </h2>
           <p className="text-xl text-muted-foreground text-center mb-16 max-w-2xl mx-auto">
             Three simple steps to get farm-fresh ingredients delivered to your door
           </p>
@@ -52,7 +51,7 @@ const UnauthenticatedLanding = () => {
                 <div className="w-16 h-16 bg-gradient-fresh rounded-full flex items-center justify-center mx-auto mb-4">
                   <Leaf className="w-8 h-8 text-white" />
                 </div>
-                <CardTitle className="text-2xl">1. Customize Your Box</CardTitle>
+                <CardTitle className="text-2xl">1. Pick Your Produce</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
@@ -98,7 +97,7 @@ const UnauthenticatedLanding = () => {
       {/* Featured Products Section */}
       <section className="py-20 px-4 bg-secondary/50">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-4">Billy's Fresh Picks</h2>
+          <h2 className="text-4xl font-bold text-center mb-4">Billy's Personal Picks</h2>
           <p className="text-xl text-muted-foreground text-center mb-16">
             Hand-selected from our hydroponic greenhouse this week
           </p>
@@ -136,7 +135,7 @@ const UnauthenticatedLanding = () => {
       {/* Why Choose Billy's */}
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-16">Why Choose Billy's Botanicals?</h2>
+          <h2 className="text-4xl font-bold text-center mb-16">What sets Billy&apos;s Botanicals apart?</h2>
           
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -146,8 +145,9 @@ const UnauthenticatedLanding = () => {
                     <Leaf className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold mb-2">100% Hydroponic & Sustainable</h3>
-                    <p className="text-muted-foreground">Our greenhouse uses 95% less water and zero pesticides while producing the freshest vegetables year-round.</p>
+                    <h3 className="text-xl font-semibold mb-2">100% Sustainable</h3>
+                    <p className="text-muted-foreground">Closed-loop aquaponics system is a soil-free growth method sans pesticides or synthetic fertilizers.
+                    </p>
                   </div>
                 </div>
                 
@@ -156,8 +156,8 @@ const UnauthenticatedLanding = () => {
                     <Users className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold mb-2">Family-Owned Since 2018</h3>
-                    <p className="text-muted-foreground">Billy and his family personally grow every vegetable with love and dedication to quality.</p>
+                    <h3 className="text-xl font-semibold mb-2">Family-Owned Since 2020</h3>
+                    <p className="text-muted-foreground">From sow to sale, owners Billy and Ana put their hearts and hands into the entire operation.</p>
                   </div>
                 </div>
                 
@@ -166,8 +166,8 @@ const UnauthenticatedLanding = () => {
                     <Truck className="w-6 h-6 text-white" />
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold mb-2">Fresh Weekly Delivery</h3>
-                    <p className="text-muted-foreground">From harvest to your door in 24 hours. Choose your delivery day and we'll take care of the rest.</p>
+                    <h3 className="text-xl font-semibold mb-2">Community-loved</h3>
+                    <p className="text-muted-foreground">Dedicated to supporting fellow local growers, foragers, and makers in Savannah </p>
                   </div>
                 </div>
               </div>
@@ -240,9 +240,9 @@ const UnauthenticatedLanding = () => {
       {/* CTA Section */}
       <section className="py-20 px-4 bg-gradient-primary text-white">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold mb-6">Ready to Join Billy's Botanical Family?</h2>
+          <h2 className="text-4xl font-bold mb-6">Be nurtured by Billy&apos;s Botanicals</h2>
           <p className="text-xl mb-8 opacity-90">
-            Experience the freshest hydroponic produce grown with love since 2018.
+            Experience the freshest produce grown with love since 2018.
           </p>
           <div className="flex gap-4 justify-center">
             <Button asChild variant="organic" size="xl">

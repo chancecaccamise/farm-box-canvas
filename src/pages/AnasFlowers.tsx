@@ -187,12 +187,11 @@ const AnasFlowers = () => {
         <div className="relative z-10 max-w-6xl mx-auto px-4 text-center text-white">
           <h1 className="text-5xl font-bold mb-6 animate-fade-in">Ana's Arrangements</h1>
           <p className="text-xl mb-8 max-w-3xl mx-auto opacity-90 animate-fade-in">
-            Creating beautiful, custom floral arrangements for life's most special moments. 
-            From intimate bouquets to grand celebrations, every arrangement tells your unique story.
+          Combining her love of local flora and creative expression, Ana Dugger forages and designs custom floral arrangements — including grand installations and bespoke bouquets —  for any and every occasion.
           </p>
           <Button variant="organic" size="xl" className="animate-scale-in hover-scale" onClick={scrollToForm}>
             <Flower className="w-5 h-5 mr-2" />
-            Request Custom Bouquet
+            Request An Arrangement
           </Button>
         </div>
       </section>
@@ -200,9 +199,9 @@ const AnasFlowers = () => {
       <div className="max-w-6xl mx-auto px-4 py-12">
         {/* Services Grid */}
         <div className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-4">Floral Services</h2>
+          <h2 className="text-3xl font-bold text-center mb-4">Bouquets by occasion</h2>
           <p className="text-xl text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
-            Specializing in custom arrangements for every occasion
+          Cultivated and designed to fit your special day and aesthetic preferences
           </p>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -239,7 +238,7 @@ const AnasFlowers = () => {
 
         {/* Testimonials */}
         <div className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-12">What Clients Say</h2>
+          <h2 className="text-3xl font-bold text-center mb-12">Locals love Ana&apos;s flowers</h2>
           <div className="grid md:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
               <Card key={index}>
@@ -379,9 +378,7 @@ const AnasFlowers = () => {
                     {submitting ? "Submitting..." : "Submit Bouquet Request"}
                   </Button>
 
-                  <p className="text-xs text-center text-muted-foreground">
-                    We'll respond within 24 hours with a custom proposal and pricing
-                  </p>
+                  
                 </form>
               </CardContent>
             </Card>
@@ -392,7 +389,7 @@ const AnasFlowers = () => {
             {/* About Ana */}
             <Card>
               <CardHeader>
-                <CardTitle>Meet Ana</CardTitle>
+                <CardTitle>More about Ana</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
@@ -404,10 +401,7 @@ const AnasFlowers = () => {
                     />
                   </div>
                   <p className="text-muted-foreground leading-relaxed">
-                    With over 15 years of experience in floral design, Ana combines classical training 
-                    with a modern aesthetic to create arrangements that are both timeless and fresh. 
-                    Her passion for using locally-grown, seasonal flowers ensures every bouquet is 
-                    not only beautiful but also sustainable.
+                  Ana combines classical training with a modern twist to deliver arrangements that are timeless, fresh, and distinctively unique. Her passion for using locally grown, seasonal flowers ensures every bouquet is not only beautiful but also sustainably acquired.
                   </p>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
@@ -416,7 +410,7 @@ const AnasFlowers = () => {
                     </div>
                     <div>
                       <p className="font-semibold">Experience</p>
-                      <p className="text-muted-foreground">15+ years in floral design</p>
+                      <p className="text-muted-foreground">8+ years in floral design</p>
                     </div>
                   </div>
                 </div>

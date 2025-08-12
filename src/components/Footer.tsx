@@ -21,8 +21,7 @@ const Footer = () => {
               />
             </Link>
             <p className="text-muted-foreground mb-8 leading-relaxed text-lg">
-              Family-owned since 2018. Fresh, hydroponic produce grown with love and 
-              delivered weekly to your doorstep. Supporting sustainable agriculture in our community.
+              Tapping the natural magic of sun, water, and land, Billy&apos;s Botanicals provides local, sustainably raised and harvested fish, fruit, herbs, vegetables, greens, & more. 
             </p>
             <div className="flex space-x-4">
               <Button variant="outline" size="icon" className="border-primary/20 hover:bg-primary hover:text-primary-foreground">
@@ -39,13 +38,13 @@ const Footer = () => {
             <h3 className="text-xl font-bold mb-8 text-foreground">Quick Links</h3>
             <div className="grid grid-cols-2 gap-x-4 gap-y-4">
               <Link to="/how-we-grow" className="block text-muted-foreground hover:text-primary transition-colors text-base">
-                How We Grow
+              Grown for good
               </Link>
               <Link to="/how-farm-bags-work" className="block text-muted-foreground hover:text-primary transition-colors text-base">
-                How Farm Bags Work
+                Pantry Pack 101
               </Link>
               <Link to="/meet-farmers" className="block text-muted-foreground hover:text-primary transition-colors text-base">
-                Meet the Farmers
+                Meet the Duggers
               </Link>
               <Link to="/faqs" className="block text-muted-foreground hover:text-primary transition-colors text-base">
                 FAQs
@@ -59,12 +58,8 @@ const Footer = () => {
               <Link to="/anas-flowers" className="block text-muted-foreground hover:text-primary transition-colors text-base">
                 Ana's Arrangements
               </Link>
-              <Link to="/our-mission" className="block text-muted-foreground hover:text-primary transition-colors text-base">
-                Our Mission
-              </Link>
-              <Link to="/gift-cards" className="block text-muted-foreground hover:text-primary transition-colors text-base">
-                Gift Cards
-              </Link>
+            
+              
               <Link to="/become-a-partner" className="block text-muted-foreground hover:text-primary transition-colors text-base">
                 Become a Partner
               </Link>
@@ -105,19 +100,9 @@ const Footer = () => {
         {/* Bottom Section */}
         <div className="flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
           <p className="text-muted-foreground text-base">
-            © 2024 Billy's Botanicals. All rights reserved. | Family-owned since 2018
+            © 2025 Billy's Botanicals. All rights reserved. | Website Designed by Mangia DMA
           </p>
-          <div className="flex space-x-8 text-base">
-            <Link to="/privacy" className="text-muted-foreground hover:text-primary transition-colors">
-              Privacy Policy
-            </Link>
-            <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors">
-              Terms of Service
-            </Link>
-            <Link to="/support-local" className="text-muted-foreground hover:text-primary transition-colors">
-              Support Local
-            </Link>
-          </div>
+          
         </div>
       </div>
     </footer>

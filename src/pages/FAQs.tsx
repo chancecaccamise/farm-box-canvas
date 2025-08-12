@@ -38,26 +38,26 @@ const FAQs = () => {
   const sourcingFAQs = [
     {
       id: "2",
-      question: "Where is the food sourced from?",
-      answer: "All our produce comes from local farms within 100 miles of our facility. We partner with over 25 small-scale, sustainable farms that practice organic or regenerative farming methods. Each item in your box includes information about which farm it came from, so you know exactly where your food was grown.",
+      question: "How is the produce grown?",
+      answer: "We specialize in aquaponic farming practices, producing soil-free, organic fruits, roots, veggies, and herbs using sustainable fish tanks and natural nitrates.",
       icon: <Truck className="w-5 h-5 text-accent" />
     },
     {
       id: "4",
-      question: "Are the vegetables organic?",
-      answer: "Most of our produce is certified organic, and all non-organic items are clearly labeled. Our farmers follow sustainable, chemical-free growing practices. You can set your preferences to 'Organic Only' if you prefer to receive only certified organic items in your box.",
+      question: "Is everything organic?",
+      answer: "Everything we grow is organic by all standards. To have our produce officially “certified” by USDA agencies would require a cost hike in our produce, so we promote our “word of mouth” organic status.",
       icon: <Leaf className="w-5 h-5 text-accent" />
     },
     {
       id: "5",
-      question: "How are fish sourced?",
-      answer: "Our fish and seafood come from local, sustainable fisheries that practice responsible fishing methods. We work with day-boat fishermen who bring in the freshest catch, and all our seafood is traceable to its source. You can opt out of fish entirely in your dietary preferences if preferred.",
+      question: "What is aquaponic farming?",
+      answer: "Aquaponic farming is a method of growing plants without soil, using nutrient-rich water solutions. This allows for year-round growing, uses 90% less water than traditional farming, and produces incredibly fresh, clean produce. Several of our partner farms use hydroponic systems for leafy greens and herbs.",
       icon: <Fish className="w-5 h-5 text-accent" />
     },
     {
       id: "6",
-      question: "What is hydroponic farming?",
-      answer: "Hydroponic farming is a method of growing plants without soil, using nutrient-rich water solutions. This allows for year-round growing, uses 90% less water than traditional farming, and produces incredibly fresh, clean produce. Several of our partner farms use hydroponic systems for leafy greens and herbs.",
+      question: "Where is the fish caught?",
+      answer: "All our fish, shrimp, and oceanic proteins are caught off the Georgia coast by our fishing team.",
       icon: <Droplets className="w-5 h-5 text-accent" />
     }
   ];

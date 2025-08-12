@@ -212,7 +212,7 @@ const BoxComparison = () => {
         <div className="text-center mt-8">
           <p className="text-muted-foreground">
             {isSubscription 
-              ? "All subscriptions include free delivery • Skip or pause anytime • Cancel without fees"
+              ? "All subscriptions include free delivery • Cancel anytime without fees"
               : "One-time purchases include free delivery • No commitment required"
             }
           </p>

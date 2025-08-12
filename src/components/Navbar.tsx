@@ -61,13 +61,13 @@ const Navbar = () => {
               </DropdownMenuTrigger>
               <DropdownMenuContent className="bg-background/95 backdrop-blur-sm border border-border/50">
                 <DropdownMenuItem asChild>
-                  <Link to="/how-we-grow" className="transition-smooth">How We Grow</Link>
+                  <Link to="/how-we-grow" className="transition-smooth">Grown for Good</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/how-farm-bags-work" className="transition-smooth">How Farm Bags Work</Link>
+                  <Link to="/how-farm-bags-work" className="transition-smooth">Pantry Pack 101</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/meet-farmers" className="transition-smooth">Meet the Farmers</Link>
+                  <Link to="/meet-farmers" className="transition-smooth">Meet the Duggers</Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -129,17 +129,17 @@ const Navbar = () => {
                       <div className="space-y-1 pl-4">
                         <Button variant="ghost" size="sm" className="w-full justify-start" asChild>
                           <Link to="/how-we-grow" onClick={() => setMobileMenuOpen(false)}>
-                            How We Grow
+                            Grown for Good
                           </Link>
                         </Button>
                         <Button variant="ghost" size="sm" className="w-full justify-start" asChild>
                           <Link to="/how-farm-bags-work" onClick={() => setMobileMenuOpen(false)}>
-                            How Farm Bags Work
+                          Pantry Pack 101
                           </Link>
                         </Button>
                         <Button variant="ghost" size="sm" className="w-full justify-start" asChild>
                           <Link to="/meet-farmers" onClick={() => setMobileMenuOpen(false)}>
-                            Meet the Farmers
+                            Meet the Duggers
                           </Link>
                         </Button>
                       </div>
