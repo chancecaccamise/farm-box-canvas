@@ -28,7 +28,7 @@ const Landing = () => {
           Subscribe to your <span className="text-accent">sustenance.</span>
           </h1>
           <p className="text-xl mb-8 max-w-2xl mx-auto leading-relaxed">
-          Billy&apos;s Botanicals seasonal Pantry Pack is delivered fresh to your door or available for pickup at the Forsyth Farmer&apos;s Market.
+          Billy&apos;s Botanicals seasonal Billy's Box To Go is delivered fresh to your door or available for pickup at the Forsyth Farmer&apos;s Market.
           </p>
           <Button onClick={scrollToBoxes} variant="hero" size="xl">
             View Subscription Options
