@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from '@/components/AuthProvider';
-import { Fish, Phone, User } from "lucide-react";
+import { Fish, Phone, User, Mail } from "lucide-react";
 
 interface FreshCatchAnnouncement {
   id: string;
@@ -257,24 +258,180 @@ const FreshCatch = () => {
               Get Fresh Fish Alerts
             </CardTitle>
             <CardDescription>
-              For security and spam protection, fresh fish alerts are now managed by our team. 
-              Please contact us directly to join our notification list.
+              Sign up to receive notifications when your preferred fresh fish arrive from our local fishermen partners
             </CardDescription>
           </CardHeader>
-          <CardContent className="text-center py-8">
-            <div className="space-y-4">
-              <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                <User className="h-5 w-5" />
-                <span>Contact our team to sign up for fresh fish alerts</span>
+          <CardContent>
+            <form onSubmit={handleSMSSignup} className="space-y-6">
+              {/* Required Fields */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-sm font-medium">
+                    Name *
+                  </Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Your full name"
+                    required
+                    className="w-full"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-sm font-medium">
+                    Email *
+                  </Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="your@email.com"
+                    required
+                    className="w-full"
+                  />
+                </div>
               </div>
-              <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                <Phone className="h-5 w-5" />
-                <span>Call us or visit our store for personalized service</span>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className="text-sm font-medium">
+                    Phone Number *
+                  </Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder="(555) 123-4567"
+                    required
+                    className="w-full"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="zipCode" className="text-sm font-medium">
+                    Zip Code
+                  </Label>
+                  <Input
+                    id="zipCode"
+                    type="text"
+                    value={zipCode}
+                    onChange={(e) => setZipCode(e.target.value)}
+                    placeholder="12345"
+                    className="w-full"
+                  />
+                </div>
               </div>
-              <p className="text-sm text-muted-foreground mt-4">
-                This change helps us protect customer information and provide better, more personalized service.
+
+              {/* Optional Preferences */}
+              <div className="space-y-2">
+                <Label htmlFor="preferredFish" className="text-sm font-medium">
+                  Preferred Fish Types
+                </Label>
+                <Input
+                  id="preferredFish"
+                  type="text"
+                  value={preferredFish}
+                  onChange={(e) => setPreferredFish(e.target.value)}
+                  placeholder="e.g. Salmon, Tuna, Snapper (separate with commas)"
+                  className="w-full"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Leave blank to receive alerts for all fish types
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="deliveryPrefs" className="text-sm font-medium">
+                  Delivery Preferences
+                </Label>
+                <Input
+                  id="deliveryPrefs"
+                  type="text"
+                  value={deliveryPreferences}
+                  onChange={(e) => setDeliveryPreferences(e.target.value)}
+                  placeholder="e.g. Same day pickup, Next day delivery"
+                  className="w-full"
+                />
+              </div>
+
+              {/* Communication Preferences */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">
+                  How would you like to be notified? *
+                </Label>
+                <div className="flex flex-col space-y-2">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="sms"
+                      checked={communicationPrefs.includes('SMS')}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setCommunicationPrefs(prev => [...prev.filter(p => p !== 'SMS'), 'SMS']);
+                        } else {
+                          setCommunicationPrefs(prev => prev.filter(p => p !== 'SMS'));
+                        }
+                      }}
+                    />
+                    <Label htmlFor="sms" className="flex items-center gap-2 text-sm">
+                      <Phone className="h-4 w-4" />
+                      Text Messages (SMS)
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="email-alerts"
+                      checked={communicationPrefs.includes('Email')}
+                      onCheckedChange={(checked) => {
+                        if (checked) {
+                          setCommunicationPrefs(prev => [...prev.filter(p => p !== 'Email'), 'Email']);
+                        } else {
+                          setCommunicationPrefs(prev => prev.filter(p => p !== 'Email'));
+                        }
+                      }}
+                    />
+                    <Label htmlFor="email-alerts" className="flex items-center gap-2 text-sm">
+                      <Mail className="h-4 w-4" />
+                      Email Notifications
+                    </Label>
+                  </div>
+                </div>
+                {communicationPrefs.length === 0 && (
+                  <p className="text-xs text-red-500">
+                    Please select at least one notification method
+                  </p>
+                )}
+              </div>
+
+              {/* Special Requests */}
+              <div className="space-y-2">
+                <Label htmlFor="specialRequests" className="text-sm font-medium">
+                  Special Requests or Notes
+                </Label>
+                <Textarea
+                  id="specialRequests"
+                  value={specialRequests}
+                  onChange={(e) => setSpecialRequests(e.target.value)}
+                  placeholder="Any special requests, dietary restrictions, or additional notes..."
+                  className="w-full min-h-[80px]"
+                />
+              </div>
+
+              {/* Submit Button */}
+              <Button
+                type="submit"
+                disabled={alertsSubmitting || !name.trim() || !email.trim() || !phoneNumber.trim() || communicationPrefs.length === 0}
+                className="w-full"
+              >
+                {alertsSubmitting ? "Signing Up..." : "Sign Up for Fresh Fish Alerts"}
+              </Button>
+
+              <p className="text-xs text-muted-foreground text-center">
+                * Required fields. We'll only contact you about fresh fish availability and never share your information.
               </p>
-            </div>
+            </form>
           </CardContent>
         </Card>
       </div>
