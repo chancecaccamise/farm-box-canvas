@@ -64,7 +64,7 @@ const Navbar = () => {
                   <Link to="/how-we-grow" className="transition-smooth">Grown for Good</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/how-farm-bags-work" className="transition-smooth">Billy's Box To Go 101</Link>
+                  <Link to="/how-farm-bags-work" className="transition-smooth">Billy's Bags To Go 101</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link to="/meet-farmers" className="transition-smooth">Meet the Duggers</Link>
@@ -134,7 +134,7 @@ const Navbar = () => {
                         </Button>
                         <Button variant="ghost" size="sm" className="w-full justify-start" asChild>
                           <Link to="/how-farm-bags-work" onClick={() => setMobileMenuOpen(false)}>
-                          Billy's Box To Go 101
+                          Billy's Bags To Go 101
                           </Link>
                         </Button>
                         <Button variant="ghost" size="sm" className="w-full justify-start" asChild>

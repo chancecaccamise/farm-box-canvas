@@ -12,7 +12,7 @@ const FAQs = () => {
     {
       id: "1",
       question: "How do farm boxes work?",
-      answer: "Billy's boxes are weekly deliveries of fresh, hydroponically-grown produce. Billy personally curates each box with the best seasonal vegetables and herbs from his greenhouse. You choose your box size (Small $35, Medium $50, or Large $70), and can add optional extras like fresh fish or proteins. You can skip weeks, pause your subscription, or cancel anytime.",
+      answer: "Billy's bags are weekly deliveries of fresh, hydroponically-grown produce. Billy personally curates each bag with the best seasonal vegetables and herbs from his greenhouse. You choose your bag size (Small $35, Medium $50, or Large $70), and can add optional extras like fresh fish or proteins. You can skip weeks, pause your subscription, or cancel anytime.",
       icon: <Leaf className="w-5 h-5 text-accent" />
     },
     {
@@ -30,7 +30,7 @@ const FAQs = () => {
     {
       id: "8",
       question: "What if I don't like something in my box?",
-      answer: "Billy stands behind every item! If you receive something you don't enjoy, let us know and we'll credit your account. Since Billy curates each box based on what's fresh and seasonal from his greenhouse, the contents may vary weekly, but quality is always guaranteed.",
+      answer: "Billy stands behind every item! If you receive something you don't enjoy, let us know and we'll credit your account. Since Billy curates each bag based on what's fresh and seasonal from his greenhouse, the contents may vary weekly, but quality is always guaranteed.",
       icon: <HelpCircle className="w-5 h-5 text-accent" />
     }
   ];

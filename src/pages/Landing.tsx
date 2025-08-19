@@ -28,7 +28,7 @@ const Landing = () => {
           Subscribe to Your <span className="text-accent">Sustenance.</span>
           </h1>
           <p className="text-xl mb-8 max-w-2xl mx-auto leading-relaxed">
-          Billy&apos;s Botanicals seasonal Billy's Box To Go is delivered fresh to your door or available for pickup at the Forsyth Farmer&apos;s Market.
+          Billy&apos;s Botanicals seasonal Billy's Bags To Go is delivered fresh to your door or available for pickup at the Forsyth Farmer&apos;s Market.
           </p>
           <Button onClick={scrollToBoxes} variant="hero" size="xl">
             View Subscription Options
@@ -167,7 +167,7 @@ const Landing = () => {
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl font-bold text-center mb-4">What Families Are Saying</h2>
           <p className="text-xl text-muted-foreground text-center mb-16">
-            Real stories from families who love their weekly Billy's boxes
+            Real stories from families who love their weekly Billy's bags
           </p>
           
           <div className="grid md:grid-cols-3 gap-8">

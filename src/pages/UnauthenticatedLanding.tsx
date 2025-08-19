@@ -24,7 +24,7 @@ const UnauthenticatedLanding = () => {
           Subscribe to Your  <span className="text-accent">Sustenance</span>
           </h1>
           <p className="text-xl mb-8 max-w-2xl mx-auto leading-relaxed">
-          Billy&apos;s Botanicals seasonal Billy's Box To Go is delivered fresh to your door or available for pickup at the Forsyth Farmer&apos;s Market.
+          Billy&apos;s Botanicals seasonal Billy's Bags To Go is delivered fresh to your door or available for pickup at the Forsyth Farmer&apos;s Market.
           </p>
           <div className="flex gap-4 justify-center">
             <Button asChild variant="hero" size="xl">

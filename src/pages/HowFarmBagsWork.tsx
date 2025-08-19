@@ -18,7 +18,7 @@ const HowFarmBagsWork = () => {
       >
         <div className="absolute inset-0 bg-black opacity-50"></div>
         <div className="relative z-10 max-w-6xl mx-auto text-center">
-          <h1 className="text-5xl font-bold mb-6 text-white">How Billy's Boxes Work</h1>
+          <h1 className="text-5xl font-bold mb-6 text-white">How Billy's Bags Work</h1>
           <p className="text-xl mb-8 max-w-3xl mx-auto text-white/90">
             From Billy's hydroponic greenhouse to your doorstep, discover how we bring the freshest produce 
             directly to your kitchen every week with love and care.
@@ -72,7 +72,7 @@ const HowFarmBagsWork = () => {
               {
                 step: "05",
                 title: "Fresh Delivery",
-                description: "Your Billy's box arrives fresh at your door with a smile",
+                description: "Your Billy's bag arrives fresh at your door with a smile",
                 icon: <Truck className="w-8 h-8" />,
                 color: "bg-gradient-fresh"
               }
@@ -95,7 +95,7 @@ const HowFarmBagsWork = () => {
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl font-bold text-center mb-4">Choose Your Box Size</h2>
           <p className="text-xl text-muted-foreground text-center mb-16">
-            Billy curates each box with the freshest seasonal produce. Simply choose your size and add any extras!
+            Billy curates each bag with the freshest seasonal produce. Simply choose your size and add any extras!
           </p>
           
           <div className="grid md:grid-cols-3 gap-8">
@@ -127,7 +127,7 @@ const HowFarmBagsWork = () => {
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base mb-4">
-                  Billy personally selects the best seasonal produce from his greenhouse for each box
+                  Billy personally selects the best seasonal produce from his greenhouse for each bag
                 </CardDescription>
                 <div className="space-y-2">
                   <Badge variant="outline">Fresh Vegetables</Badge>
@@ -218,7 +218,7 @@ const HowFarmBagsWork = () => {
         <div className="max-w-6xl mx-auto text-center">
           <h2 className="text-4xl font-bold mb-6">Billy's Promise</h2>
           <p className="text-xl mb-12 opacity-90 max-w-3xl mx-auto">
-            Billy personally stands behind every box. If you're not completely satisfied 
+            Billy personally stands behind every bag. If you're not completely satisfied 
             with any item, Billy will make it right - that's the Billy's Botanicals guarantee.
           </p>
           

@@ -41,7 +41,7 @@ const Footer = () => {
               Grown for good
               </Link>
               <Link to="/how-farm-bags-work" className="block text-muted-foreground hover:text-primary transition-colors text-base">
-                Billy's Box To Go 101
+                Billy's Bags To Go 101
               </Link>
               <Link to="/meet-farmers" className="block text-muted-foreground hover:text-primary transition-colors text-base">
                 Meet the Duggers
