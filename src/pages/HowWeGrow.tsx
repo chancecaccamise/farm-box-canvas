@@ -35,7 +35,7 @@ const HowWeGrow = () => {
         {/* Section 1: Hydroponic System */}
         <section className="mb-20">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">Ancient, adaptable methods</h2>
+            <h2 className="text-4xl font-bold mb-4">Ancient, Adaptable Methods</h2>
             <h3 className="text-2xl text-muted-foreground mb-8">Growing in Water, Not Soil</h3>
           </div>
           
@@ -91,7 +91,7 @@ const HowWeGrow = () => {
         {/* Section 2: Sustainable Practices */}
         <section className="mb-20">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4">Environmental advantages of aquaponics</h2>
+            <h2 className="text-4xl font-bold mb-4">Environmental Advantages of Aquaponics</h2>
             <h3 className="text-2xl text-muted-foreground">Better for you, safer for the planet</h3>
           </div>
           

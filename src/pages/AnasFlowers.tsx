@@ -199,7 +199,7 @@ const AnasFlowers = () => {
       <div className="max-w-6xl mx-auto px-4 py-12">
         {/* Services Grid */}
         <div className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-4">Bouquets by occasion</h2>
+          <h2 className="text-3xl font-bold text-center mb-4">Bouquets by Occasion</h2>
           <p className="text-xl text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
           Cultivated and designed to fit your special day and aesthetic preferences
           </p>

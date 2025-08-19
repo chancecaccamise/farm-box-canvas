@@ -101,7 +101,7 @@ const SupportLocal = () => {
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <div className="relative h-[60vh] bg-gradient-fresh overflow-hidden">
-        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="absolute inset-0 bg-black/50"></div>
         <img 
           src="/src/assets/partnersTable.jpg"
           alt="Local partners and community" 
