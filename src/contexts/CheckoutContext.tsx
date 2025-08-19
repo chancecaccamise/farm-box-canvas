@@ -7,6 +7,7 @@ interface CheckoutState {
   addOns: Record<string, number>; // Changed to Record<string, number> for quantities
   zipCode: string;
   deliveryDay: string;
+  deliveryMethod: 'delivery' | 'market-pickup' | 'farm-pickup';
 }
 
 interface CheckoutContextType {
@@ -17,6 +18,7 @@ interface CheckoutContextType {
   updateAddOns: (addOns: Record<string, number>) => void; // Updated type
   updateZipCode: (zipCode: string) => void;
   updateDeliveryDay: (deliveryDay: string) => void;
+  updateDeliveryMethod: (method: 'delivery' | 'market-pickup' | 'farm-pickup') => void;
   clearCheckout: () => void;
 }
 
@@ -27,6 +29,7 @@ const initialState: CheckoutState = {
   addOns: {}, // Changed to empty object
   zipCode: '',
   deliveryDay: '',
+  deliveryMethod: 'delivery',
 };
 
 const CheckoutContext = createContext<CheckoutContextType | undefined>(undefined);
@@ -70,6 +73,10 @@ export const CheckoutProvider: React.FC<CheckoutProviderProps> = ({ children }) 
     setCheckoutState(prev => ({ ...prev, deliveryDay }));
   };
 
+  const updateDeliveryMethod = (method: 'delivery' | 'market-pickup' | 'farm-pickup') => {
+    setCheckoutState(prev => ({ ...prev, deliveryMethod: method }));
+  };
+
   const clearCheckout = () => {
     setCheckoutState(initialState);
   };
@@ -82,6 +89,7 @@ export const CheckoutProvider: React.FC<CheckoutProviderProps> = ({ children }) 
     updateAddOns,
     updateZipCode,
     updateDeliveryDay,
+    updateDeliveryMethod,
     clearCheckout,
   };
 
