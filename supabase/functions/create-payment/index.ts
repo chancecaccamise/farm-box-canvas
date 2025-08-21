@@ -264,7 +264,7 @@ serve(async (req) => {
       status: 'pending'
     };
 
-    const { data: order, error: orderError } = await supabaseClient
+    const { data: order, error: orderError } = await supabaseServiceClient
       .from("orders")
       .insert(orderData)
       .select()
@@ -325,7 +325,7 @@ serve(async (req) => {
     }
 
     if (orderItems.length > 0) {
-      const { error: itemsError } = await supabaseClient
+      const { error: itemsError } = await supabaseServiceClient
         .from("order_items")
         .insert(orderItems);
 
