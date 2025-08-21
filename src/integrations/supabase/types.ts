@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -1245,22 +1245,22 @@ export type Database = {
         Returns: string
       }
       get_or_create_current_week_bag_with_size: {
-        Args: { user_uuid: string; box_size_name?: string }
+        Args: { box_size_name?: string; user_uuid: string }
         Returns: string
       }
       get_or_create_weekly_order: {
         Args: {
           p_user_id: string
-          p_weekly_bag_id: string
-          p_week_start_date: string
           p_week_end_date: string
+          p_week_start_date: string
+          p_weekly_bag_id: string
         }
         Returns: string
       }
       has_role: {
         Args: {
-          _user_id: string
           _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
         }
         Returns: boolean
       }
@@ -1274,9 +1274,9 @@ export type Database = {
       }
       update_all_user_bags_for_template_change: {
         Args: {
-          template_week_start: string
           template_box_size: string
           template_is_confirmed: boolean
+          template_week_start: string
         }
         Returns: number
       }
