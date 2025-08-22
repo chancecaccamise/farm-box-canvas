@@ -4,6 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Package, Calendar, Truck, Settings, Shield } from "lucide-react";
 import { Link } from "react-router-dom";
 import greenhouse from "@/assets/greenhouse.jpg";
+import billysBagsHeader from "@/assets/billysBagsHeader.jpg";
+import happyFamily from "@/assets/happyFamily.jpg";
 import leafyGreens from "@/assets/leafy-greens.jpg";
 import tomatoes from "@/assets/tomatoes.jpg";
 import bellPeppers from "@/assets/bell-peppers.jpg";
@@ -14,7 +16,7 @@ const HowFarmBagsWork = () => {
       {/* Hero Section */}
       <section 
         className="relative py-20 px-4 bg-cover bg-center"
-        style={{ backgroundImage: `url(${greenhouse})` }}
+        style={{ backgroundImage: `url(${billysBagsHeader})` }}
       >
         <div className="absolute inset-0 bg-black opacity-50"></div>
         <div className="relative z-10 max-w-6xl mx-auto text-center">
@@ -34,7 +36,7 @@ const HowFarmBagsWork = () => {
       {/* Step-by-Step Process */}
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-4">Your Farm Bag Journey</h2>
+          <h2 className="text-4xl font-bold text-center mb-4">Your Billy&apos;s Bags Journey</h2>
           <p className="text-xl text-muted-foreground text-center mb-16 max-w-2xl mx-auto">
             Follow your fresh produce from Billy's greenhouse to your table in five simple steps
           </p>
@@ -205,7 +207,7 @@ const HowFarmBagsWork = () => {
             
             <div 
               className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-cover bg-center"
-              style={{ backgroundImage: `url(${greenhouse})` }}
+              style={{ backgroundImage: `url(${happyFamily})` }}
             >
               <div className="absolute inset-0 bg-black/20"></div>
             </div>

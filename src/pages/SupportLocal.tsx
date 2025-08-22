@@ -103,7 +103,7 @@ const SupportLocal = () => {
       <div className="relative h-[60vh] bg-gradient-fresh overflow-hidden">
         <div className="absolute inset-0 bg-black/50"></div>
         <img 
-          src="/src/assets/partnersTable.jpg"
+          src="/src/assets/supportLocalFish.jpg"
           alt="Local partners and community" 
           className="w-full h-full object-cover"
         />
