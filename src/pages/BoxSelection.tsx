@@ -8,7 +8,7 @@ import { useCheckout } from "@/contexts/CheckoutContext";
 import { supabase } from "@/integrations/supabase/client";
 
 type BoxType = "one-time" | "subscription";
-type BoxSize = "small" | "medium" | "large";
+type BoxSize = "small" | "medium" | "large" | "protein-pack";
 
 const BoxSelection = () => {
   const { checkoutState, updateBoxType, updateBoxSize } = useCheckout();
