@@ -46,45 +46,9 @@ const BoxComparison = () => {
         setBoxOptions(formattedBoxes);
       } catch (error) {
         console.error('Error fetching box sizes:', error);
-        // Fallback to Ana's new box structure if there's an error
-        setBoxOptions([
-          {
-            size: "veggie_bag",
-            name: "Small Veggie Bag",
-            basePrice: 30,
-            subscriberPrice: 25,
-            price: "$30",
-            items: "6 items",
-            serves: "Perfect for 1-2 people",
-            description: "Perfect vegetable selection for conscious eaters",
-            sampleItems: ["Organic Mixed Greens", "Rainbow Carrots", "Fresh Basil", "Seasonal Apples", "Cherry Tomatoes", "Heirloom Tomatoes"],
-            popular: false
-          },
-          {
-            size: "full_farm_bag", 
-            name: "Full Farm Bag",
-            basePrice: 55,
-            subscriberPrice: 50,
-            price: "$55",
-            items: "8 items + 1 complimentary gift",
-            serves: "Great for 2-4 people",
-            description: "Complete farm experience with vegetables, proteins, and pantry goods",
-            sampleItems: ["Organic Mixed Greens", "Rainbow Carrots", "Fresh Basil", "Farm Fresh Eggs", "Artisan Bread", "Atlantic Salmon", "Local Honey", "Complimentary Gift"],
-            popular: true
-          },
-          {
-            size: "protein_pack",
-            name: "Seafood/Protein Pack",
-            basePrice: 100,
-            subscriberPrice: 95,
-            price: "$100",
-            items: "5 customer-selected proteins",
-            serves: "Ideal for 4+ people",
-            description: "Premium selection of proteins and seafood",
-            sampleItems: ["Grass-Fed Ground Beef", "Atlantic Salmon", "Free-Range Chicken", "Local Seafood", "Premium Steaks"],
-            popular: false
-          }
-        ]);
+        // Fallback - should not happen as database now has clean 3 boxes
+        console.error('Failed to fetch box sizes from database');
+        setBoxOptions([]);
       } finally {
         setLoading(false);
       }
@@ -96,11 +60,11 @@ const BoxComparison = () => {
   const getSampleItems = (boxSize) => {
     switch (boxSize) {
       case 'veggie_bag':
-        return ['Organic Mixed Greens', 'Rainbow Carrots', 'Fresh Basil', 'Seasonal Apples', 'Cherry Tomatoes', 'Heirloom Tomatoes'];
+        return ['6 vegetables chosen by Billy', 'Seasonal organic greens', 'Farm-fresh root vegetables', 'Locally-sourced herbs', 'Seasonal fruits', 'Billy\'s farming tips included'];
       case 'full_farm_bag':
-        return ['Organic Mixed Greens', 'Rainbow Carrots', 'Fresh Basil', 'Farm Fresh Eggs', 'Artisan Bread', 'Atlantic Salmon', 'Local Honey', 'Complimentary Gift'];
-      case 'protein_pack':
-        return ['Grass-Fed Ground Beef', 'Atlantic Salmon', 'Free-Range Chicken', 'Local Seafood', 'Premium Steaks'];
+        return ['Complete farm selection', 'Fresh vegetables & herbs', 'Premium proteins', 'Artisan pantry goods', 'Weekly complimentary gift', 'Farm-to-table recipes'];
+      case 'protein-pack':
+        return ['5 proteins of your choice', 'Fresh local seafood options', 'Premium grass-fed meats', 'Free-range poultry', 'Sustainable fishing selections'];
       default:
         return [];
     }
@@ -200,7 +164,7 @@ const BoxComparison = () => {
                     + Weekly Complimentary Gift
                   </Badge>
                 )}
-                {box.size === 'protein_pack' && (
+                {box.size === 'protein-pack' && (
                   <Badge variant="outline" className="mt-2 text-blue-600 border-blue-200">
                     You Choose Your Proteins
                   </Badge>
@@ -209,7 +173,7 @@ const BoxComparison = () => {
               
               <CardContent className="space-y-4">
                 <div className="text-left">
-                  <h4 className="font-semibold mb-3 text-center">What's Inside This Week:</h4>
+                  <h4 className="font-semibold mb-3 text-center">What's Included in This Bag:</h4>
                   <ul className="space-y-2">
                     {box.sampleItems.map((item, index) => (
                       <li key={index} className="flex items-center gap-2 text-sm">
