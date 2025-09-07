@@ -45,7 +45,13 @@ const BoxSelection = () => {
   };
 
   const handleContinue = () => {
-    navigate("/add-ons");
+    // Check if user selected a protein pack box size
+    const selectedBoxSize = boxSizes.find(s => s.name === boxSize);
+    if (selectedBoxSize?.name === 'protein-pack') {
+      navigate("/protein-selection");
+    } else {
+      navigate("/add-ons");
+    }
   };
 
   return (

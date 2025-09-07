@@ -5,6 +5,7 @@ interface CheckoutState {
   boxSize: 'small' | 'medium' | 'large';
   selectedItems: Record<string, number>;
   addOns: Record<string, number>; // Changed to Record<string, number> for quantities
+  proteinSelections: string[]; // Array of selected protein IDs
   zipCode: string;
   deliveryDay: string;
   deliveryMethod: 'delivery' | 'market-pickup' | 'farm-pickup';
@@ -16,6 +17,7 @@ interface CheckoutContextType {
   updateBoxSize: (size: 'small' | 'medium' | 'large') => void;
   updateSelectedItems: (items: Record<string, number>) => void;
   updateAddOns: (addOns: Record<string, number>) => void; // Updated type
+  updateProteinSelections: (proteins: string[]) => void;
   updateZipCode: (zipCode: string) => void;
   updateDeliveryDay: (deliveryDay: string) => void;
   updateDeliveryMethod: (method: 'delivery' | 'market-pickup' | 'farm-pickup') => void;
@@ -27,6 +29,7 @@ const initialState: CheckoutState = {
   boxSize: 'small',
   selectedItems: {},
   addOns: {}, // Changed to empty object
+  proteinSelections: [], // Empty array for protein selections
   zipCode: '',
   deliveryDay: '',
   deliveryMethod: 'delivery',
@@ -65,6 +68,10 @@ export const CheckoutProvider: React.FC<CheckoutProviderProps> = ({ children }) 
     setCheckoutState(prev => ({ ...prev, addOns }));
   };
 
+  const updateProteinSelections = (proteins: string[]) => {
+    setCheckoutState(prev => ({ ...prev, proteinSelections: proteins }));
+  };
+
   const updateZipCode = (zipCode: string) => {
     setCheckoutState(prev => ({ ...prev, zipCode }));
   };
@@ -87,6 +94,7 @@ export const CheckoutProvider: React.FC<CheckoutProviderProps> = ({ children }) 
     updateBoxSize,
     updateSelectedItems,
     updateAddOns,
+    updateProteinSelections,
     updateZipCode,
     updateDeliveryDay,
     updateDeliveryMethod,
