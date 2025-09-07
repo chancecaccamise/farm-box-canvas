@@ -18,6 +18,8 @@ const OrderSummary = () => {
   const [addOnProducts, setAddOnProducts] = useState<any[]>([]);
   const [boxPrice, setBoxPrice] = useState(0);
   const [hasActiveSubscription, setHasActiveSubscription] = useState(false);
+  const [selectedProtein, setSelectedProtein] = useState<any>(null);
+  const [selectedCarb, setSelectedCarb] = useState<any>(null);
   const { checkoutState } = useCheckout();
 
   useEffect(() => {
@@ -70,6 +72,29 @@ const OrderSummary = () => {
           .select('*')
           .in('id', addOnIds);
         setAddOnProducts(products || []);
+      }
+
+      // Fetch Full Farm Bag protein and carb selections
+      if (checkoutState.boxSize === 'full_farm_bag' && checkoutState.fullFarmBagSelections) {
+        // Fetch protein product
+        if (checkoutState.fullFarmBagSelections.protein) {
+          const { data: proteinData } = await supabase
+            .from('products')
+            .select('*')
+            .eq('id', checkoutState.fullFarmBagSelections.protein)
+            .single();
+          setSelectedProtein(proteinData);
+        }
+
+        // Fetch carb product
+        if (checkoutState.fullFarmBagSelections.carb) {
+          const { data: carbData } = await supabase
+            .from('products')
+            .select('*')
+            .eq('id', checkoutState.fullFarmBagSelections.carb)
+            .single();
+          setSelectedCarb(carbData);
+        }
       }
     } catch (error) {
       console.error('Error fetching checkout data:', error);
@@ -344,17 +369,51 @@ const OrderSummary = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="font-medium">
-                        {checkoutState.boxSize?.charAt(0).toUpperCase() + checkoutState.boxSize?.slice(1)} Box
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        Fresh seasonal produce
-                      </p>
+                  {checkoutState.boxSize === 'full_farm_bag' ? (
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h3 className="font-medium">Full Farm Bag</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Your personalized selections
+                          </p>
+                        </div>
+                        <span className="font-medium">${boxPrice.toFixed(2)}</span>
+                      </div>
+                      
+                      {selectedProtein && (
+                        <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
+                          <div className="w-2 h-2 bg-accent rounded-full"></div>
+                          <div>
+                            <span className="text-sm font-medium">{selectedProtein.name}</span>
+                            <Badge variant="outline" className="ml-2 text-xs">Protein</Badge>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {selectedCarb && (
+                        <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg">
+                          <div className="w-2 h-2 bg-secondary rounded-full"></div>
+                          <div>
+                            <span className="text-sm font-medium">{selectedCarb.name}</span>
+                            <Badge variant="outline" className="ml-2 text-xs">Carb</Badge>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    <span className="font-medium">${boxPrice.toFixed(2)}</span>
-                  </div>
+                  ) : (
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="font-medium">
+                          {checkoutState.boxSize?.charAt(0).toUpperCase() + checkoutState.boxSize?.slice(1)} Box
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          Fresh seasonal produce
+                        </p>
+                      </div>
+                      <span className="font-medium">${boxPrice.toFixed(2)}</span>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}
@@ -371,17 +430,51 @@ const OrderSummary = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h3 className="font-medium text-green-800">
-                        {checkoutState.boxSize?.charAt(0).toUpperCase() + checkoutState.boxSize?.slice(1)} Box
-                      </h3>
-                      <p className="text-sm text-green-700">
-                        Fresh seasonal produce (subscription active)
-                      </p>
+                  {checkoutState.boxSize === 'full_farm_bag' ? (
+                    <div className="space-y-3">
+                      <div className="flex justify-between items-center">
+                        <div>
+                          <h3 className="font-medium text-green-800">Full Farm Bag</h3>
+                          <p className="text-sm text-green-700">
+                            Your personalized selections (subscription active)
+                          </p>
+                        </div>
+                        <span className="font-medium text-green-800">Included</span>
+                      </div>
+                      
+                      {selectedProtein && (
+                        <div className="flex items-center gap-2 p-3 bg-green-100/50 rounded-lg">
+                          <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                          <div>
+                            <span className="text-sm font-medium text-green-800">{selectedProtein.name}</span>
+                            <Badge variant="outline" className="ml-2 text-xs border-green-600 text-green-700">Protein</Badge>
+                          </div>
+                        </div>
+                      )}
+                      
+                      {selectedCarb && (
+                        <div className="flex items-center gap-2 p-3 bg-green-100/50 rounded-lg">
+                          <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                          <div>
+                            <span className="text-sm font-medium text-green-800">{selectedCarb.name}</span>
+                            <Badge variant="outline" className="ml-2 text-xs border-green-600 text-green-700">Carb</Badge>
+                          </div>
+                        </div>
+                      )}
                     </div>
-                    <span className="font-medium text-green-800">Included</span>
-                  </div>
+                  ) : (
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="font-medium text-green-800">
+                          {checkoutState.boxSize?.charAt(0).toUpperCase() + checkoutState.boxSize?.slice(1)} Box
+                        </h3>
+                        <p className="text-sm text-green-700">
+                          Fresh seasonal produce (subscription active)
+                        </p>
+                      </div>
+                      <span className="font-medium text-green-800">Included</span>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             )}
