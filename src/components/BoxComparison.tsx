@@ -34,46 +34,54 @@ const BoxComparison = () => {
           size: box.name,
           name: box.display_name,
           basePrice: box.base_price,
+          subscriberPrice: box.subscriber_price,
           price: `$${box.base_price}`,
           items: box.item_count_range,
           serves: box.serves_text,
+          description: box.description,
           sampleItems: getSampleItems(box.name),
-          popular: box.name === 'medium' // Keep medium as most popular
+          popular: box.name === 'full_farm_bag' // Ana's Full Farm Bag is most popular
         }));
 
         setBoxOptions(formattedBoxes);
       } catch (error) {
         console.error('Error fetching box sizes:', error);
-        // Fallback to default data if there's an error
+        // Fallback to Ana's new box structure if there's an error
         setBoxOptions([
           {
-            size: "small",
-            name: "Small Box",
-            basePrice: 35,
-            price: "$35",
-            items: "8-10 items",
+            size: "veggie_bag",
+            name: "Small Veggie Bag",
+            basePrice: 30,
+            subscriberPrice: 25,
+            price: "$30",
+            items: "6 items",
             serves: "Perfect for 1-2 people",
-            sampleItems: ["Rainbow Carrots", "Leafy Greens", "Heritage Tomatoes", "Fresh Herbs"],
+            description: "Perfect vegetable selection for conscious eaters",
+            sampleItems: ["Organic Mixed Greens", "Rainbow Carrots", "Fresh Basil", "Seasonal Apples", "Cherry Tomatoes", "Heirloom Tomatoes"],
             popular: false
           },
           {
-            size: "medium", 
-            name: "Medium Box",
-            basePrice: 50,
-            price: "$50",
-            items: "12-15 items",
+            size: "full_farm_bag", 
+            name: "Full Farm Bag",
+            basePrice: 55,
+            subscriberPrice: 50,
+            price: "$55",
+            items: "8 items + 1 complimentary gift",
             serves: "Great for 2-4 people",
-            sampleItems: ["Rainbow Carrots", "Leafy Greens", "Heritage Tomatoes", "Bell Peppers", "Fresh Fish", "Artisan Bread"],
+            description: "Complete farm experience with vegetables, proteins, and pantry goods",
+            sampleItems: ["Organic Mixed Greens", "Rainbow Carrots", "Fresh Basil", "Farm Fresh Eggs", "Artisan Bread", "Atlantic Salmon", "Local Honey", "Complimentary Gift"],
             popular: true
           },
           {
-            size: "large",
-            name: "Large Box",
-            basePrice: 70,
-            price: "$70",
-            items: "18-22 items",
+            size: "protein_pack",
+            name: "Seafood/Protein Pack",
+            basePrice: 100,
+            subscriberPrice: 95,
+            price: "$100",
+            items: "5 customer-selected proteins",
             serves: "Ideal for 4+ people",
-            sampleItems: ["Rainbow Carrots", "Leafy Greens", "Heritage Tomatoes", "Bell Peppers", "Fresh Fish", "Artisan Bread", "Seasonal Herbs", "Local Honey"],
+            description: "Premium selection of proteins and seafood",
+            sampleItems: ["Grass-Fed Ground Beef", "Atlantic Salmon", "Free-Range Chicken", "Local Seafood", "Premium Steaks"],
             popular: false
           }
         ]);
@@ -86,14 +94,15 @@ const BoxComparison = () => {
   }, []);
 
   const getSampleItems = (boxSize) => {
-    const baseItems = ["Rainbow Carrots", "Leafy Greens", "Heritage Tomatoes"];
-    
-    if (boxSize === 'small') {
-      return [...baseItems, "Fresh Herbs"];
-    } else if (boxSize === 'medium') {
-      return [...baseItems, "Bell Peppers", "Fresh Fish", "Artisan Bread"];
-    } else {
-      return [...baseItems, "Bell Peppers", "Fresh Fish", "Artisan Bread", "Seasonal Herbs", "Local Honey"];
+    switch (boxSize) {
+      case 'veggie_bag':
+        return ['Organic Mixed Greens', 'Rainbow Carrots', 'Fresh Basil', 'Seasonal Apples', 'Cherry Tomatoes', 'Heirloom Tomatoes'];
+      case 'full_farm_bag':
+        return ['Organic Mixed Greens', 'Rainbow Carrots', 'Fresh Basil', 'Farm Fresh Eggs', 'Artisan Bread', 'Atlantic Salmon', 'Local Honey', 'Complimentary Gift'];
+      case 'protein_pack':
+        return ['Grass-Fed Ground Beef', 'Atlantic Salmon', 'Free-Range Chicken', 'Local Seafood', 'Premium Steaks'];
+      default:
+        return [];
     }
   };
 
@@ -107,14 +116,15 @@ const BoxComparison = () => {
     }
   };
 
-  const getDisplayPrice = (basePrice) => {
-    const price = isSubscription ? basePrice : basePrice + 5;
+  const getDisplayPrice = (basePrice, subscriberPrice) => {
+    const price = isSubscription ? (subscriberPrice || basePrice) : basePrice;
     return `$${price}`;
   };
 
-  const getSavingsText = (basePrice) => {
-    if (isSubscription) {
-      return `Save $5 vs one-time purchase!`;
+  const getSavingsText = (basePrice, subscriberPrice) => {
+    if (isSubscription && subscriberPrice && subscriberPrice < basePrice) {
+      const savings = basePrice - subscriberPrice;
+      return `Save $${savings} vs one-time purchase!`;
     }
     return null;
   };
@@ -132,9 +142,9 @@ const BoxComparison = () => {
   return (
     <section className="py-20 px-4 bg-secondary/30">
       <div className="max-w-6xl mx-auto">
-        <h2 className="text-4xl font-bold text-center mb-4">Choose Your Weekly Box</h2>
+        <h2 className="text-4xl font-bold text-center mb-4">Choose Your Weekly Experience</h2>
         <p className="text-xl text-muted-foreground text-center mb-8 max-w-2xl mx-auto">
-          Each box is carefully curated with the freshest local produce, sustainable seafood, and artisan goods
+          From fresh vegetables to premium proteins, each option is crafted with Ana's expertise and local partnerships
         </p>
         
         {/* Subscription Toggle */}
@@ -171,17 +181,30 @@ const BoxComparison = () => {
               
               <CardHeader className="pb-4">
                 <CardTitle className="text-2xl mb-2">{box.name}</CardTitle>
-                <div className="text-4xl font-bold text-primary mb-2">{getDisplayPrice(box.basePrice)}</div>
+                <div className="text-4xl font-bold text-primary mb-2">{getDisplayPrice(box.basePrice, box.subscriberPrice)}</div>
                 <div className="text-sm text-muted-foreground mb-1">
                   {isSubscription ? 'per week' : 'per delivery'}
                 </div>
-                {getSavingsText(box.basePrice) && (
+                {getSavingsText(box.basePrice, box.subscriberPrice) && (
                   <div className="text-xs text-accent font-medium mb-2">
-                    {getSavingsText(box.basePrice)}
+                    {getSavingsText(box.basePrice, box.subscriberPrice)}
                   </div>
                 )}
                 <CardDescription className="text-base font-medium">{box.serves}</CardDescription>
                 <div className="text-sm text-accent font-medium">{box.items}</div>
+                {box.description && (
+                  <p className="text-sm text-muted-foreground mt-2">{box.description}</p>
+                )}
+                {box.size === 'full_farm_bag' && (
+                  <Badge variant="outline" className="mt-2 text-orange-600 border-orange-200">
+                    + Weekly Complimentary Gift
+                  </Badge>
+                )}
+                {box.size === 'protein_pack' && (
+                  <Badge variant="outline" className="mt-2 text-blue-600 border-blue-200">
+                    You Choose Your Proteins
+                  </Badge>
+                )}
               </CardHeader>
               
               <CardContent className="space-y-4">
@@ -212,8 +235,8 @@ const BoxComparison = () => {
         <div className="text-center mt-8">
           <p className="text-muted-foreground">
             {isSubscription 
-              ? "All subscriptions include free delivery • Cancel anytime without fees"
-              : "One-time purchases include free delivery • No commitment required"
+              ? "All subscriptions include free delivery • Cancel anytime • Mix and match different bags"
+              : "One-time purchases include free delivery • No commitment • Mix and match different bags"
             }
           </p>
         </div>

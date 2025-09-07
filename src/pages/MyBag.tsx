@@ -141,7 +141,7 @@ function MyBag() {
       const { data: bagIdData, error: bagError } = await supabase
         .rpc('get_or_create_current_week_bag_with_size', { 
           user_uuid: user?.id,
-          box_size_name: 'medium'
+          box_size_name: 'full_farm_bag'
         });
 
       if (bagError) throw bagError;

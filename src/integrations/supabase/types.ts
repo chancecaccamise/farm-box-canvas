@@ -73,6 +73,7 @@ export type Database = {
           item_count_range: string | null
           name: string
           serves_text: string | null
+          subscriber_price: number | null
           updated_at: string
         }
         Insert: {
@@ -85,6 +86,7 @@ export type Database = {
           item_count_range?: string | null
           name: string
           serves_text?: string | null
+          subscriber_price?: number | null
           updated_at?: string
         }
         Update: {
@@ -97,6 +99,7 @@ export type Database = {
           item_count_range?: string | null
           name?: string
           serves_text?: string | null
+          subscriber_price?: number | null
           updated_at?: string
         }
         Relationships: []
@@ -143,8 +146,11 @@ export type Database = {
           confirmed_at: string | null
           confirmed_by: string | null
           created_at: string
+          customer_choice: boolean | null
           id: string
           is_confirmed: boolean
+          item_type: string | null
+          price_override: number | null
           product_id: string
           quantity: number
           updated_at: string
@@ -155,8 +161,11 @@ export type Database = {
           confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string
+          customer_choice?: boolean | null
           id?: string
           is_confirmed?: boolean
+          item_type?: string | null
+          price_override?: number | null
           product_id: string
           quantity?: number
           updated_at?: string
@@ -167,8 +176,11 @@ export type Database = {
           confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string
+          customer_choice?: boolean | null
           id?: string
           is_confirmed?: boolean
+          item_type?: string | null
+          price_override?: number | null
           product_id?: string
           quantity?: number
           updated_at?: string
@@ -724,10 +736,14 @@ export type Database = {
           image: string | null
           inventory_count: number | null
           is_available: boolean | null
+          is_complimentary: boolean | null
+          market_price_enabled: boolean | null
           name: string
           price: number
           tags: string[] | null
+          unit_description: string | null
           updated_at: string
+          weight: number | null
         }
         Insert: {
           category: string
@@ -737,10 +753,14 @@ export type Database = {
           image?: string | null
           inventory_count?: number | null
           is_available?: boolean | null
+          is_complimentary?: boolean | null
+          market_price_enabled?: boolean | null
           name: string
           price: number
           tags?: string[] | null
+          unit_description?: string | null
           updated_at?: string
+          weight?: number | null
         }
         Update: {
           category?: string
@@ -750,10 +770,14 @@ export type Database = {
           image?: string | null
           inventory_count?: number | null
           is_available?: boolean | null
+          is_complimentary?: boolean | null
+          market_price_enabled?: boolean | null
           name?: string
           price?: number
           tags?: string[] | null
+          unit_description?: string | null
           updated_at?: string
+          weight?: number | null
         }
         Relationships: []
       }
@@ -974,6 +998,36 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_bag_selections: {
+        Row: {
+          box_type: string
+          created_at: string
+          id: string
+          quantity: number | null
+          updated_at: string
+          user_id: string
+          week_start_date: string
+        }
+        Insert: {
+          box_type: string
+          created_at?: string
+          id?: string
+          quantity?: number | null
+          updated_at?: string
+          user_id: string
+          week_start_date: string
+        }
+        Update: {
+          box_type?: string
+          created_at?: string
+          id?: string
+          quantity?: number | null
+          updated_at?: string
+          user_id?: string
+          week_start_date?: string
+        }
+        Relationships: []
       }
       user_preferences: {
         Row: {

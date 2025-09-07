@@ -16,6 +16,7 @@ interface BoxSize {
   name: string;
   display_name: string;
   base_price: number;
+  subscriber_price?: number;
   description: string | null;
   serves_text: string | null;
   item_count_range: string | null;
@@ -27,7 +28,7 @@ interface BoxSizeSelectorProps {
   isConfirmed?: boolean;
 }
 
-export function BoxSizeSelector({ currentBoxSize = "medium", onBoxSizeChange, isConfirmed = false }: BoxSizeSelectorProps) {
+export function BoxSizeSelector({ currentBoxSize = "full_farm_bag", onBoxSizeChange, isConfirmed = false }: BoxSizeSelectorProps) {
   const [boxSizes, setBoxSizes] = useState<BoxSize[]>([]);
   const [selectedSize, setSelectedSize] = useState(currentBoxSize);
   const [loading, setLoading] = useState(true);
@@ -199,7 +200,14 @@ export function BoxSizeSelector({ currentBoxSize = "medium", onBoxSizeChange, is
                     )}
                   </div>
                   <div className="text-right">
-                    <div className="font-semibold">${boxSize.base_price.toFixed(2)}/week</div>
+                    <div className="font-semibold">
+                      ${(boxSize.subscriber_price || boxSize.base_price).toFixed(2)}/week
+                    </div>
+                    {boxSize.subscriber_price && boxSize.subscriber_price < boxSize.base_price && (
+                      <div className="text-xs text-muted-foreground line-through">
+                        ${boxSize.base_price.toFixed(2)}
+                      </div>
+                    )}
                     {boxSize.name === currentBoxSize && (
                       <Badge variant="secondary" className="mt-1">Current</Badge>
                     )}
