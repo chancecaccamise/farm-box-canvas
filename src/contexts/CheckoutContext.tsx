@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface CheckoutState {
   boxType: 'subscription' | 'one-time';
-  boxSize: 'small' | 'medium' | 'large' | 'protein-pack' | 'full-farm-bag';
+  boxSize: 'small' | 'medium' | 'large' | 'protein-pack' | 'full_farm_bag';
   selectedItems: Record<string, number>;
   addOns: Record<string, number>; // Changed to Record<string, number> for quantities
   proteinSelections: string[]; // Array of selected protein IDs
@@ -16,7 +16,7 @@ interface CheckoutState {
 interface CheckoutContextType {
   checkoutState: CheckoutState;
   updateBoxType: (type: 'subscription' | 'one-time') => void;
-  updateBoxSize: (size: 'small' | 'medium' | 'large' | 'protein-pack' | 'full-farm-bag') => void;
+  updateBoxSize: (size: 'small' | 'medium' | 'large' | 'protein-pack' | 'full_farm_bag') => void;
   updateSelectedItems: (items: Record<string, number>) => void;
   updateAddOns: (addOns: Record<string, number>) => void; // Updated type
   updateProteinSelections: (proteins: string[]) => void;
@@ -62,7 +62,7 @@ export const CheckoutProvider: React.FC<CheckoutProviderProps> = ({ children }) 
     setCheckoutState(prev => ({ ...prev, boxType: type }));
   };
 
-  const updateBoxSize = (size: 'small' | 'medium' | 'large' | 'protein-pack' | 'full-farm-bag') => {
+  const updateBoxSize = (size: 'small' | 'medium' | 'large' | 'protein-pack' | 'full_farm_bag') => {
     setCheckoutState(prev => ({ ...prev, boxSize: size }));
   };
 
