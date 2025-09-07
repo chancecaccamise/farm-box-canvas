@@ -50,7 +50,7 @@ const BoxSelection = () => {
     if (selectedBoxSize?.name === 'protein-pack') {
       navigate("/protein-selection");
     } else if (selectedBoxSize?.name === 'full-farm-bag') {
-      navigate("/full-farm-bag-selection");
+      navigate("/full-farm-bag-protein-selection");
     } else {
       navigate("/add-ons");
     }

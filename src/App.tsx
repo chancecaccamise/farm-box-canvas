@@ -29,6 +29,8 @@ import Account from "./pages/Account";
 import BoxSelection from "./pages/BoxSelection";
 import ProductSelection from "./pages/ProductSelection";
 import ProteinSelection from "./pages/ProteinSelection";
+import FullFarmBagProteinSelection from "./pages/FullFarmBagProteinSelection";
+import FullFarmBagCarbSelection from "./pages/FullFarmBagCarbSelection";
 import FullFarmBagSelection from "./pages/FullFarmBagSelection";
 import AddOns from "./pages/AddOns";
 import Delivery from "./pages/Delivery";
@@ -109,6 +111,8 @@ const AppRoutes = () => {
         <Route path="/box-selection" element={<BoxSelection />} />
         <Route path="/product-selection" element={<ProductSelection />} />
         <Route path="/protein-selection" element={<ProteinSelection />} />
+        <Route path="/full-farm-bag-protein-selection" element={<FullFarmBagProteinSelection />} />
+        <Route path="/full-farm-bag-carb-selection" element={<FullFarmBagCarbSelection />} />
         <Route path="/full-farm-bag-selection" element={<FullFarmBagSelection />} />
         <Route path="/add-ons" element={<AddOns />} />
         <Route path="/delivery" element={<Delivery />} />
