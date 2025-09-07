@@ -18,7 +18,8 @@ import {
   Quote,
   Upload,
   Calendar,
-  Palette
+  Palette,
+  Camera
 } from "lucide-react";
 import weddingBouquet from "@/assets/weddingBouquet.png";
 import babyShowerFlowers from "@/assets/Large on table.jpg";
@@ -233,6 +234,66 @@ const AnasFlowers = () => {
                 </CardContent>
               </Card>
             ))}
+          </div>
+        </div>
+
+        {/* Gallery Preview */}
+        <div className="mb-16">
+          <div className="text-center mb-8">
+            <h2 className="text-3xl font-bold mb-4">Featured Arrangements</h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Discover Ana's artistry through our collection of custom floral designs
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-3 gap-6 mb-8">
+            <div className="group relative overflow-hidden rounded-lg aspect-square">
+              <img 
+                src={weddingBouquet} 
+                alt="Wedding Bouquet - Elegant white and green arrangement"
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-300"></div>
+              <div className="absolute bottom-4 left-4 text-white">
+                <h3 className="font-semibold">Wedding Collection</h3>
+                <p className="text-sm opacity-90">Romantic & timeless</p>
+              </div>
+            </div>
+            
+            <div className="group relative overflow-hidden rounded-lg aspect-square">
+              <img 
+                src={birthdayFlowers} 
+                alt="Birthday Centerpiece - Vibrant celebration arrangement"
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-300"></div>
+              <div className="absolute bottom-4 left-4 text-white">
+                <h3 className="font-semibold">Celebration Centerpieces</h3>
+                <p className="text-sm opacity-90">Joyful & colorful</p>
+              </div>
+            </div>
+            
+            <div className="group relative overflow-hidden rounded-lg aspect-square">
+              <img 
+                src={seasonalBouquet} 
+                alt="Seasonal Bouquet - Fresh seasonal flower arrangement"
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+              <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-300"></div>
+              <div className="absolute bottom-4 left-4 text-white">
+                <h3 className="font-semibold">Seasonal Selections</h3>
+                <p className="text-sm opacity-90">Nature's finest</p>
+              </div>
+            </div>
+          </div>
+          
+          <div className="text-center">
+            <Button variant="outline" size="lg" className="group" asChild>
+              <a href="/gallery">
+                <Camera className="w-4 h-4 mr-2 transition-transform group-hover:scale-110" />
+                View Full Gallery
+              </a>
+            </Button>
           </div>
         </div>
 

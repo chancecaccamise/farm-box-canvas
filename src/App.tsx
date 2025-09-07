@@ -24,6 +24,7 @@ import SupportLocal from "./pages/SupportLocal";
 import FreshCatch from "./pages/FreshCatch";
 import BecomeAPartner from "./pages/BecomeAPartner";
 import AnasFlowers from "./pages/AnasFlowers";
+import Gallery from "./pages/Gallery";
 import ZipCode from "./pages/ZipCode";
 import Account from "./pages/Account";
 import BoxSelection from "./pages/BoxSelection";
@@ -78,6 +79,7 @@ const AppRoutes = () => {
         <Route path="/auth" element={<Auth />} />
         <Route path="/anas-flowers" element={<AnasFlowers />} />
         <Route path="/anas-arrangements" element={<AnasFlowers />} />
+        <Route path="/gallery" element={<Gallery />} />
         <Route path="/how-we-grow" element={<HowWeGrow />} />
         <Route path="/our-mission" element={<OurMission />} />
         <Route path="/meet-farmers" element={<MeetFarmers />} />
