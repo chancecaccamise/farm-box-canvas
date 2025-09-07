@@ -2,10 +2,12 @@ import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 interface CheckoutState {
   boxType: 'subscription' | 'one-time';
-  boxSize: 'small' | 'medium' | 'large' | 'protein-pack';
+  boxSize: 'small' | 'medium' | 'large' | 'protein-pack' | 'full-farm-bag';
   selectedItems: Record<string, number>;
   addOns: Record<string, number>; // Changed to Record<string, number> for quantities
   proteinSelections: string[]; // Array of selected protein IDs
+  carbSelections: string[]; // Array of selected carb IDs
+  fullFarmBagSelections: { protein?: string; carb?: string }; // Full farm bag selections
   zipCode: string;
   deliveryDay: string;
   deliveryMethod: 'delivery' | 'market-pickup' | 'farm-pickup';
@@ -14,10 +16,12 @@ interface CheckoutState {
 interface CheckoutContextType {
   checkoutState: CheckoutState;
   updateBoxType: (type: 'subscription' | 'one-time') => void;
-  updateBoxSize: (size: 'small' | 'medium' | 'large' | 'protein-pack') => void;
+  updateBoxSize: (size: 'small' | 'medium' | 'large' | 'protein-pack' | 'full-farm-bag') => void;
   updateSelectedItems: (items: Record<string, number>) => void;
   updateAddOns: (addOns: Record<string, number>) => void; // Updated type
   updateProteinSelections: (proteins: string[]) => void;
+  updateCarbSelections: (carbs: string[]) => void;
+  updateFullFarmBagSelections: (selections: { protein?: string; carb?: string }) => void;
   updateZipCode: (zipCode: string) => void;
   updateDeliveryDay: (deliveryDay: string) => void;
   updateDeliveryMethod: (method: 'delivery' | 'market-pickup' | 'farm-pickup') => void;
@@ -30,6 +34,8 @@ const initialState: CheckoutState = {
   selectedItems: {},
   addOns: {}, // Changed to empty object
   proteinSelections: [], // Empty array for protein selections
+  carbSelections: [], // Empty array for carb selections
+  fullFarmBagSelections: {}, // Empty object for full farm bag selections
   zipCode: '',
   deliveryDay: '',
   deliveryMethod: 'delivery',
@@ -56,7 +62,7 @@ export const CheckoutProvider: React.FC<CheckoutProviderProps> = ({ children }) 
     setCheckoutState(prev => ({ ...prev, boxType: type }));
   };
 
-  const updateBoxSize = (size: 'small' | 'medium' | 'large' | 'protein-pack') => {
+  const updateBoxSize = (size: 'small' | 'medium' | 'large' | 'protein-pack' | 'full-farm-bag') => {
     setCheckoutState(prev => ({ ...prev, boxSize: size }));
   };
 
@@ -70,6 +76,14 @@ export const CheckoutProvider: React.FC<CheckoutProviderProps> = ({ children }) 
 
   const updateProteinSelections = (proteins: string[]) => {
     setCheckoutState(prev => ({ ...prev, proteinSelections: proteins }));
+  };
+
+  const updateCarbSelections = (carbs: string[]) => {
+    setCheckoutState(prev => ({ ...prev, carbSelections: carbs }));
+  };
+
+  const updateFullFarmBagSelections = (selections: { protein?: string; carb?: string }) => {
+    setCheckoutState(prev => ({ ...prev, fullFarmBagSelections: selections }));
   };
 
   const updateZipCode = (zipCode: string) => {
@@ -95,6 +109,8 @@ export const CheckoutProvider: React.FC<CheckoutProviderProps> = ({ children }) 
     updateSelectedItems,
     updateAddOns,
     updateProteinSelections,
+    updateCarbSelections,
+    updateFullFarmBagSelections,
     updateZipCode,
     updateDeliveryDay,
     updateDeliveryMethod,
