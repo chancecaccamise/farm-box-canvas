@@ -59,7 +59,7 @@ export function ProductCard({ product, quantity, onUpdateQuantity, isLocked, isC
 
   return (
     <Card className="overflow-hidden group hover:shadow-medium transition-all duration-300">
-      <div className="aspect-square relative overflow-hidden">
+      <div className="aspect-[4/3] relative overflow-hidden">
         {imageSrc ? (
           <img
             src={imageSrc}
@@ -108,8 +108,8 @@ export function ProductCard({ product, quantity, onUpdateQuantity, isLocked, isC
         )}
       </div>
 
-      <CardContent className="p-4">
-        <div className="space-y-3">
+      <CardContent className="p-3">
+        <div className="space-y-2">
           {/* Product Info */}
           <div>
             <h3 className="font-semibold text-base line-clamp-1">{product.name}</h3>

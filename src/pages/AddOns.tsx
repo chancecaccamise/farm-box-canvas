@@ -124,7 +124,7 @@ const AddOns = () => {
             <p className="text-muted-foreground">No add-ons available at the moment.</p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-3 gap-6 mb-12">
+          <div className="grid md:grid-cols-2 gap-6 mb-12">
             {addOns.map((addOn) => {
               const quantity = selectedAddOns[addOn.id] || 0;
               const isSelected = quantity > 0;
@@ -141,7 +141,7 @@ const AddOns = () => {
                   }`}
                 >
                   {addOn.image && addOn.image !== '/api/placeholder/300/200' ? (
-                    <div className="aspect-square w-full overflow-hidden rounded-t-lg">
+                    <div className="aspect-[4/3] w-full overflow-hidden rounded-t-lg">
                       <img
                         src={addOn.image}
                         alt={addOn.name}
@@ -153,7 +153,7 @@ const AddOns = () => {
                       />
                     </div>
                   ) : (
-                    <div className="aspect-square w-full bg-gradient-to-br from-muted to-muted/60 flex items-center justify-center rounded-t-lg">
+                    <div className="aspect-[4/3] w-full bg-gradient-to-br from-muted to-muted/60 flex items-center justify-center rounded-t-lg">
                       <div className="text-center">
                         <div className="text-4xl mb-2">
                           {addOn.category === 'meat' ? '🥩' : 

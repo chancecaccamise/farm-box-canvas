@@ -24,7 +24,7 @@ interface AddOnsGridProps {
   confirmedAddons?: string[]; // Product IDs that are already confirmed/paid
 }
 
-const PRODUCTS_PER_PAGE = 9;
+const PRODUCTS_PER_PAGE = 8;
 const CATEGORIES = ["All", "Vegetables", "Fruits", "Herbs", "Dairy", "Meat", "Fish", "Bakery", "Pantry", "Other"];
 
 export function AddOnsGrid({ bagItems, onUpdateQuantity, isLocked = false, confirmedAddons = [] }: AddOnsGridProps) {
@@ -129,7 +129,7 @@ export function AddOnsGrid({ bagItems, onUpdateQuantity, isLocked = false, confi
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {displayedProducts.map((product) => (
           <ProductCard
             key={product.id}
