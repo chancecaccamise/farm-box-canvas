@@ -8,7 +8,7 @@ import { useCheckout } from "@/contexts/CheckoutContext";
 import { supabase } from "@/integrations/supabase/client";
 
 type BoxType = "one-time" | "subscription";
-type BoxSize = "small" | "medium" | "large" | "protein-pack";
+type BoxSize = "small" | "medium" | "large" | "protein-pack" | "full-farm-bag";
 
 const BoxSelection = () => {
   const { checkoutState, updateBoxType, updateBoxSize } = useCheckout();
@@ -49,6 +49,8 @@ const BoxSelection = () => {
     const selectedBoxSize = boxSizes.find(s => s.name === boxSize);
     if (selectedBoxSize?.name === 'protein-pack') {
       navigate("/protein-selection");
+    } else if (selectedBoxSize?.name === 'full-farm-bag') {
+      navigate("/full-farm-bag-selection");
     } else {
       navigate("/add-ons");
     }

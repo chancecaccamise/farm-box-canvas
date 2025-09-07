@@ -29,6 +29,7 @@ import Account from "./pages/Account";
 import BoxSelection from "./pages/BoxSelection";
 import ProductSelection from "./pages/ProductSelection";
 import ProteinSelection from "./pages/ProteinSelection";
+import FullFarmBagSelection from "./pages/FullFarmBagSelection";
 import AddOns from "./pages/AddOns";
 import Delivery from "./pages/Delivery";
 import OrderSummary from "./pages/OrderSummary";
@@ -107,7 +108,7 @@ const AppRoutes = () => {
             <Route path="/account" element={<Account />} />
         <Route path="/box-selection" element={<BoxSelection />} />
         <Route path="/product-selection" element={<ProductSelection />} />
-        <Route path="/protein-selection" element={<ProteinSelection />} />
+        <Route path="/full-farm-bag-selection" element={<FullFarmBagSelection />} />
         <Route path="/add-ons" element={<AddOns />} />
         <Route path="/delivery" element={<Delivery />} />
         <Route path="/order-summary" element={<OrderSummary />} />
