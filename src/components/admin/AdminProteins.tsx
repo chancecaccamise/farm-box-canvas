@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Fish, Plus, Edit, Trash2, DollarSign } from "lucide-react";
+import { Fish, Plus, Edit, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
@@ -16,11 +15,7 @@ interface Protein {
   id: string;
   name: string;
   description: string | null;
-  price: number;
   unit_description: string | null;
-  weight: number | null;
-  image: string | null;
-  tags: string[] | null;
   is_available: boolean;
 }
 
@@ -32,11 +27,7 @@ export const AdminProteins = () => {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    price: "",
     unit_description: "",
-    weight: "",
-    image: "",
-    tags: "",
     is_available: true,
   });
   const { toast } = useToast();
@@ -74,11 +65,8 @@ export const AdminProteins = () => {
       name: formData.name,
       description: formData.description || null,
       category: 'proteins',
-      price: parseFloat(formData.price),
+      price: 0, // Default price since we're not managing prices in admin
       unit_description: formData.unit_description || null,
-      weight: formData.weight ? parseFloat(formData.weight) : null,
-      image: formData.image || null,
-      tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : null,
       is_available: formData.is_available,
     };
 
@@ -124,11 +112,7 @@ export const AdminProteins = () => {
     setFormData({
       name: protein.name,
       description: protein.description || "",
-      price: protein.price.toString(),
       unit_description: protein.unit_description || "",
-      weight: protein.weight ? protein.weight.toString() : "",
-      image: protein.image || "",
-      tags: protein.tags ? protein.tags.join(', ') : "",
       is_available: protein.is_available,
     });
     setIsDialogOpen(true);
@@ -188,11 +172,7 @@ export const AdminProteins = () => {
     setFormData({
       name: "",
       description: "",
-      price: "",
       unit_description: "",
-      weight: "",
-      image: "",
-      tags: "",
       is_available: true,
     });
     setEditingProtein(null);
@@ -238,27 +218,14 @@ export const AdminProteins = () => {
             </DialogHeader>
             
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="name">Name *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="price">Price ($) *</Label>
-                  <Input
-                    id="price"
-                    type="number"
-                    step="0.01"
-                    value={formData.price}
-                    onChange={(e) => setFormData({...formData, price: e.target.value})}
-                    required
-                  />
-                </div>
+              <div>
+                <Label htmlFor="name">Name *</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  required
+                />
               </div>
 
               <div>
@@ -271,44 +238,13 @@ export const AdminProteins = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="unit_description">Unit Description</Label>
-                  <Input
-                    id="unit_description"
-                    placeholder="e.g., 1 lb fillet"
-                    value={formData.unit_description}
-                    onChange={(e) => setFormData({...formData, unit_description: e.target.value})}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="weight">Weight (lbs)</Label>
-                  <Input
-                    id="weight"
-                    type="number"
-                    step="0.1"
-                    value={formData.weight}
-                    onChange={(e) => setFormData({...formData, weight: e.target.value})}
-                  />
-                </div>
-              </div>
-
               <div>
-                <Label htmlFor="image">Image URL</Label>
+                <Label htmlFor="unit_description">Unit Description</Label>
                 <Input
-                  id="image"
-                  value={formData.image}
-                  onChange={(e) => setFormData({...formData, image: e.target.value})}
-                />
-              </div>
-
-              <div>
-                <Label htmlFor="tags">Tags (comma-separated)</Label>
-                <Input
-                  id="tags"
-                  placeholder="e.g., seafood, premium, wild-caught"
-                  value={formData.tags}
-                  onChange={(e) => setFormData({...formData, tags: e.target.value})}
+                  id="unit_description"
+                  placeholder="e.g., 1 lb fillet"
+                  value={formData.unit_description}
+                  onChange={(e) => setFormData({...formData, unit_description: e.target.value})}
                 />
               </div>
 
@@ -349,9 +285,7 @@ export const AdminProteins = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
-                <TableHead>Price</TableHead>
-                <TableHead>Unit</TableHead>
-                <TableHead>Tags</TableHead>
+                <TableHead>Unit Description</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -364,42 +298,23 @@ export const AdminProteins = () => {
                       <div className="font-medium">{protein.name}</div>
                       {protein.description && (
                         <div className="text-sm text-muted-foreground">
-                          {protein.description.length > 50 
-                            ? `${protein.description.substring(0, 50)}...`
+                          {protein.description.length > 60 
+                            ? `${protein.description.substring(0, 60)}...`
                             : protein.description
                           }
                         </div>
                       )}
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1">
-                      <DollarSign className="w-3 h-3" />
-                      {protein.price.toFixed(2)}
-                    </div>
-                  </TableCell>
                   <TableCell>{protein.unit_description || '-'}</TableCell>
                   <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {protein.tags?.slice(0, 2).map((tag) => (
-                        <Badge key={tag} variant="outline" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                      {protein.tags && protein.tags.length > 2 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{protein.tags.length - 2}
-                        </Badge>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <Badge 
-                      variant={protein.is_available ? "default" : "secondary"}
-                      className={protein.is_available ? "bg-green-100 text-green-800" : ""}
-                    >
+                    <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                      protein.is_available 
+                        ? "bg-green-100 text-green-800" 
+                        : "bg-gray-100 text-gray-800"
+                    }`}>
                       {protein.is_available ? "Available" : "Disabled"}
-                    </Badge>
+                    </div>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Fish, Package } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -11,11 +10,7 @@ interface Product {
   id: string;
   name: string;
   description: string | null;
-  price: number;
   unit_description: string | null;
-  weight: number | null;
-  image: string | null;
-  tags: string[] | null;
 }
 
 interface ProteinSelectorProps {
@@ -152,15 +147,6 @@ export function ProteinSelector({
                     <p className="text-sm text-muted-foreground mb-2">
                       {protein.description}
                     </p>
-                  )}
-                  {protein.tags && protein.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1">
-                      {protein.tags.slice(0, 3).map((tag) => (
-                        <Badge key={tag} variant="outline" className="text-xs">
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
                   )}
                 </div>
               </div>
