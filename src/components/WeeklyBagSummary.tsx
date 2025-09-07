@@ -40,19 +40,19 @@ export function WeeklyBagSummary({
   const boxPrice = weeklyBag?.box_price || 0;
   const addonsTotal = weeklyBag?.addons_total || 0;
   
-  // No delivery fee for any orders
-  const deliveryFee = 0;
+  // Delivery fee for all orders
+  const deliveryFee = 9.00;
   
   const subtotal = boxPrice + addonsTotal;
   
-  // Updated total calculation - no delivery fee for anyone
+  // Updated total calculation - delivery fee for everyone
   const getTotal = () => {
     if (hasActiveSubscription) {
-      // For subscribers, only charge for unpaid add-ons
-      return unpaidAddonsTotal;
+      // For subscribers, only charge for unpaid add-ons + delivery fee
+      return unpaidAddonsTotal + deliveryFee;
     } else {
-      // For one-time customers, charge for box and add-ons (no delivery fee)
-      return subtotal;
+      // For one-time customers, charge for box and add-ons + delivery fee
+      return subtotal + deliveryFee;
     }
   };
 
@@ -182,7 +182,7 @@ export function WeeklyBagSummary({
             )}
             <div className="flex items-center justify-between text-sm">
               <span>Delivery fee</span>
-              <span>Free</span>
+              <span>${deliveryFee.toFixed(2)}</span>
             </div>
             {hasActiveSubscription && (
               <div className="flex items-center justify-between text-sm text-muted-foreground">

@@ -69,7 +69,7 @@ export function BagSummary({ bagItems, isSubscription, onConfirmOrder }: BagSumm
 
   const totalItems = Object.values(bagItems).reduce((sum, quantity) => sum + quantity, 0);
   const subtotal = bagDetails.reduce((sum, item) => sum + (item.products.price * item.quantity), 0);
-  const deliveryFee = 4.99;
+  const deliveryFee = 9.00;
   const total = subtotal + deliveryFee;
 
   const categoryCount = bagDetails.reduce((acc, item) => {

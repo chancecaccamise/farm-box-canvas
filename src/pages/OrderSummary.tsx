@@ -252,7 +252,7 @@ const OrderSummary = () => {
     return total + (product.price * quantity);
   }, 0);
 
-  const deliveryFee = 0; // Free delivery
+  const deliveryFee = 9.00; // $9 delivery fee
   const effectiveBoxPrice = hasActiveSubscription ? 0 : boxPrice;
   const totalAmount = effectiveBoxPrice + addOnTotal + deliveryFee;
 
@@ -445,7 +445,7 @@ const OrderSummary = () => {
                   )}
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Delivery Fee:</span>
-                    <span className="text-accent">Free</span>
+                    <span>${deliveryFee.toFixed(2)}</span>
                   </div>
                   {hasActiveSubscription && (
                     <div className="flex justify-between text-green-700">

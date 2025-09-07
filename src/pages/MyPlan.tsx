@@ -250,7 +250,7 @@ const MyPlan = () => {
                   </div>
                   <div className="flex justify-between">
                     <span>Delivery Fee</span>
-                    <span>${weeklyBag?.delivery_fee?.toFixed(2) || '4.99'}</span>
+                    <span>$9.00</span>
                   </div>
                 </div>
 
