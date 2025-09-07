@@ -10,10 +10,8 @@ import { AdminProducts } from '@/components/admin/AdminProducts';
 import { AdminBoxTemplates } from '@/components/admin/AdminBoxTemplates';
 import { EnhancedOrderManagement } from '@/components/admin/EnhancedOrderManagement';
 import { AdminFreshCatch } from '@/components/admin/AdminFreshCatch';
-import { AdminBouquetRequests } from '@/components/admin/AdminBouquetRequests';
-import { AdminFreshFishAlerts } from '@/components/admin/AdminFreshFishAlerts';
 import { AdminDeliveryAreas } from '@/components/admin/AdminDeliveryAreas';
-import { AdminPartnerApplications } from '@/components/admin/AdminPartnerApplications';
+import { AdminFormSubmissions } from '@/components/admin/AdminFormSubmissions';
 import { TestCleanup } from '@/components/TestCleanup';
 
 const Admin = () => {
@@ -74,7 +72,7 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="products" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-9">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               Products
@@ -91,21 +89,13 @@ const Admin = () => {
               <Fish className="h-4 w-4" />
               Fresh Catch
             </TabsTrigger>
-            <TabsTrigger value="fish-alerts" className="flex items-center gap-2">
-              <Fish className="h-4 w-4" />
-              Fish Alerts
-            </TabsTrigger>
-            <TabsTrigger value="arrangements" className="flex items-center gap-2">
-              <Flower className="h-4 w-4" />
-              Bouquet Requests
+            <TabsTrigger value="form-submissions" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Form Submissions
             </TabsTrigger>
             <TabsTrigger value="delivery-areas" className="flex items-center gap-2">
               <MapPin className="h-4 w-4" />
               Delivery Areas
-            </TabsTrigger>
-            <TabsTrigger value="partner-applications" className="flex items-center gap-2">
-              <UserCheck className="h-4 w-4" />
-              Become a Partner
             </TabsTrigger>
             <TabsTrigger value="test-cleanup" className="flex items-center gap-2">
               🧹
@@ -136,26 +126,8 @@ const Admin = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="fish-alerts">
-            <Card>
-              <CardHeader>
-                <CardTitle>Fresh Fish Alerts</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <AdminFreshFishAlerts />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="arrangements">
-            <Card>
-              <CardHeader>
-                <CardTitle>Bouquet Requests</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <AdminBouquetRequests />
-              </CardContent>
-            </Card>
+          <TabsContent value="form-submissions">
+            <AdminFormSubmissions />
           </TabsContent>
 
           <TabsContent value="delivery-areas">
@@ -170,10 +142,6 @@ const Admin = () => {
                 <AdminDeliveryAreas />
               </CardContent>
             </Card>
-          </TabsContent>
-
-          <TabsContent value="partner-applications">
-            <AdminPartnerApplications />
           </TabsContent>
 
           <TabsContent value="test-cleanup">
