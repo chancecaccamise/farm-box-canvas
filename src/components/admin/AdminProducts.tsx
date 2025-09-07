@@ -8,7 +8,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Edit, Trash2, Search } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Switch } from '@/components/ui/switch';
+import { Plus, Edit, Trash2, Search, Fish, Wheat, Package } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ImageUpload } from './ImageUpload';
 
@@ -22,6 +24,7 @@ interface Product {
   is_available: boolean;
   inventory_count?: number;
   tags?: string[];
+  unit_description?: string;
 }
 
 export const AdminProducts = () => {
@@ -29,6 +32,7 @@ export const AdminProducts = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [currentView, setCurrentView] = useState('all'); // 'all', 'proteins', 'carbs'
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const { toast } = useToast();
@@ -41,10 +45,21 @@ export const AdminProducts = () => {
     image: '',
     is_available: true,
     inventory_count: '100',
-    tags: ''
+    tags: '',
+    unit_description: ''
   });
 
-  const categories = ['vegetables', 'fruits', 'herbs', 'dairy', 'meat', 'fish', 'bakery', 'other'];
+  const categories = ['vegetables', 'fruits', 'herbs', 'dairy', 'meat', 'fish', 'bakery', 'proteins', 'carbs', 'other'];
+  
+  const getViewIcon = (view: string) => {
+    switch (view) {
+      case 'proteins': return <Fish className="h-4 w-4" />;
+      case 'carbs': return <Wheat className="h-4 w-4" />;
+      default: return <Package className="h-4 w-4" />;
+    }
+  };
+
+  const isProteinOrCarb = currentView === 'proteins' || currentView === 'carbs';
 
   useEffect(() => {
     fetchProducts();
@@ -55,7 +70,7 @@ export const AdminProducts = () => {
       const { data, error } = await supabase
         .from('products')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('name', { ascending: true });
 
       if (error) throw error;
       setProducts(data || []);
@@ -74,17 +89,39 @@ export const AdminProducts = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.category || !formData.price) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive"
-      });
-      return;
+    // Different validation for proteins/carbs vs regular products
+    if (isProteinOrCarb) {
+      if (!formData.name || !formData.unit_description) {
+        toast({
+          title: "Error",
+          description: "Name and unit description are required",
+          variant: "destructive"
+        });
+        return;
+      }
+    } else {
+      if (!formData.name || !formData.category || !formData.price) {
+        toast({
+          title: "Error",
+          description: "Please fill in all required fields",
+          variant: "destructive"
+        });
+        return;
+      }
     }
 
     try {
-      const productData = {
+      const productData = isProteinOrCarb ? {
+        name: formData.name,
+        category: currentView, // Auto-set category for proteins/carbs
+        price: 0, // Default price for proteins/carbs
+        description: formData.description || null,
+        unit_description: formData.unit_description || null,
+        is_available: formData.is_available,
+        inventory_count: 100,
+        image: null,
+        tags: null
+      } : {
         name: formData.name,
         category: formData.category,
         price: parseFloat(formData.price),
@@ -92,7 +129,8 @@ export const AdminProducts = () => {
         image: formData.image || null,
         is_available: formData.is_available,
         inventory_count: parseInt(formData.inventory_count) || 100,
-        tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : null
+        tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : null,
+        unit_description: formData.unit_description || null
       };
 
       if (editingProduct) {
@@ -141,7 +179,8 @@ export const AdminProducts = () => {
       image: product.image || '',
       is_available: product.is_available,
       inventory_count: product.inventory_count?.toString() || '100',
-      tags: product.tags?.join(', ') || ''
+      tags: product.tags?.join(', ') || '',
+      unit_description: product.unit_description || ''
     });
     setIsDialogOpen(true);
   };
@@ -174,22 +213,60 @@ export const AdminProducts = () => {
   const resetForm = () => {
     setFormData({
       name: '',
-      category: '',
+      category: isProteinOrCarb ? currentView : '',
       price: '',
       description: '',
       image: '',
       is_available: true,
       inventory_count: '100',
-      tags: ''
+      tags: '',
+      unit_description: ''
     });
     setEditingProduct(null);
+  };
+
+  const toggleAvailability = async (productId: string, isAvailable: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('products')
+        .update({ is_available: !isAvailable })
+        .eq('id', productId);
+
+      if (error) throw error;
+      toast({
+        title: "Success",
+        description: `Product ${!isAvailable ? "enabled" : "disabled"} successfully!`,
+      });
+      fetchProducts();
+    } catch (error: any) {
+      console.error('Error updating product availability:', error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update product availability.",
+        variant: "destructive",
+      });
+    }
   };
 
   const filteredProducts = products.filter(product => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          product.description?.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
-    return matchesSearch && matchesCategory;
+    
+    // Filter by current view first
+    let matchesView = true;
+    if (currentView === 'proteins') {
+      matchesView = product.category === 'proteins';
+    } else if (currentView === 'carbs') {
+      matchesView = product.category === 'carbs';
+    } else if (currentView === 'all') {
+      matchesView = true;
+    }
+    
+    // Then filter by category if not viewing proteins/carbs specifically
+    const matchesCategory = (currentView === 'proteins' || currentView === 'carbs') ? true :
+      (selectedCategory === 'all' || product.category === selectedCategory);
+    
+    return matchesSearch && matchesView && matchesCategory;
   });
 
   if (loading) {
@@ -200,211 +277,268 @@ export const AdminProducts = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Product Management</h2>
-        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={resetForm}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add Product
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>{editingProduct ? 'Edit Product' : 'Add New Product'}</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="name">Product Name *</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="category">Category *</Label>
-                  <Select value={formData.category} onValueChange={(value) => setFormData({...formData, category: value})}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map(category => (
-                        <SelectItem key={category} value={category}>
-                          {category.charAt(0).toUpperCase() + category.slice(1)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="price">Price ($) *</Label>
-                  <Input
-                    id="price"
-                    type="number"
-                    step="0.01"
-                    value={formData.price}
-                    onChange={(e) => setFormData({...formData, price: e.target.value})}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="inventory">Inventory Count</Label>
-                  <Input
-                    id="inventory"
-                    type="number"
-                    value={formData.inventory_count}
-                    onChange={(e) => setFormData({...formData, inventory_count: e.target.value})}
-                  />
-                </div>
-              </div>
-
-              <div>
-                <Label htmlFor="description">Description</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  rows={3}
-                />
-              </div>
-
-              <ImageUpload
-                value={formData.image}
-                onChange={(url) => setFormData({...formData, image: url})}
-                label="Product Image"
-                placeholder="Drop an image here or click to upload"
-              />
-
-              <div>
-                <Label htmlFor="tags">Tags (comma-separated)</Label>
-                <Input
-                  id="tags"
-                  value={formData.tags}
-                  onChange={(e) => setFormData({...formData, tags: e.target.value})}
-                  placeholder="organic, local, seasonal"
-                />
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  id="available"
-                  checked={formData.is_available}
-                  onChange={(e) => setFormData({...formData, is_available: e.target.checked})}
-                />
-                <Label htmlFor="available">Available for purchase</Label>
-              </div>
-
-              <div className="flex justify-end space-x-2">
-                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit">
-                  {editingProduct ? 'Update' : 'Create'} Product
-                </Button>
-              </div>
-            </form>
-          </DialogContent>
-        </Dialog>
       </div>
 
-      <div className="flex space-x-4 mb-6">
-        <div className="flex-1">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              placeholder="Search products..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
-          </div>
-        </div>
-        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-          <SelectTrigger className="w-48">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Categories</SelectItem>
-            {categories.map(category => (
-              <SelectItem key={category} value={category}>
-                {category.charAt(0).toUpperCase() + category.slice(1)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <Tabs value={currentView} onValueChange={setCurrentView} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3 max-w-md">
+          <TabsTrigger value="all" className="flex items-center gap-2">
+            <Package className="h-4 w-4" />
+            All Products
+          </TabsTrigger>
+          <TabsTrigger value="proteins" className="flex items-center gap-2">
+            <Fish className="h-4 w-4" />
+            Proteins
+          </TabsTrigger>
+          <TabsTrigger value="carbs" className="flex items-center gap-2">
+            <Wheat className="h-4 w-4" />
+            Carbs
+          </TabsTrigger>
+        </TabsList>
 
-      <div className="grid gap-4">
-        {filteredProducts.map((product) => (
-          <Card key={product.id}>
-            <CardContent className="p-6">
-              <div className="flex justify-between items-start">
-                <div className="flex space-x-4">
-                  {product.image && (
-                    <img
-                      src={product.image}
-                      alt={product.name}
-                      className="w-16 h-16 object-cover rounded"
-                    />
-                  )}
-                  <div>
-                    <h3 className="font-semibold text-lg">{product.name}</h3>
-                    <p className="text-muted-foreground">{product.description}</p>
-                    <div className="flex items-center space-x-2 mt-2">
-                      <Badge variant="secondary">{product.category}</Badge>
-                      <span className="font-semibold">${product.price}</span>
-                      {!product.is_available && (
-                        <Badge variant="destructive">Unavailable</Badge>
-                      )}
-                      <span className="text-sm text-muted-foreground">
-                        Stock: {product.inventory_count || 0}
-                      </span>
+        <TabsContent value={currentView} className="space-y-6">
+          <div className="flex justify-between items-center">
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button onClick={resetForm}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add {currentView === 'all' ? 'Product' : currentView.slice(0, -1)} 
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl">
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingProduct ? `Edit ${isProteinOrCarb ? currentView.slice(0, -1) : 'Product'}` : 
+                     `Add New ${isProteinOrCarb ? currentView.slice(0, -1) : 'Product'}`}
+                  </DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="name">{isProteinOrCarb ? `${currentView.slice(0, -1)} Name` : 'Product Name'} *</Label>
+                      <Input
+                        id="name"
+                        value={formData.name}
+                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                        required
+                      />
                     </div>
-                    {product.tags && product.tags.length > 0 && (
-                      <div className="flex space-x-1 mt-2">
-                        {product.tags.map((tag, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
-                            {tag}
-                          </Badge>
-                        ))}
+                    {isProteinOrCarb ? (
+                      <div>
+                        <Label htmlFor="unit_description">Unit Description *</Label>
+                        <Input
+                          id="unit_description"
+                          value={formData.unit_description}
+                          onChange={(e) => setFormData({...formData, unit_description: e.target.value})}
+                          placeholder="e.g., 1 lb fillet, 2 lb bag"
+                          required
+                        />
+                      </div>
+                    ) : (
+                      <div>
+                        <Label htmlFor="category">Category *</Label>
+                        <Select value={formData.category} onValueChange={(value) => setFormData({...formData, category: value})}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {categories.filter(cat => cat !== 'proteins' && cat !== 'carbs').map(category => (
+                              <SelectItem key={category} value={category}>
+                                {category.charAt(0).toUpperCase() + category.slice(1)}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
                       </div>
                     )}
                   </div>
-                </div>
-                <div className="flex space-x-2">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => handleEdit(product)}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="destructive"
-                    onClick={() => handleDelete(product.id)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                  
+                  {!isProteinOrCarb && (
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="price">Price ($) *</Label>
+                        <Input
+                          id="price"
+                          type="number"
+                          step="0.01"
+                          value={formData.price}
+                          onChange={(e) => setFormData({...formData, price: e.target.value})}
+                          required
+                        />
+                      </div>
+                      <div>
+                        <Label htmlFor="inventory">Inventory Count</Label>
+                        <Input
+                          id="inventory"
+                          type="number"
+                          value={formData.inventory_count}
+                          onChange={(e) => setFormData({...formData, inventory_count: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                  )}
 
-      {filteredProducts.length === 0 && (
-        <Card>
-          <CardContent className="text-center py-8">
-            <p className="text-muted-foreground">No products found.</p>
-          </CardContent>
-        </Card>
-      )}
+                  <div>
+                    <Label htmlFor="description">Description</Label>
+                    <Textarea
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => setFormData({...formData, description: e.target.value})}
+                      rows={3}
+                    />
+                  </div>
+
+                  {!isProteinOrCarb && (
+                    <>
+                      <ImageUpload
+                        value={formData.image}
+                        onChange={(url) => setFormData({...formData, image: url})}
+                        label="Product Image"
+                        placeholder="Drop an image here or click to upload"
+                      />
+
+                      <div>
+                        <Label htmlFor="tags">Tags (comma-separated)</Label>
+                        <Input
+                          id="tags"
+                          value={formData.tags}
+                          onChange={(e) => setFormData({...formData, tags: e.target.value})}
+                          placeholder="organic, local, seasonal"
+                        />
+                      </div>
+                    </>
+                  )}
+
+                  <div className="flex items-center space-x-2">
+                    <Switch
+                      id="available"
+                      checked={formData.is_available}
+                      onCheckedChange={(checked) => setFormData({...formData, is_available: checked})}
+                    />
+                    <Label htmlFor="available">Available for purchase</Label>
+                  </div>
+
+                  <div className="flex justify-end space-x-2">
+                    <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)}>
+                      Cancel
+                    </Button>
+                    <Button type="submit">
+                      {editingProduct ? 'Update' : 'Create'} {isProteinOrCarb ? currentView.slice(0, -1) : 'Product'}
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          <div className="flex space-x-4 mb-6">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  placeholder={`Search ${currentView === 'all' ? 'products' : currentView}...`}
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            {currentView === 'all' && (
+              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                <SelectTrigger className="w-48">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Categories</SelectItem>
+                  {categories.filter(cat => cat !== 'proteins' && cat !== 'carbs').map(category => (
+                    <SelectItem key={category} value={category}>
+                      {category.charAt(0).toUpperCase() + category.slice(1)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          </div>
+
+          <div className="grid gap-4">
+            {filteredProducts.map((product) => (
+              <Card key={product.id}>
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start">
+                    <div className="flex space-x-4">
+                      {product.image && currentView === 'all' && (
+                        <img
+                          src={product.image}
+                          alt={product.name}
+                          className="w-16 h-16 object-cover rounded"
+                        />
+                      )}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          {getViewIcon(product.category)}
+                          <h3 className="font-semibold text-lg">{product.name}</h3>
+                        </div>
+                        <p className="text-muted-foreground mb-2">{product.description}</p>
+                        <div className="flex items-center space-x-2 flex-wrap gap-1">
+                          <Badge variant="secondary">{product.category}</Badge>
+                          {currentView === 'all' && <span className="font-semibold">${product.price}</span>}
+                          {product.unit_description && (
+                            <Badge variant="outline">{product.unit_description}</Badge>
+                          )}
+                          <Badge
+                            variant={product.is_available ? "default" : "secondary"}
+                            className="cursor-pointer"
+                            onClick={() => toggleAvailability(product.id, product.is_available)}
+                          >
+                            {product.is_available ? "Available" : "Unavailable"}
+                          </Badge>
+                          {currentView === 'all' && (
+                            <span className="text-sm text-muted-foreground">
+                              Stock: {product.inventory_count || 0}
+                            </span>
+                          )}
+                        </div>
+                        {product.tags && product.tags.length > 0 && currentView === 'all' && (
+                          <div className="flex space-x-1 mt-2">
+                            {product.tags.map((tag, index) => (
+                              <Badge key={index} variant="outline" className="text-xs">
+                                {tag}
+                              </Badge>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex space-x-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleEdit(product)}
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => handleDelete(product.id)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {filteredProducts.length === 0 && (
+            <Card>
+              <CardContent className="text-center py-8">
+                <p className="text-muted-foreground">No {currentView === 'all' ? 'products' : currentView} found.</p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

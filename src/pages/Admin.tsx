@@ -7,8 +7,6 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Package, ShoppingBag, Users, Fish, Flower, MapPin, UserCheck } from 'lucide-react';
 import { AdminProducts } from '@/components/admin/AdminProducts';
-import { AdminProteins } from '@/components/admin/AdminProteins';
-import AdminCarbs from '@/components/admin/AdminCarbs';
 import { AdminBoxTemplates } from '@/components/admin/AdminBoxTemplates';
 import { EnhancedOrderManagement } from '@/components/admin/EnhancedOrderManagement';
 import { AdminFreshCatch } from '@/components/admin/AdminFreshCatch';
@@ -76,18 +74,10 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="products" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-11">
+          <TabsList className="grid w-full grid-cols-9">
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               Products
-            </TabsTrigger>
-            <TabsTrigger value="proteins" className="flex items-center gap-2">
-              <Fish className="h-4 w-4" />
-              Proteins
-            </TabsTrigger>
-            <TabsTrigger value="carbs" className="flex items-center gap-2">
-              <Package className="h-4 w-4" />
-              Carbs
             </TabsTrigger>
             <TabsTrigger value="boxes" className="flex items-center gap-2">
               <ShoppingBag className="h-4 w-4" />
@@ -125,14 +115,6 @@ const Admin = () => {
 
           <TabsContent value="products">
             <AdminProducts />
-          </TabsContent>
-
-          <TabsContent value="proteins">
-            <AdminProteins />
-          </TabsContent>
-
-          <TabsContent value="carbs">
-            <AdminCarbs />
           </TabsContent>
 
           <TabsContent value="boxes">
