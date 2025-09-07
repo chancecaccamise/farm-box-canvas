@@ -89,12 +89,6 @@ export function ProteinSelector({
     onSelectionChange(newSelections);
   };
 
-  const getSelectedTotal = () => {
-    return selectedProteins.reduce((total, proteinId) => {
-      const protein = proteins.find(p => p.id === proteinId);
-      return total + (protein ? protein.price : 0);
-    }, 0);
-  };
 
   if (loading) {
     return (
@@ -146,16 +140,13 @@ export function ProteinSelector({
                   disabled={!selectedProteins.includes(protein.id) && selectedProteins.length >= maxSelections}
                 />
                 <div className="flex-1">
-                  <div className="flex justify-between items-start mb-2">
+                  <div className="mb-2">
                     <h3 className="font-medium">{protein.name}</h3>
-                    <div className="text-right">
-                      <div className="font-semibold">${protein.price.toFixed(2)}</div>
-                      {protein.unit_description && (
-                        <div className="text-xs text-muted-foreground">
-                          {protein.unit_description}
-                        </div>
-                      )}
-                    </div>
+                    {protein.unit_description && (
+                      <div className="text-sm text-muted-foreground mt-1">
+                        {protein.unit_description}
+                      </div>
+                    )}
                   </div>
                   {protein.description && (
                     <p className="text-sm text-muted-foreground mb-2">
@@ -179,15 +170,7 @@ export function ProteinSelector({
 
         {selectedProteins.length > 0 && (
           <div className="border-t pt-4">
-            <div className="flex justify-between items-center">
-              <span className="font-medium">
-                Selected Proteins ({selectedProteins.length}/{maxSelections}):
-              </span>
-              <span className="text-lg font-bold text-primary">
-                ${getSelectedTotal().toFixed(2)}
-              </span>
-            </div>
-            <div className="mt-2 text-sm text-muted-foreground">
+            <div className="text-sm text-muted-foreground">
               {selectedProteins.length < maxSelections && (
                 <p>You can select {maxSelections - selectedProteins.length} more protein{maxSelections - selectedProteins.length !== 1 ? 's' : ''}.</p>
               )}
