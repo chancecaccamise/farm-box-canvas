@@ -1,6 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { CheckCircle, Leaf, Truck, Users, Star } from "lucide-react";
 import heroImage from "@/assets/billysBotanicals-hero.png";
 import BoxComparison from "@/components/BoxComparison";
@@ -166,48 +167,84 @@ const Landing = () => {
       {/* Customer Testimonials */}
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-4">What Families Are Saying</h2>
+          <h2 className="text-4xl font-bold text-center mb-4">What Our Community Is Saying</h2>
           <p className="text-xl text-muted-foreground text-center mb-16">
-            Real stories from families who love their weekly Billy's bags
+            Real stories from local chefs, customers, and families who choose Billy's Botanicals
           </p>
           
-          <div className="grid md:grid-cols-3 gap-8">
-            {[
-              {
-                name: "Sarah Johnson",
-                location: "Botanical Valley, CA",
-                quote: "The weekly boxes are incredible! Billy curates the perfect mix each week. My kids now ask for more vegetables and we discover new favorites constantly.",
-                rating: 5
-              },
-              {
-                name: "Mike Chen",
-                location: "Greenfield, CA", 
-                quote: "The convenience and freshness is unmatched. Having our weekly box delivered means we always have fresh, local ingredients without the meal planning stress.",
-                rating: 5
-              },
-              {
-                name: "Elena Rodriguez",
-                location: "Valley Springs, CA",
-                quote: "Billy's personal touch makes each delivery special. The fresh fish add-ons and seasonal surprises make every week feel like a gift from the farm.",
-                rating: 5
-              }
-            ].map((testimonial, index) => (
-              <Card key={index} className="text-center">
-                <CardContent className="p-6">
-                  <div className="flex justify-center mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </div>
-                  <p className="text-muted-foreground mb-4 italic">"{testimonial.quote}"</p>
-                  <div>
-                    <p className="font-semibold">{testimonial.name}</p>
-                    <p className="text-sm text-muted-foreground">{testimonial.location}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <Carousel
+            opts={{
+              align: "start",
+              loop: true,
+            }}
+            className="w-full max-w-5xl mx-auto"
+          >
+            <CarouselContent className="-ml-2 md:-ml-4">
+              {[
+                {
+                  name: "Chef Derek Lark",
+                  location: "Marker 107",
+                  quote: "Billy's Botanicals is a gem! Their seafood is incredibly fresh and the herbs add such a vibrant kick to our dishes. The quality is unmatched, and the service is always warm and dependable. I highly recommend this local treasure!",
+                  rating: 5,
+                  type: "chef"
+                },
+                {
+                  name: "Chef Collin Clemons", 
+                  location: "1540 Room & Desoto Hotel",
+                  quote: "Billy's Botanicals provides the highest quality products in the low-country, hands down. The relationships they have built with fishermen and restaurateurs, not to mention the amazing quality of vegetables and herbs grown on their farm are second to none. We at the DeSoto Hotel and 1540 Room restaurant are beyond proud to provide the highest quality food thanks to Billy.",
+                  rating: 5,
+                  type: "chef"
+                },
+                {
+                  name: "Jane Fishel",
+                  location: "Savannah, GA",
+                  quote: "Billy's Botanicals is your one stop shop for produce, seafood, and stunning floral arrangements. Whether you go to the farmers market or get one of their beautifully curated farm bags, it is always fresh and always local!",
+                  rating: 5,
+                  type: "customer"
+                },
+                {
+                  name: "Rena P",
+                  location: "Savannah, GA",
+                  quote: "What a privilege to get a weekly delivery from Billy's Botanicals. Want in on the source of the freshest ingredients used by some of your favorite restaurants in Savannah? Where to find local fish? Fresh eggs? Just picked veggies? A bouquet of flowers that lasts a week? And the nicest folks you could ever meet? Billy's Botanicals is calling your name!",
+                  rating: 5,
+                  type: "customer"
+                },
+                {
+                  name: "Karen G",
+                  location: "Farm Bag Customer",
+                  quote: "My family also uses Billy's Botanicals Farm Bag. It is so enjoyable to have the opportunity to have fresh and sustainably sourced produce and seafood as well as the privilege to support a local business.",
+                  rating: 5,
+                  type: "customer"
+                },
+                {
+                  name: "Jay H",
+                  location: "Savannah, GA",
+                  quote: "WE LOVE BILLY'S! From the fresh, local seafood to the produce, eggs, spices and sauces, you can't go wrong! We love the farmbags which include proteins, eggs, produce and more letting us eat healthy, fresh and local meals that vary every week depending on what's in season.",
+                  rating: 5,
+                  type: "customer"
+                }
+              ].map((testimonial, index) => (
+                <CarouselItem key={index} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
+                  <Card className="text-center h-full">
+                    <CardContent className="p-6 flex flex-col h-full">
+                      <div className="flex justify-center mb-4">
+                        {[...Array(testimonial.rating)].map((_, i) => (
+                          <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
+                        ))}
+                      </div>
+                      <p className="text-muted-foreground mb-4 italic flex-grow text-sm leading-relaxed">"{testimonial.quote}"</p>
+                      <div className="mt-auto">
+                        <p className="font-semibold">{testimonial.name}</p>
+                        <p className="text-sm text-muted-foreground">{testimonial.location}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="hidden sm:flex -left-12" />
+            <CarouselNext className="hidden sm:flex -right-12" />
+          </Carousel>
         </div>
       </section>
 
