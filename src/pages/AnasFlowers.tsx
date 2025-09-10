@@ -174,6 +174,18 @@ const AnasFlowers = () => {
       author: "Adeina",
       event: "Wedding",
       rating: 5
+    },
+    {
+      text: "Words can't express how grateful we are to have had our dear friend Ana do the flowers for our wedding. We've always known how talented she is, but watching her bring our vision to life was truly magical.From our very first conversation, Ana took my rambling ideas and chaos and turned it into something truly cohesive and elegant. She understood the vibe we wanted to create and offered brilliant suggestions that perfectly complemented our venue and color palette. The results were beyond anything we could have dreamed of. My bouquet was a true work of art which brought tears to my eyes as soon as I saw it. The florals at our ceremony were absolutely breathtaking, and the centerpieces at the reception perfectly tied the entire room together. We received soooo many compliments, even many months later. Beyond the incredible artistry, Ana was a complete professional throughout the entire process. She handled everything flawlessly on the wedding day, and her calming presence made us feel so at ease and taken care of. If you are looking for a florist who will not only deliver your dream florals but also genuinely care about your special day, look no further than Flowers by Ana. We feel so lucky to call Ana a friend and even luckier that we got to be one of her clients. We cannot recommend her and her team highly enough!",
+      author: "Libby B.",
+      event: "Wedding",
+      rating: 5
+    },
+    {
+      text: "Flowers by AND does a weekly flower arrangement for us at Lavender Hill SpaSalon and the flowers catch every customer's eye. They are beautiful every single week. Each arrangement is unique, interesting and one-of-a-kind; we get so many compliments!",
+      author: "Karen G. at SalonSpa",
+      event: "Other",
+      rating: 5
     }
   ];
 
