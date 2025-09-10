@@ -158,21 +158,21 @@ const AnasFlowers = () => {
 
   const testimonials = [
     {
-      text: "Ana created the most beautiful wedding bouquet I could have imagined. Every detail was perfect, and the flowers stayed fresh throughout our entire celebration.",
-      author: "Sarah M.",
+      text: "I have had such wonderful experiences working with Ana at Billy’s Botanicals! She is amazing to work with—her communication is always clear and timely, and she truly listens to what couples want for their wedding day. Ana is incredibly talented and creates the most beautiful floral arrangements that can completely transform our venues or add just enough to enhance their natural beauty. She has a gift for bringing creative visions to life while also offering her expertise and artistic touch to make everything even more stunning than imagined. If you’re looking for someone professional, thoughtful, and passionate about her craft, Ana is the perfect choice for your wedding flowers!",
+      author: "Melanie Marchand - Senior Wedding & Event Specialist, Red Gate Farms",
       event: "Wedding",
       rating: 5
     },
     {
-      text: "The baby shower arrangements were absolutely stunning. Ana captured exactly the soft, welcoming feeling we wanted for our special day.",
-      author: "Jennifer L.",
-      event: "Baby Shower", 
+      text: "As a recent bride who loves flowers, I highly recommend Ana’s services. Floral selection was something I dreamed about for my wedding day. I was able to put my trust in her.Ana completely followed through with the vision I provided for my bouquet. I gave her more freedom with the altar centerpiece. It was stunning and a beautiful compliment to my bouquet. Everything looked cohesive yet unique to where it was placed. Everything held up throughout the day and night.Ana not only provided stunning floral arrangements, but also demonstrated professionalism and kindness. I’m so glad I could count on her. It brought peace of mind for our big day.",
+      author: "Erin B.",
+      event: "Wedding", 
       rating: 5
     },
     {
-      text: "Ana's seasonal arrangements bring such joy to our home. Her understanding of color and texture is remarkable.",
-      author: "Michael R.",
-      event: "Seasonal Arrangements",
+      text: "We would like to extend our heartfelt thanks to Ana and her team for their wonderful service. I shared my ideas with Ana for our wedding day, and she executed the vision beautifully. All of the florals were fresh, vibrant in color, and thoughtfully arranged to complement our theme. Ana maintained excellent communication with us throughout the planning process, and she even coordinated with our vendors to ensure everything matched perfectly. Her professionalism and attention to detail were truly appreciated. The prices were reasonable, and the service exceeded our expectations.Thank you, Ana, for helping make our special day so beautiful and memorable!",
+      author: "Adeina",
+      event: "Wedding",
       rating: 5
     }
   ];

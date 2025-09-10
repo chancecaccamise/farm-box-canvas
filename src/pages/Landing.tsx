@@ -5,6 +5,7 @@ import { CheckCircle, Leaf, Truck, Users, Star } from "lucide-react";
 import heroImage from "@/assets/billysBotanicals-hero.png";
 import BoxComparison from "@/components/BoxComparison";
 import FreshAddOns from "@/components/FreshAddOns";
+import whychoosebillys from "@/assets/whyChooseBillys.jpg";
 
 const Landing = () => {
 
@@ -153,7 +154,7 @@ const Landing = () => {
             
             <div className="relative">
               <img 
-                src={heroImage} 
+                src={whychoosebillys} 
                 alt="Billy's hydroponic greenhouse operation" 
                 className="w-full h-full object-cover rounded-2xl shadow-lg"
               />

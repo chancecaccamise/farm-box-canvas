@@ -7,6 +7,7 @@ import rainbowCarrots from "@/assets/rainbow-carrots.jpg";
 import leafyGreens from "@/assets/leafy-greens.jpg";
 import tomatoes from "@/assets/tomatoes.jpg";
 import bellPeppers from "@/assets/bell-peppers.jpg";
+import whychoosebillys from "@/assets/whyChooseBillys.jpg";
 import greenhouse from "@/assets/greenhouse.jpg";
 import BoxComparison from "@/components/BoxComparison";
 
@@ -176,7 +177,7 @@ const UnauthenticatedLanding = () => {
             <div className="relative">
               <div className="aspect-square rounded-2xl overflow-hidden">
                 <img 
-                  src={greenhouse} 
+                  src={whychoosebillys} 
                   alt="Billy's hydroponic greenhouse" 
                   className="w-full h-full object-cover"
                 />
