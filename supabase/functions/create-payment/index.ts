@@ -57,6 +57,15 @@ serve(async (req) => {
       isSubscription = false // New flag for subscription vs one-time payment
     } = requestData;
 
+    logStep("Request data parsed", { 
+      hasWeeklyBag: !!weeklyBag,
+      hasBagItems: !!bagItems,
+      hasActiveSubscription,
+      hasCheckoutState: !!checkoutState,
+      isSubscription,
+      requestedMode: isSubscription ? "subscription" : "payment"
+    });
+
     if (!weeklyBag && !checkoutState) {
       throw new Error("Missing order data");
     }
@@ -263,16 +272,29 @@ serve(async (req) => {
 
     logStep("Created line items", { itemCount: lineItems.length });
 
+    // Validate that we're not mixing subscription mode with price_data
+    if (isSubscription && lineItems.some(item => item.price_data)) {
+      logStep("ERROR: Cannot use subscription mode with price_data objects");
+      throw new Error("Cannot use subscription mode with one-time price_data objects. Use recurring prices for subscriptions.");
+    }
+
     // Get the correct origin URL for redirects
     const origin = req.headers.get("origin") || req.headers.get("referer")?.split('/').slice(0, 3).join('/') || "https://f78f5142-250a-4339-adfa-6897bce152ea.lovableproject.com";
     logStep("Using origin for redirects", { origin });
+
+    const sessionMode = isSubscription ? "subscription" : "payment";
+    logStep("Creating Stripe session", { 
+      mode: sessionMode,
+      lineItemsCount: lineItems.length,
+      customerId: customerId || "new_customer"
+    });
 
     // Create Stripe checkout session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
       line_items: lineItems,
-      mode: isSubscription ? "subscription" : "payment",
+      mode: sessionMode,
       success_url: `${origin}/?stripe_redirect=thank-you&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/?stripe_redirect=my-bag&cancelled=true`,
       shipping_address_collection: {
