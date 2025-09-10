@@ -1265,7 +1265,11 @@ export type Database = {
           subtotal: number | null
           total_amount: number | null
           updated_at: string
+          user_carb_selections: string[] | null
+          user_full_farm_bag_carb: string | null
+          user_full_farm_bag_protein: string | null
           user_id: string
+          user_protein_selections: string[] | null
           week_end_date: string
           week_start_date: string
         }
@@ -1282,7 +1286,11 @@ export type Database = {
           subtotal?: number | null
           total_amount?: number | null
           updated_at?: string
+          user_carb_selections?: string[] | null
+          user_full_farm_bag_carb?: string | null
+          user_full_farm_bag_protein?: string | null
           user_id: string
+          user_protein_selections?: string[] | null
           week_end_date: string
           week_start_date: string
         }
@@ -1299,7 +1307,11 @@ export type Database = {
           subtotal?: number | null
           total_amount?: number | null
           updated_at?: string
+          user_carb_selections?: string[] | null
+          user_full_farm_bag_carb?: string | null
+          user_full_farm_bag_protein?: string | null
           user_id?: string
+          user_protein_selections?: string[] | null
           week_end_date?: string
           week_start_date?: string
         }

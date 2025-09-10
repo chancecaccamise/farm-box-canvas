@@ -89,6 +89,54 @@ serve(async (req) => {
       }
     }
 
+    // Store user selections in the weekly bag if we have checkoutState
+    if (actualWeeklyBag && checkoutState) {
+      const updateData: any = {};
+      
+      // Store protein selections for protein pack
+      if (checkoutState.boxSize === 'protein-pack' && checkoutState.proteinSelections?.length > 0) {
+        updateData.user_protein_selections = checkoutState.proteinSelections;
+      }
+      
+      // Store full farm bag selections
+      if (checkoutState.boxSize === 'full_farm_bag') {
+        if (checkoutState.fullFarmBagSelections?.protein) {
+          updateData.user_full_farm_bag_protein = checkoutState.fullFarmBagSelections.protein;
+        }
+        if (checkoutState.fullFarmBagSelections?.carb) {
+          updateData.user_full_farm_bag_carb = checkoutState.fullFarmBagSelections.carb;
+        }
+      }
+
+      // Update the weekly bag with user selections if we have any
+      if (Object.keys(updateData).length > 0) {
+        const { error: updateError } = await supabaseServiceClient
+          .from('weekly_bags')
+          .update(updateData)
+          .eq('id', actualWeeklyBag.id);
+        
+        if (updateError) {
+          logStep("Error storing user selections", { error: updateError });
+        } else {
+          logStep("Stored user selections", updateData);
+          
+          // Repopulate the bag with user selections
+          const { error: populateError } = await supabaseServiceClient
+            .rpc('populate_weekly_bag_from_template', {
+              bag_id: actualWeeklyBag.id,
+              box_size_name: checkoutState.boxSize,
+              week_start: actualWeeklyBag.week_start_date
+            });
+          
+          if (populateError) {
+            logStep("Error repopulating bag with user selections", { error: populateError });
+          } else {
+            logStep("Repopulated bag with user selections");
+          }
+        }
+      }
+    }
+
     logStep("Request data received", { 
       weeklyBagId: actualWeeklyBag?.id || 'checkout-only', 
       itemsCount: bagItems?.length || 0,

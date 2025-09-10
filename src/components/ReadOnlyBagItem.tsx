@@ -20,9 +20,10 @@ interface BagItem {
 interface ReadOnlyBagItemProps {
   item: BagItem;
   partnerName?: string;
+  showUserSelectedBadge?: boolean;
 }
 
-export function ReadOnlyBagItem({ item, partnerName }: ReadOnlyBagItemProps) {
+export function ReadOnlyBagItem({ item, partnerName, showUserSelectedBadge = false }: ReadOnlyBagItemProps) {
   const getCategoryColor = (category: string) => {
     const colors = {
       produce: "bg-primary/10 text-primary border-primary/20",
@@ -88,6 +89,12 @@ export function ReadOnlyBagItem({ item, partnerName }: ReadOnlyBagItemProps) {
         <Badge className="absolute top-3 right-3 bg-primary/90 backdrop-blur-sm shadow-soft">
           {item.quantity}x
         </Badge>
+
+        {showUserSelectedBadge && (
+          <Badge className="absolute bottom-3 right-3 bg-blue-500/90 text-white backdrop-blur-sm shadow-soft">
+            Your Choice
+          </Badge>
+        )}
 
         <Badge 
           variant="secondary" 

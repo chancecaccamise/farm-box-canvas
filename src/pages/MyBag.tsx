@@ -30,7 +30,7 @@ interface WeeklyBagItem {
   product_id: string;
   quantity: number;
   price_at_time: number;
-  item_type: 'box_item' | 'addon';
+  item_type: 'box_item' | 'addon' | 'user_selected_protein' | 'user_selected_carb';
   is_paid: boolean;
   products: {
     id: string;
@@ -138,10 +138,26 @@ function MyBag() {
 
   const initializeCurrentWeekBag = async () => {
     try {
+      // Determine user's box size from their most recent order or default to medium
+      let userBoxSize = 'medium';
+      
+      // Check user's most recent order to get their preferred box size
+      const { data: recentOrder } = await supabase
+        .from('orders')
+        .select('box_size')
+        .eq('user_id', user?.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      
+      if (recentOrder?.box_size) {
+        userBoxSize = recentOrder.box_size;
+      }
+
       const { data: bagIdData, error: bagError } = await supabase
         .rpc('get_or_create_current_week_bag_with_size', { 
           user_uuid: user?.id,
-          box_size_name: 'full_farm_bag'
+          box_size_name: userBoxSize
         });
 
       if (bagError) throw bagError;
@@ -379,6 +395,21 @@ function MyBag() {
     return bagItems.filter(item => item.item_type === 'box_item');
   };
 
+  const getUserSelectedItems = () => {
+    return bagItems.filter(item => 
+      item.item_type === 'user_selected_protein' || 
+      item.item_type === 'user_selected_carb'
+    );
+  };
+
+  const getUserSelectedProteins = () => {
+    return bagItems.filter(item => item.item_type === 'user_selected_protein');
+  };
+
+  const getUserSelectedCarbs = () => {
+    return bagItems.filter(item => item.item_type === 'user_selected_carb');
+  };
+
   const getConfirmedAddons = () => {
     return bagItems.filter(item => item.item_type === 'addon');
   };
@@ -395,6 +426,10 @@ function MyBag() {
 
   const hasBoxItems = () => {
     return getBoxItems().length > 0;
+  };
+
+  const getTotalItemCount = () => {
+    return bagItems.length;
   };
 
   const getConfirmedAddonIds = () => {
@@ -462,10 +497,34 @@ function MyBag() {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Main content - Bag Items */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Box Items Section */}
+              {/* User Selected Items Section - Show for Full Farm Bag and Protein Pack */}
+              {(currentWeekBag.box_size === 'full_farm_bag' || currentWeekBag.box_size === 'protein-pack') && getUserSelectedItems().length > 0 && (
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-xl font-semibold">
+                      {currentWeekBag.box_size === 'full_farm_bag' ? 'Your Selected Items' : 'Your Selected Proteins'}
+                    </h2>
+                    <Badge variant="default" className="bg-blue-100 text-blue-800">Your Choice</Badge>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {getUserSelectedItems().map((item) => (
+                      <ReadOnlyBagItem
+                        key={item.id}
+                        item={item}
+                        showUserSelectedBadge={true}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Box Items Section - Show vegetables for Full Farm Bag, all items for regular boxes */}
               <div>
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl font-semibold">Your Box Contents</h2>
+                  <h2 className="text-xl font-semibold">
+                    {currentWeekBag.box_size === 'full_farm_bag' ? 'Fresh Vegetables & Herbs' : 
+                     currentWeekBag.box_size === 'protein-pack' ? 'Additional Items' : 'Your Box Contents'}
+                  </h2>
                   {hasBoxItems() && !templateStatus.isConfirmed && templateStatus.hasTemplates && (
                     <Badge variant="secondary">Preview - Not Confirmed</Badge>
                   )}
@@ -485,7 +544,12 @@ function MyBag() {
                 ) : (
                   <div className="border-2 border-dashed border-muted-foreground/20 rounded-lg p-8 text-center text-muted-foreground">
                     <Package className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    {!templateStatus.hasTemplates ? (
+                    {currentWeekBag.box_size === 'protein-pack' ? (
+                      <div>
+                        <p className="font-medium mb-2">Additional Items Coming Soon</p>
+                        <p className="text-sm">You've selected your proteins! Any additional items will appear here.</p>
+                      </div>
+                    ) : !templateStatus.hasTemplates ? (
                       <div>
                         <p className="font-medium mb-2">Box Contents Coming Soon</p>
                         <p className="text-sm">Our team is still preparing the contents for this week's {currentWeekBag.box_size} box.</p>
