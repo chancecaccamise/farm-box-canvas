@@ -610,6 +610,7 @@ function MyBag() {
                   hasActiveSubscription={hasActiveSubscription}
                   loading={loading}
                   unpaidAddonsTotal={bagItems.filter(item => item.item_type === 'addon' && !item.is_paid).reduce((sum, item) => sum + (item.price_at_time * item.quantity), 0)}
+                  hasPaidForThisWeek={hasPaidForThisWeek}
                 />
               </div>
             </div>

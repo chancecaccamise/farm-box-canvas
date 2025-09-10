@@ -23,6 +23,7 @@ interface WeeklyBagSummaryProps {
   loading: boolean;
   hasActiveSubscription?: boolean;
   unpaidAddonsTotal?: number;
+  hasPaidForThisWeek?: boolean;
 }
 
 export function WeeklyBagSummary({ 
@@ -32,7 +33,8 @@ export function WeeklyBagSummary({
   isLocked, 
   loading,
   hasActiveSubscription = false,
-  unpaidAddonsTotal = 0
+  unpaidAddonsTotal = 0,
+  hasPaidForThisWeek = false
 }: WeeklyBagSummaryProps) {
   const [promoCode, setPromoCode] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
@@ -47,7 +49,10 @@ export function WeeklyBagSummary({
   
   // Updated total calculation - delivery fee for everyone
   const getTotal = () => {
-    if (hasActiveSubscription) {
+    if (hasPaidForThisWeek) {
+      // User has already paid for this week's box, only charge for unpaid add-ons + delivery fee
+      return unpaidAddonsTotal + deliveryFee;
+    } else if (hasActiveSubscription) {
       // For subscribers, only charge for unpaid add-ons + delivery fee
       return unpaidAddonsTotal + deliveryFee;
     } else {
@@ -159,13 +164,13 @@ export function WeeklyBagSummary({
 
           {/* Pricing Breakdown */}
           <div className="space-y-2">
-            {!hasActiveSubscription && (
+            {!hasActiveSubscription && !hasPaidForThisWeek && (
               <div className="flex items-center justify-between text-sm">
                 <span>Box contents</span>
                 <span>${boxPrice.toFixed(2)}</span>
               </div>
             )}
-            {hasActiveSubscription ? (
+            {(hasActiveSubscription || hasPaidForThisWeek) ? (
               unpaidAddonsTotal > 0 && (
                 <div className="flex items-center justify-between text-sm">
                   <span>Additional add-ons</span>
@@ -184,9 +189,9 @@ export function WeeklyBagSummary({
               <span>Delivery fee</span>
               <span>${deliveryFee.toFixed(2)}</span>
             </div>
-            {hasActiveSubscription && (
+            {(hasActiveSubscription || hasPaidForThisWeek) && (
               <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <span>Box contents (subscription)</span>
+                <span>Box contents {hasPaidForThisWeek ? '(paid)' : '(subscription)'}</span>
                 <span>Included</span>
               </div>
             )}
