@@ -79,6 +79,16 @@ const AddOns = () => {
   const selectedCount = Object.keys(selectedAddOns).length;
   const totalSelected = Object.values(selectedAddOns).reduce((sum, qty) => sum + qty, 0);
 
+  const getBackRoute = () => {
+    if (checkoutState.boxSize === 'full_farm_bag') {
+      return '/full-farm-bag-carb-selection';
+    } else if (checkoutState.boxSize === 'protein-pack') {
+      return '/protein-selection';
+    } else {
+      return '/box-selection';
+    }
+  };
+
   const handleContinue = () => {
     updateAddOns(selectedAddOns);
     navigate("/delivery");
@@ -89,11 +99,9 @@ const AddOns = () => {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <Button variant="ghost" asChild>
-            <Link to="/product-selection">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back
-            </Link>
+          <Button variant="ghost" onClick={() => navigate(getBackRoute())}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
           </Button>
           
           <div className="flex items-center gap-2">
