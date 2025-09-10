@@ -29,6 +29,18 @@ const BoxSelection = () => {
     return nameMap[boxName] || boxName;
   };
 
+  const getDisplayPrice = (basePrice: number, subscriberPrice?: number) => {
+    if (boxType === 'subscription' && subscriberPrice && subscriberPrice < basePrice) {
+      return (
+        <div className="text-2xl font-bold mb-2">
+          <span className="line-through text-muted-foreground">${basePrice}</span>{" "}
+          <span className="text-accent">${subscriberPrice}</span>
+        </div>
+      );
+    }
+    return <div className="text-2xl font-bold text-primary mb-2">${basePrice}</div>;
+  };
+
   useEffect(() => {
     updateBoxType(boxType);
     updateBoxSize(boxSize);
@@ -184,14 +196,11 @@ const BoxSelection = () => {
                       <CheckCircle className="w-6 h-6 text-primary mx-auto" />
                     )}
                   </CardHeader>
-                  <CardContent className="text-center">
-                    <div className="text-2xl font-bold text-primary mb-2">${size.base_price}</div>
-                    <div className="text-lg font-medium mb-2">{size.item_count_range}</div>
-                    <CardDescription className="text-base">{size.serves_text}</CardDescription>
-                    {size.description && (
-                      <CardDescription className="text-sm mt-2">{size.description}</CardDescription>
-                    )}
-                  </CardContent>
+                   <CardContent className="text-center">
+                     {getDisplayPrice(size.base_price, size.subscriber_price)}
+                     <div className="text-lg font-medium mb-2">{size.item_count_range}</div>
+                     <CardDescription className="text-base">{size.serves_text}</CardDescription>
+                   </CardContent>
                 </Card>
               ))}
             </div>
@@ -210,8 +219,7 @@ const BoxSelection = () => {
               <div>
                 <span className="text-muted-foreground">Box Size:</span>
                 <span className="ml-2 font-medium">
-                  {boxSizes.find(s => s.name === boxSize)?.display_name} 
-                  ({boxSizes.find(s => s.name === boxSize)?.item_count_range})
+                  {boxSizes.find(s => s.name === boxSize)?.display_name}
                 </span>
               </div>
             </div>
