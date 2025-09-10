@@ -60,11 +60,11 @@ const BoxComparison = () => {
   const getSampleItems = (boxSize) => {
     switch (boxSize) {
       case 'veggie_bag':
-        return ['6 vegetables chosen by Billy', 'Seasonal organic greens', 'Farm-fresh root vegetables', 'Locally-sourced herbs', 'Seasonal fruits', 'Billy\'s farming tips included'];
+        return ['Mixed greens', 'Rainbow carrots', 'Cherry tomatoes', 'Fresh herbs', 'Bell peppers', 'Seasonal vegetables'];
       case 'full_farm_bag':
-        return ['Complete farm selection', 'Fresh vegetables & herbs', 'Premium proteins', 'Artisan pantry goods', 'Weekly complimentary gift', 'Farm-to-table recipes'];
+        return ['Mixed vegetables', 'Fresh eggs', 'Artisan bread', 'Local honey', 'Seasonal protein', 'Farm cheese', 'Leafy greens', 'Root vegetables'];
       case 'protein-pack':
-        return ['5 proteins of your choice', 'Fresh local seafood options', 'Premium grass-fed meats', 'Free-range poultry', 'Sustainable fishing selections'];
+        return ['Fresh salmon', 'Grass-fed beef', 'Free-range chicken', 'Wild shrimp', 'Sustainable catch'];
       default:
         return [];
     }
@@ -81,16 +81,18 @@ const BoxComparison = () => {
   };
 
   const getDisplayPrice = (basePrice, subscriberPrice) => {
-    const price = isSubscription ? (subscriberPrice || basePrice) : basePrice;
-    return `$${price}`;
-  };
-
-  const getSavingsText = (basePrice, subscriberPrice) => {
     if (isSubscription && subscriberPrice && subscriberPrice < basePrice) {
-      const savings = basePrice - subscriberPrice;
-      return `Save $${savings} vs one-time purchase!`;
+      return {
+        strikethrough: `$${basePrice}`,
+        price: `$${subscriberPrice}`,
+        showStrikethrough: true
+      };
     }
-    return null;
+    const price = isSubscription ? (subscriberPrice || basePrice) : basePrice;
+    return {
+      price: `$${price}`,
+      showStrikethrough: false
+    };
   };
 
   if (loading) {
@@ -126,16 +128,14 @@ const BoxComparison = () => {
             <Label htmlFor="subscription-toggle" className="text-sm font-medium">
               Weekly subscription
             </Label>
-            {isSubscription && (
-              <Badge variant="secondary" className="ml-2 bg-accent/10 text-accent">
-                Save $5/week
-              </Badge>
-            )}
           </div>
         </div>
         
         <div className="grid md:grid-cols-3 gap-8">
-          {boxOptions.map((box) => (
+          {boxOptions.map((box) => {
+            const priceDisplay = getDisplayPrice(box.basePrice, box.subscriberPrice);
+            
+            return (
             <Card key={box.size} className={`relative text-center ${box.popular ? 'ring-2 ring-accent shadow-lg scale-105' : ''}`}>
               {box.popular && (
                 <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-accent text-white">
@@ -145,29 +145,27 @@ const BoxComparison = () => {
               
               <CardHeader className="pb-4">
                 <CardTitle className="text-2xl mb-2">{box.name}</CardTitle>
-                <div className="text-4xl font-bold text-primary mb-2">{getDisplayPrice(box.basePrice, box.subscriberPrice)}</div>
+                <div className="text-4xl font-bold text-primary mb-2">
+                  {priceDisplay.showStrikethrough ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="line-through text-muted-foreground text-2xl">
+                        {priceDisplay.strikethrough}
+                      </span>
+                      <span className="text-accent">
+                        {priceDisplay.price}
+                      </span>
+                    </div>
+                  ) : (
+                    priceDisplay.price
+                  )}
+                </div>
                 <div className="text-sm text-muted-foreground mb-1">
                   {isSubscription ? 'per week' : 'per delivery'}
                 </div>
-                {getSavingsText(box.basePrice, box.subscriberPrice) && (
-                  <div className="text-xs text-accent font-medium mb-2">
-                    {getSavingsText(box.basePrice, box.subscriberPrice)}
-                  </div>
-                )}
                 <CardDescription className="text-base font-medium">{box.serves}</CardDescription>
                 <div className="text-sm text-accent font-medium">{box.items}</div>
                 {box.description && (
                   <p className="text-sm text-muted-foreground mt-2">{box.description}</p>
-                )}
-                {box.size === 'full_farm_bag' && (
-                  <Badge variant="outline" className="mt-2 text-orange-600 border-orange-200">
-                    + Weekly Complimentary Gift
-                  </Badge>
-                )}
-                {box.size === 'protein-pack' && (
-                  <Badge variant="outline" className="mt-2 text-blue-600 border-blue-200">
-                    You Choose Your Proteins
-                  </Badge>
                 )}
               </CardHeader>
               
@@ -193,14 +191,15 @@ const BoxComparison = () => {
                 </Button>
               </CardContent>
             </Card>
-          ))}
+          )
+          })}
         </div>
         
         <div className="text-center mt-8">
           <p className="text-muted-foreground">
             {isSubscription 
-              ? "All subscriptions include free delivery • Cancel anytime • Mix and match different bags"
-              : "One-time purchases include free delivery • No commitment • Mix and match different bags"
+              ? "All subscriptions include free delivery"
+              : "One-time purchases include a $9.00 delivery fee"
             }
           </p>
         </div>
