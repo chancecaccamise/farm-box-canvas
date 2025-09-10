@@ -69,15 +69,21 @@ export function ProteinSelector({
     if (newSelections.includes(proteinId)) {
       newSelections = newSelections.filter(id => id !== proteinId);
     } else {
-      if (newSelections.length >= maxSelections) {
-        toast({
-          title: "Maximum Selection Reached",
-          description: `You can select up to ${maxSelections} proteins for your pack.`,
-          variant: "destructive",
-        });
-        return;
+      if (maxSelections === 1) {
+        // For single selection, replace existing selection
+        newSelections = [proteinId];
+      } else {
+        // For multiple selections, check limit
+        if (newSelections.length >= maxSelections) {
+          toast({
+            title: "Maximum Selection Reached",
+            description: `You can select up to ${maxSelections} proteins for your pack.`,
+            variant: "destructive",
+          });
+          return;
+        }
+        newSelections.push(proteinId);
       }
-      newSelections.push(proteinId);
     }
     
     setSelectedProteins(newSelections);

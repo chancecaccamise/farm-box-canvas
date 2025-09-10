@@ -42,11 +42,9 @@ const FullFarmBagProteinSelection = () => {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
-          <Button variant="ghost" asChild>
-            <Link to="/box-selection">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Box Selection
-            </Link>
+          <Button variant="ghost" onClick={() => navigate(-1)}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
           </Button>
         </div>
 

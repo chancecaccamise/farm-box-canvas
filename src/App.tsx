@@ -28,7 +28,6 @@ import Gallery from "./pages/Gallery";
 import ZipCode from "./pages/ZipCode";
 import Account from "./pages/Account";
 import BoxSelection from "./pages/BoxSelection";
-import ProductSelection from "./pages/ProductSelection";
 import ProteinSelection from "./pages/ProteinSelection";
 import FullFarmBagProteinSelection from "./pages/FullFarmBagProteinSelection";
 import FullFarmBagCarbSelection from "./pages/FullFarmBagCarbSelection";
@@ -111,7 +110,6 @@ const AppRoutes = () => {
             <Route path="/zip-code" element={<ZipCode />} />
             <Route path="/account" element={<Account />} />
         <Route path="/box-selection" element={<BoxSelection />} />
-        <Route path="/product-selection" element={<ProductSelection />} />
         <Route path="/protein-selection" element={<ProteinSelection />} />
         <Route path="/full-farm-bag-protein-selection" element={<FullFarmBagProteinSelection />} />
         <Route path="/full-farm-bag-carb-selection" element={<FullFarmBagCarbSelection />} />

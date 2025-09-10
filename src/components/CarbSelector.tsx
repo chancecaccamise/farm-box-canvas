@@ -68,15 +68,21 @@ export function CarbSelector({
     if (newSelections.includes(carbId)) {
       newSelections = newSelections.filter(id => id !== carbId);
     } else {
-      if (newSelections.length >= maxSelections) {
-        toast({
-          title: "Maximum Selection Reached",
-          description: `You can select up to ${maxSelections} carb${maxSelections > 1 ? 's' : ''} for your pack.`,
-          variant: "destructive",
-        });
-        return;
+      if (maxSelections === 1) {
+        // For single selection, replace existing selection
+        newSelections = [carbId];
+      } else {
+        // For multiple selections, check limit
+        if (newSelections.length >= maxSelections) {
+          toast({
+            title: "Maximum Selection Reached",
+            description: `You can select up to ${maxSelections} carb${maxSelections > 1 ? 's' : ''} for your pack.`,
+            variant: "destructive",
+          });
+          return;
+        }
+        newSelections.push(carbId);
       }
-      newSelections.push(carbId);
     }
     
     setSelectedCarbs(newSelections);
