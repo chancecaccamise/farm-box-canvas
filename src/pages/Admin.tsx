@@ -5,13 +5,14 @@ import { Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Package, ShoppingBag, Users, Fish, Flower, MapPin, UserCheck } from 'lucide-react';
+import { Package, ShoppingBag, Users, Fish, Flower, MapPin, UserCheck, Camera } from 'lucide-react';
 import { AdminProducts } from '@/components/admin/AdminProducts';
 import { AdminBoxTemplates } from '@/components/admin/AdminBoxTemplates';
 import { EnhancedOrderManagement } from '@/components/admin/EnhancedOrderManagement';
 import { AdminFreshCatch } from '@/components/admin/AdminFreshCatch';
 import { AdminDeliveryAreas } from '@/components/admin/AdminDeliveryAreas';
 import { AdminFormSubmissions } from '@/components/admin/AdminFormSubmissions';
+import { AdminGallery } from '@/components/admin/AdminGallery';
 import { TestCleanup } from '@/components/TestCleanup';
 
 const Admin = () => {
@@ -72,7 +73,7 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="products" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-8">
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               Products
@@ -92,6 +93,10 @@ const Admin = () => {
             <TabsTrigger value="form-submissions" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
               Form Submissions
+            </TabsTrigger>
+            <TabsTrigger value="gallery" className="flex items-center gap-2">
+              <Camera className="h-4 w-4" />
+              Ana's Gallery
             </TabsTrigger>
             <TabsTrigger value="delivery-areas" className="flex items-center gap-2">
               <MapPin className="h-4 w-4" />
@@ -128,6 +133,20 @@ const Admin = () => {
 
           <TabsContent value="form-submissions">
             <AdminFormSubmissions />
+          </TabsContent>
+
+          <TabsContent value="gallery">
+            <Card>
+              <CardHeader>
+                <CardTitle>Ana's Gallery Management</CardTitle>
+                <CardDescription>
+                  Manage arrangement photos displayed in the gallery for Ana's Arrangements
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AdminGallery />
+              </CardContent>
+            </Card>
           </TabsContent>
 
           <TabsContent value="delivery-areas">

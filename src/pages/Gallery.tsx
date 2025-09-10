@@ -1,64 +1,52 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Heart, Baby, Cake, Leaf, Flower } from "lucide-react";
-import weddingBouquet from "@/assets/weddingBouquet.png";
-import babyShowerFlowers from "@/assets/Large on table.jpg";
-import birthdayFlowers from "@/assets/Happy Birthday Centerpeice.jpeg";
-import seasonalBouquet from "@/assets/Christmas1.jpg";
-import meganCenterpiece from "@/assets/meganCenterpiece.png";
-import anaFlowersHero from "@/assets/ana-flowers-hero.jpg";
+
+interface GalleryImage {
+  id: string;
+  title: string;
+  description: string | null;
+  category: string;
+  image_url: string;
+  sort_order: number;
+}
 
 const Gallery = () => {
   const [activeFilter, setActiveFilter] = useState("all");
+  const [galleryImages, setGalleryImages] = useState<GalleryImage[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const filters = [
     { value: "all", label: "All Arrangements", icon: <Flower className="w-4 h-4" /> },
-    { value: "weddings", label: "Weddings", icon: <Heart className="w-4 h-4" /> },
-    { value: "celebrations", label: "Celebrations", icon: <Cake className="w-4 h-4" /> },
-    { value: "baby-showers", label: "Baby Showers", icon: <Baby className="w-4 h-4" /> },
+    { value: "wedding", label: "Weddings", icon: <Heart className="w-4 h-4" /> },
+    { value: "celebration", label: "Celebrations", icon: <Cake className="w-4 h-4" /> },
+    { value: "baby-shower", label: "Baby Showers", icon: <Baby className="w-4 h-4" /> },
     { value: "seasonal", label: "Seasonal", icon: <Leaf className="w-4 h-4" /> }
   ];
 
-  const galleryImages = [
-    {
-      src: weddingBouquet,
-      title: "Classic Wedding Bouquet",
-      category: "weddings",
-      description: "Elegant white roses and greenery for a timeless ceremony"
-    },
-    {
-      src: birthdayFlowers,
-      title: "Birthday Centerpiece",
-      category: "celebrations", 
-      description: "Vibrant mixed flowers perfect for celebration tables"
-    },
-    {
-      src: seasonalBouquet,
-      title: "Holiday Arrangement",
-      category: "seasonal",
-      description: "Festive seasonal flowers with rich winter colors"
-    },
-    {
-      src: babyShowerFlowers,
-      title: "Baby Shower Display",
-      category: "baby-showers",
-      description: "Soft, delicate arrangements for welcoming new life"
-    },
-    {
-      src: meganCenterpiece,
-      title: "Grand Table Centerpiece",
-      category: "celebrations",
-      description: "Stunning focal point arrangement for special occasions"
-    },
-    {
-      src: anaFlowersHero,
-      title: "Seasonal Garden Mix",
-      category: "seasonal",
-      description: "Fresh seasonal flowers showcasing nature's beauty"
-    }
-  ];
+  useEffect(() => {
+    const fetchGalleryImages = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("gallery_images")
+          .select("*")
+          .eq("is_active", true)
+          .order("sort_order", { ascending: true });
+
+        if (error) throw error;
+        setGalleryImages(data || []);
+      } catch (error) {
+        console.error("Error fetching gallery images:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchGalleryImages();
+  }, []);
 
   const filteredImages = activeFilter === "all" 
     ? galleryImages 
@@ -105,30 +93,39 @@ const Gallery = () => {
         </div>
 
         {/* Gallery Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-          {filteredImages.map((image, index) => (
-            <Card key={index} className="overflow-hidden group">
-              <div className="aspect-square overflow-hidden">
-                <img
-                  src={image.src}
-                  alt={image.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-              </div>
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between mb-2">
-                  <h3 className="font-semibold text-lg">{image.title}</h3>
-                  <Badge variant="secondary" className="ml-2 shrink-0">
-                    {filters.find(f => f.value === image.category)?.label}
-                  </Badge>
+        {loading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-2"></div>
+              <p>Loading gallery...</p>
+            </div>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            {filteredImages.map((image) => (
+              <Card key={image.id} className="overflow-hidden group">
+                <div className="aspect-square overflow-hidden">
+                  <img
+                    src={image.image_url}
+                    alt={image.title}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  />
                 </div>
-                <p className="text-muted-foreground text-sm">
-                  {image.description}
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="font-semibold text-lg">{image.title}</h3>
+                    <Badge variant="secondary" className="ml-2 shrink-0">
+                      {filters.find(f => f.value === image.category)?.label}
+                    </Badge>
+                  </div>
+                  <p className="text-muted-foreground text-sm">
+                    {image.description}
+                  </p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
 
         {/* Call to Action */}
         <div className="text-center bg-muted/30 rounded-lg p-8">
