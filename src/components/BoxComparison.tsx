@@ -164,9 +164,6 @@ const BoxComparison = () => {
                 </div>
                 <CardDescription className="text-base font-medium">{box.serves}</CardDescription>
                 <div className="text-sm text-accent font-medium">{box.items}</div>
-                {box.description && (
-                  <p className="text-sm text-muted-foreground mt-2">{box.description}</p>
-                )}
               </CardHeader>
               
               <CardContent className="space-y-4">
@@ -197,10 +194,7 @@ const BoxComparison = () => {
         
         <div className="text-center mt-8">
           <p className="text-muted-foreground">
-            {isSubscription 
-              ? "All subscriptions include free delivery"
-              : "One-time purchases include a $9.00 delivery fee"
-            }
+            All orders include a $9.00 delivery fee
           </p>
         </div>
       </div>

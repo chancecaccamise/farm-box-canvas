@@ -58,15 +58,6 @@ const FreshAddOns = () => {
             </Card>
           ))}
         </div>
-        
-        <div className="text-center">
-          <Button asChild variant="outline" size="lg" className="gap-2">
-            <Link to="/add-ons">
-              <Plus className="w-4 h-4" />
-              Browse Weekly Add-Ons
-            </Link>
-          </Button>
-        </div>
       </div>
     </section>
   );

@@ -96,7 +96,7 @@ export function StartFarmBoxJourney() {
       {/* Additional Info */}
       <div className="text-center text-sm text-gray-500 space-y-2">
         <p>No commitment required • Skip or pause anytime • Cancel whenever you want</p>
-        <p>Starting from $24.99/week with free delivery on orders over $35</p>
+        <p>Starting from $24.99/week • $9.00 delivery fee</p>
       </div>
     </div>
   );
