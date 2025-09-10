@@ -136,15 +136,6 @@ const MeetFarmers = () => {
               <p className="text-lg leading-relaxed">
               Farming runs deep in our family&apos;s roots. Some of us grew up in family fields, learning the rhythms of the land from an early age. Others found our calling through study, curiosity, and the thrill of compassionately cohabitating with the earth. What brings us together is a shared belief in aquaponic farming and the promise it holds. Its farming reimagined, producing efficient, earth-conscious, highest-quality food during every season. 
               </p>
-              
-              
-              
-              <div className="bg-primary/10 p-6 rounded-lg">
-                <blockquote className="text-lg italic mb-4">
-                  "Billy and Ana Quote"
-                </blockquote>
-                <cite className="text-muted-foreground">— Billy and Ana, Owners</cite>
-              </div>
             </div>
             
             <div className="flex justify-center">

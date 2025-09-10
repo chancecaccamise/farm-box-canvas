@@ -167,13 +167,6 @@ const HowWeGrow = () => {
               </CardContent>
             </Card>
           </div>
-          
-          <div className="bg-accent/10 p-8 rounded-lg text-center">
-            <blockquote className="text-xl italic mb-4">
-              "Quote from customer"
-            </blockquote>
-            <cite className="text-muted-foreground">— Sarah M., Happy Customer</cite>
-          </div>
         </section>
       </div>
     </div>
