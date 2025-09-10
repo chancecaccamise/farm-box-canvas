@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -312,29 +313,41 @@ const AnasFlowers = () => {
         {/* Testimonials */}
         <div className="mb-16">
           <h2 className="text-3xl font-bold text-center mb-12">Locals love Ana&apos;s Arrangements</h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <Card key={index}>
-                <CardContent className="p-6">
-                  <div className="flex items-center space-x-1 mb-4">
-                    {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    ))}
-                  </div>
-                  <Quote className="w-8 h-8 text-accent mb-4" />
-                  <p className="text-muted-foreground italic mb-4">
-                    "{testimonial.text}"
-                  </p>
-                  <div>
-                    <p className="font-semibold">{testimonial.author}</p>
-                    <Badge variant="secondary" className="mt-1">
-                      {testimonial.event}
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          <Carousel
+            opts={{
+              align: "start",
+              loop: true,
+            }}
+            className="w-full"
+          >
+            <CarouselContent className="-ml-2 md:-ml-4">
+              {testimonials.map((testimonial, index) => (
+                <CarouselItem key={index} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
+                  <Card className="h-full">
+                    <CardContent className="p-6 flex flex-col h-full">
+                      <div className="flex items-center space-x-1 mb-4">
+                        {[...Array(testimonial.rating)].map((_, i) => (
+                          <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                        ))}
+                      </div>
+                      <Quote className="w-8 h-8 text-accent mb-4" />
+                      <p className="text-muted-foreground italic mb-4 flex-grow text-sm">
+                        "{testimonial.text}"
+                      </p>
+                      <div className="mt-auto">
+                        <p className="font-semibold">{testimonial.author}</p>
+                        <Badge variant="secondary" className="mt-1">
+                          {testimonial.event}
+                        </Badge>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <CarouselPrevious className="left-0 -translate-x-12" />
+            <CarouselNext className="right-0 translate-x-12" />
+          </Carousel>
         </div>
 
         <div className="grid lg:grid-cols-2 gap-12">
