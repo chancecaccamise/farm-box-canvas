@@ -30,7 +30,7 @@ const Landing = () => {
           Subscribe to Your <span className="text-accent">Sustenance.</span>
           </h1>
           <p className="text-xl mb-8 max-w-2xl mx-auto leading-relaxed">
-          Billy&apos;s Botanicals seasonal Billy's Bags To Go is delivered fresh to your door or available for pickup at the Forsyth Farmer&apos;s Market.
+          Billy&apos;s Botanicals seasonal Billy's Bags are delivered fresh to your door or available for pickup at the Forsyth Farmer&apos;s Market.
           </p>
           <Button onClick={scrollToBoxes} variant="hero" size="xl">
             View Subscription Options
@@ -211,15 +211,15 @@ const Landing = () => {
                 },
                 {
                   name: "Karen G",
-                  location: "Farm Bag Customer",
-                  quote: "My family also uses Billy's Botanicals Farm Bag. It is so enjoyable to have the opportunity to have fresh and sustainably sourced produce and seafood as well as the privilege to support a local business.",
+                  location: "Billy's Bag Customer",
+                  quote: "My family also uses Billy's Botanicals Billy's Bag. It is so enjoyable to have the opportunity to have fresh and sustainably sourced produce and seafood as well as the privilege to support a local business.",
                   rating: 5,
                   type: "customer"
                 },
                 {
                   name: "Jay H",
                   location: "Savannah, GA",
-                  quote: "WE LOVE BILLY'S! From the fresh, local seafood to the produce, eggs, spices and sauces, you can't go wrong! We love the farmbags which include proteins, eggs, produce and more letting us eat healthy, fresh and local meals that vary every week depending on what's in season.",
+                  quote: "WE LOVE BILLY'S! From the fresh, local seafood to the produce, eggs, spices and sauces, you can't go wrong! We love Billy's Bags which include proteins, eggs, produce and more letting us eat healthy, fresh and local meals that vary every week depending on what's in season.",
                   rating: 5,
                   type: "customer"
                 }

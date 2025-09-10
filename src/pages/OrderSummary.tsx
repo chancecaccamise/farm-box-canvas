@@ -22,6 +22,17 @@ const OrderSummary = () => {
   const [selectedCarb, setSelectedCarb] = useState<any>(null);
   const { checkoutState } = useCheckout();
 
+  const getBoxDisplayName = (boxName: string) => {
+    const nameMap: Record<string, string> = {
+      small: "Veggie Billy's Bag",
+      medium: "Medium Billy's Bag", 
+      large: "Large Billy's Bag",
+      "protein-pack": "Protein Billy's Bag",
+      full_farm_bag: "Full Billy's Box"
+    };
+    return nameMap[boxName] || boxName;
+  };
+
   useEffect(() => {
     fetchCheckoutData();
     checkSubscriptionStatus();
@@ -326,7 +337,7 @@ const OrderSummary = () => {
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Box Size:</span>
-                    <span className="font-medium">{checkoutState.boxSize?.charAt(0).toUpperCase() + checkoutState.boxSize?.slice(1)} Box</span>
+                    <span className="font-medium">{getBoxDisplayName(checkoutState.boxSize || '')}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -365,7 +376,7 @@ const OrderSummary = () => {
                     Box Contents
                   </CardTitle>
                   <CardDescription>
-                    Your {checkoutState.boxSize} box selection
+                    What's included in your box
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -373,7 +384,7 @@ const OrderSummary = () => {
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
                         <div>
-                          <h3 className="font-medium">Full Farm Bag</h3>
+                          <h3 className="font-medium">Full Billy's Box</h3>
                           <p className="text-sm text-muted-foreground">
                             Your personalized selections
                           </p>
@@ -405,7 +416,7 @@ const OrderSummary = () => {
                     <div className="flex justify-between items-center">
                       <div>
                         <h3 className="font-medium">
-                          {checkoutState.boxSize?.charAt(0).toUpperCase() + checkoutState.boxSize?.slice(1)} Box
+                          {getBoxDisplayName(checkoutState.boxSize || '')}
                         </h3>
                         <p className="text-sm text-muted-foreground">
                           Fresh seasonal produce
@@ -434,7 +445,7 @@ const OrderSummary = () => {
                     <div className="space-y-3">
                       <div className="flex justify-between items-center">
                         <div>
-                          <h3 className="font-medium text-green-800">Full Farm Bag</h3>
+                          <h3 className="font-medium text-green-800">Full Billy's Box</h3>
                           <p className="text-sm text-green-700">
                             Your personalized selections (subscription active)
                           </p>
@@ -466,7 +477,7 @@ const OrderSummary = () => {
                     <div className="flex justify-between items-center">
                       <div>
                         <h3 className="font-medium text-green-800">
-                          {checkoutState.boxSize?.charAt(0).toUpperCase() + checkoutState.boxSize?.slice(1)} Box
+                          {getBoxDisplayName(checkoutState.boxSize || '')}
                         </h3>
                         <p className="text-sm text-green-700">
                           Fresh seasonal produce (subscription active)
@@ -539,6 +550,10 @@ const OrderSummary = () => {
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Delivery Fee:</span>
                     <span>${deliveryFee.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-muted-foreground">
+                    <span>Tax:</span>
+                    <span>Applied at checkout</span>
                   </div>
                   {hasActiveSubscription && (
                     <div className="flex justify-between text-green-700">

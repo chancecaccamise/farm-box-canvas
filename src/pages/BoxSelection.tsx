@@ -18,6 +18,17 @@ const BoxSelection = () => {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+  const getBoxDisplayName = (boxName: string) => {
+    const nameMap: Record<string, string> = {
+      small: "Veggie Billy's Bag",
+      medium: "Medium Billy's Bag", 
+      large: "Large Billy's Bag",
+      "protein-pack": "Protein Billy's Bag",
+      full_farm_bag: "Full Billy's Box"
+    };
+    return nameMap[boxName] || boxName;
+  };
+
   useEffect(() => {
     updateBoxType(boxType);
     updateBoxSize(boxSize);
