@@ -47,11 +47,11 @@ export function WeeklyBagSummary({
   
   const subtotal = boxPrice + addonsTotal;
   
-  // Updated total calculation - delivery fee for everyone
+  // Updated total calculation
   const getTotal = () => {
     if (hasPaidForThisWeek) {
-      // User has already paid for this week's box, only charge for unpaid add-ons + delivery fee
-      return unpaidAddonsTotal + deliveryFee;
+      // User has already paid for this week's box and delivery, only charge for unpaid add-ons
+      return unpaidAddonsTotal;
     } else if (hasActiveSubscription) {
       // For subscribers, only charge for unpaid add-ons + delivery fee
       return unpaidAddonsTotal + deliveryFee;
@@ -185,16 +185,18 @@ export function WeeklyBagSummary({
                 </div>
               )
             )}
-            <div className="flex items-center justify-between text-sm">
-              <span>Delivery fee</span>
-              <span>${deliveryFee.toFixed(2)}</span>
-            </div>
-            {(hasActiveSubscription || hasPaidForThisWeek) && (
-              <div className="flex items-center justify-between text-sm text-muted-foreground">
-                <span>Box contents {hasPaidForThisWeek ? '(paid)' : '(subscription)'}</span>
-                <span>Included</span>
+            {/* Only show delivery fee if user hasn't paid for this week yet */}
+            {!hasPaidForThisWeek && (
+              <div className="flex items-center justify-between text-sm">
+                <span>Delivery fee</span>
+                <span>${deliveryFee.toFixed(2)}</span>
               </div>
             )}
+            {/* Show tax line */}
+            <div className="flex items-center justify-between text-sm text-muted-foreground">
+              <span>Tax</span>
+              <span>Applied at checkout</span>
+            </div>
             {promoApplied && (
               <div className="flex items-center justify-between text-sm text-green-600">
                 <span>Discount (WELCOME10)</span>
