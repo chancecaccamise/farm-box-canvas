@@ -89,41 +89,30 @@ export const AdminProducts = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Different validation for proteins/carbs vs regular products
-    if (isProteinOrCarb) {
-      if (!formData.name || !formData.unit_description) {
-        toast({
-          title: "Error",
-          description: "Name and unit description are required",
-          variant: "destructive"
-        });
-        return;
-      }
-    } else {
-      if (!formData.name || !formData.category || !formData.price) {
-        toast({
-          title: "Error",
-          description: "Please fill in all required fields",
-          variant: "destructive"
-        });
-        return;
-      }
+    // Validation for all products
+    if (!formData.name || !formData.price) {
+      toast({
+        title: "Error",
+        description: "Name and price are required",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Additional validation for regular products (non-proteins/carbs)
+    if (!isProteinOrCarb && !formData.category) {
+      toast({
+        title: "Error",
+        description: "Category is required",
+        variant: "destructive"
+      });
+      return;
     }
 
     try {
-      const productData = isProteinOrCarb ? {
+      const productData = {
         name: formData.name,
-        category: currentView, // Auto-set category for proteins/carbs
-        price: 0, // Default price for proteins/carbs
-        description: formData.description || null,
-        unit_description: formData.unit_description || null,
-        is_available: formData.is_available,
-        inventory_count: 100,
-        image: null,
-        tags: null
-      } : {
-        name: formData.name,
-        category: formData.category,
+        category: isProteinOrCarb ? currentView : formData.category, // Auto-set category for proteins/carbs
         price: parseFloat(formData.price),
         description: formData.description || null,
         image: formData.image || null,
@@ -352,28 +341,38 @@ export const AdminProducts = () => {
                     )}
                   </div>
                   
-                  {!isProteinOrCarb && (
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="price">Price ($) *</Label>
-                        <Input
-                          id="price"
-                          type="number"
-                          step="0.01"
-                          value={formData.price}
-                          onChange={(e) => setFormData({...formData, price: e.target.value})}
-                          required
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="inventory">Inventory Count</Label>
-                        <Input
-                          id="inventory"
-                          type="number"
-                          value={formData.inventory_count}
-                          onChange={(e) => setFormData({...formData, inventory_count: e.target.value})}
-                        />
-                      </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="price">Price ($) *</Label>
+                      <Input
+                        id="price"
+                        type="number"
+                        step="0.01"
+                        value={formData.price}
+                        onChange={(e) => setFormData({...formData, price: e.target.value})}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="inventory">Inventory Count</Label>
+                      <Input
+                        id="inventory"
+                        type="number"
+                        value={formData.inventory_count}
+                        onChange={(e) => setFormData({...formData, inventory_count: e.target.value})}
+                      />
+                    </div>
+                  </div>
+                  
+                  {isProteinOrCarb && (
+                    <div>
+                      <Label htmlFor="unit_description_extra">Unit Description</Label>
+                      <Input
+                        id="unit_description_extra"
+                        value={formData.unit_description}
+                        onChange={(e) => setFormData({...formData, unit_description: e.target.value})}
+                        placeholder="e.g., 1 lb fillet, 2 lb bag"
+                      />
                     </div>
                   )}
 
@@ -387,26 +386,22 @@ export const AdminProducts = () => {
                     />
                   </div>
 
-                  {!isProteinOrCarb && (
-                    <>
-                      <ImageUpload
-                        value={formData.image}
-                        onChange={(url) => setFormData({...formData, image: url})}
-                        label="Product Image"
-                        placeholder="Drop an image here or click to upload"
-                      />
+                  <ImageUpload
+                    value={formData.image}
+                    onChange={(url) => setFormData({...formData, image: url})}
+                    label="Product Image"
+                    placeholder="Drop an image here or click to upload"
+                  />
 
-                      <div>
-                        <Label htmlFor="tags">Tags (comma-separated)</Label>
-                        <Input
-                          id="tags"
-                          value={formData.tags}
-                          onChange={(e) => setFormData({...formData, tags: e.target.value})}
-                          placeholder="organic, local, seasonal"
-                        />
-                      </div>
-                    </>
-                  )}
+                  <div>
+                    <Label htmlFor="tags">Tags (comma-separated)</Label>
+                    <Input
+                      id="tags"
+                      value={formData.tags}
+                      onChange={(e) => setFormData({...formData, tags: e.target.value})}
+                      placeholder="organic, local, seasonal"
+                    />
+                  </div>
 
                   <div className="flex items-center space-x-2">
                     <Switch
@@ -465,7 +460,7 @@ export const AdminProducts = () => {
                 <CardContent className="p-6">
                   <div className="flex justify-between items-start">
                     <div className="flex space-x-4">
-                      {product.image && currentView === 'all' && (
+                      {product.image && (
                         <img
                           src={product.image}
                           alt={product.name}
