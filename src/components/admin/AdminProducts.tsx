@@ -264,18 +264,18 @@ export const AdminProducts = () => {
       </div>
 
       <Tabs value={currentCategory} onValueChange={setCurrentCategory} className="space-y-6">
-        <div className="flex flex-wrap gap-2 p-1 bg-muted rounded-lg mb-6">
-          <TabsTrigger value="all" className="flex items-center gap-2 px-4 py-2 rounded-md">
+        <TabsList className="h-auto p-2 bg-muted rounded-lg mb-6 flex flex-wrap gap-2 w-fit">
+          <TabsTrigger value="all" className="flex items-center gap-2 px-4 py-2 rounded-md whitespace-nowrap">
             <Package className="h-4 w-4" />
             All Products
           </TabsTrigger>
           {availableCategories.map(category => (
-            <TabsTrigger key={category} value={category} className="flex items-center gap-2 px-4 py-2 rounded-md">
+            <TabsTrigger key={category} value={category} className="flex items-center gap-2 px-4 py-2 rounded-md whitespace-nowrap">
               {getCategoryIcon(category)}
               {getCategoryDisplayName(category)}
             </TabsTrigger>
           ))}
-        </div>
+        </TabsList>
 
         <TabsContent value={currentCategory} className="space-y-6">
           <div className="flex justify-between items-center">
