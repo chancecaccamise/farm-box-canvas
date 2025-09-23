@@ -137,12 +137,6 @@ const Admin = () => {
 
           <TabsContent value="gallery">
             <Card>
-              <CardHeader>
-                <CardTitle>Ana's Gallery Management</CardTitle>
-                <CardDescription>
-                  Manage arrangement photos displayed in the gallery for Ana's Arrangements
-                </CardDescription>
-              </CardHeader>
               <CardContent>
                 <AdminGallery />
               </CardContent>
