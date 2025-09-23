@@ -135,13 +135,7 @@ const Landing = () => {
                   </div>
                 </div>
                 
-                <div className="flex items-start gap-4">
-                  <CheckCircle className="w-6 h-6 text-accent flex-shrink-0 mt-1" />
-                  <div>
-                    
-                    <p className="text-muted-foreground">Complete flexibility with your subscription. No long-term commitments or cancellation fees.</p>
-                  </div>
-                </div>
+                
                 
                 <div className="flex items-start gap-4">
                   <CheckCircle className="w-6 h-6 text-accent flex-shrink-0 mt-1" />
@@ -220,6 +214,20 @@ const Landing = () => {
                   name: "Jay H",
                   location: "Savannah, GA",
                   quote: "WE LOVE BILLY'S! From the fresh, local seafood to the produce, eggs, spices and sauces, you can't go wrong! We love Billy's Bags which include proteins, eggs, produce and more letting us eat healthy, fresh and local meals that vary every week depending on what's in season.",
+                  rating: 5,
+                  type: "customer"
+                },
+                {
+                  name: "Jacob Hammer",
+                  location: "Husk Savannah",
+                  quote: "Billy's botanicals is something special. From sourcing the freshest seafood to truly home-grown herbs and vegetables, they are the epitome of high quality. Partnerships like theirs are what allow Husk to thrive and be successful. On top of it all, Billy and Ana are two of the kindest people on the planet.",
+                  rating: 5,
+                  type: "customer"
+                },
+                {
+                  name: "Rachel Matte",
+                  location: "Savannah, GA",
+                  quote: "I first started ordering the farm bags from Billy's Botanicals during the covid lockdown, when veggies were nowhere to be found. I quickly relied on these weekly deliveries to get the best fresh vegetables. They became my 'Chopped Baskets,' getting to try new things you'd never find in a store like edible flowers, fava beans and spicy radishes, one of my personal favorites. Salads are my go to prep for the week, and these bags give the best variety and ingredients to make new fun flavors in them. Definitely a staple to my grocery list each week.",
                   rating: 5,
                   type: "customer"
                 }
