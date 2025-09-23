@@ -71,9 +71,10 @@ export const AdminProducts = () => {
   }, []);
 
   useEffect(() => {
-    // Get unique categories from products
-    const uniqueCategories = [...new Set(products.map(p => p.category))].sort();
-    setAvailableCategories(uniqueCategories);
+    // Get unique categories from products and merge with predefined categories
+    const productCategories = [...new Set(products.map(p => p.category))];
+    const mergedCategories = [...new Set([...allCategories, ...productCategories])].sort();
+    setAvailableCategories(mergedCategories);
   }, [products]);
 
   const fetchProducts = async () => {
