@@ -68,15 +68,8 @@ const BoxSelection = () => {
   };
 
   const handleContinue = () => {
-    // Check if user selected a protein pack box size
-    const selectedBoxSize = boxSizes.find(s => s.name === boxSize);
-    if (selectedBoxSize?.name === 'protein-pack') {
-      navigate("/protein-selection");
-    } else if (selectedBoxSize?.name === 'full_farm_bag') {
-      navigate("/full-farm-bag-protein-selection");
-    } else {
-      navigate("/add-ons");
-    }
+    // Navigate to comments page for all box types
+    navigate("/box-comments");
   };
 
   return (
@@ -234,7 +227,7 @@ const BoxSelection = () => {
             size="xl"
             className="w-full md:w-auto"
           >
-            Continue to Add-ons
+            Continue
           </Button>
         </div>
       </div>

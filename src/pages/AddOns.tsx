@@ -85,7 +85,7 @@ const AddOns = () => {
     } else if (checkoutState.boxSize === 'protein-pack') {
       return '/protein-selection';
     } else {
-      return '/box-selection';
+      return '/box-comments';
     }
   };
 

@@ -8,6 +8,7 @@ interface CheckoutState {
   proteinSelections: string[]; // Array of selected protein IDs
   carbSelections: string[]; // Array of selected carb IDs
   fullFarmBagSelections: { protein?: string; carb?: string }; // Full farm bag selections
+  comments: string; // Comments/requests for Billy & Ana
   zipCode: string;
   deliveryDay: string;
   deliveryMethod: 'delivery' | 'market-pickup' | 'farm-pickup';
@@ -22,6 +23,7 @@ interface CheckoutContextType {
   updateProteinSelections: (proteins: string[]) => void;
   updateCarbSelections: (carbs: string[]) => void;
   updateFullFarmBagSelections: (selections: { protein?: string; carb?: string }) => void;
+  updateComments: (comments: string) => void;
   updateZipCode: (zipCode: string) => void;
   updateDeliveryDay: (deliveryDay: string) => void;
   updateDeliveryMethod: (method: 'delivery' | 'market-pickup' | 'farm-pickup') => void;
@@ -36,6 +38,7 @@ const initialState: CheckoutState = {
   proteinSelections: [], // Empty array for protein selections
   carbSelections: [], // Empty array for carb selections
   fullFarmBagSelections: {}, // Empty object for full farm bag selections
+  comments: '', // Empty string for comments
   zipCode: '',
   deliveryDay: '',
   deliveryMethod: 'delivery',
@@ -86,6 +89,10 @@ export const CheckoutProvider: React.FC<CheckoutProviderProps> = ({ children }) 
     setCheckoutState(prev => ({ ...prev, fullFarmBagSelections: selections }));
   };
 
+  const updateComments = (comments: string) => {
+    setCheckoutState(prev => ({ ...prev, comments }));
+  };
+
   const updateZipCode = (zipCode: string) => {
     setCheckoutState(prev => ({ ...prev, zipCode }));
   };
@@ -111,6 +118,7 @@ export const CheckoutProvider: React.FC<CheckoutProviderProps> = ({ children }) 
     updateProteinSelections,
     updateCarbSelections,
     updateFullFarmBagSelections,
+    updateComments,
     updateZipCode,
     updateDeliveryDay,
     updateDeliveryMethod,
