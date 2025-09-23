@@ -74,6 +74,9 @@ export const AdminProducts = () => {
     // Get unique categories from products and merge with predefined categories
     const productCategories = [...new Set(products.map(p => p.category))];
     const mergedCategories = [...new Set([...allCategories, ...productCategories])].sort();
+    console.log('All categories:', allCategories);
+    console.log('Product categories:', productCategories);
+    console.log('Merged categories:', mergedCategories);
     setAvailableCategories(mergedCategories);
   }, [products]);
 
@@ -261,18 +264,18 @@ export const AdminProducts = () => {
       </div>
 
       <Tabs value={currentCategory} onValueChange={setCurrentCategory} className="space-y-6">
-        <TabsList className={`grid w-full ${tabOptions.length <= 3 ? 'max-w-md grid-cols-3' : tabOptions.length <= 4 ? 'max-w-2xl grid-cols-4' : 'max-w-4xl grid-cols-5'}`}>
-          <TabsTrigger value="all" className="flex items-center gap-2">
+        <div className="flex flex-wrap gap-2 p-1 bg-muted rounded-lg mb-6">
+          <TabsTrigger value="all" className="flex items-center gap-2 px-4 py-2 rounded-md">
             <Package className="h-4 w-4" />
             All Products
           </TabsTrigger>
           {availableCategories.map(category => (
-            <TabsTrigger key={category} value={category} className="flex items-center gap-2">
+            <TabsTrigger key={category} value={category} className="flex items-center gap-2 px-4 py-2 rounded-md">
               {getCategoryIcon(category)}
               {getCategoryDisplayName(category)}
             </TabsTrigger>
           ))}
-        </TabsList>
+        </div>
 
         <TabsContent value={currentCategory} className="space-y-6">
           <div className="flex justify-between items-center">
