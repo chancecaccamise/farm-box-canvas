@@ -236,6 +236,7 @@ export const AdminBouquetRequests = () => {
                 <TableHead>Customer</TableHead>
                 <TableHead>Event</TableHead>
                 <TableHead>Date</TableHead>
+                <TableHead>Photos</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Price</TableHead>
                 <TableHead>Created</TableHead>
@@ -256,6 +257,13 @@ export const AdminBouquetRequests = () => {
                   </TableCell>
                   <TableCell>
                     {request.event_date ? new Date(request.event_date).toLocaleDateString() : 'Not specified'}
+                  </TableCell>
+                  <TableCell>
+                    {request.reference_photos && request.reference_photos.length > 0 ? (
+                      <Badge variant="outline">{request.reference_photos.length} photo(s)</Badge>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">None</span>
+                    )}
                   </TableCell>
                   <TableCell>
                     <Badge variant={getStatusBadgeVariant(request.status)}>
@@ -322,6 +330,26 @@ export const AdminBouquetRequests = () => {
                   <div className="col-span-2">
                     <Label className="text-sm font-medium">Preferences</Label>
                     <p className="text-sm">{selectedRequest.preferences}</p>
+                  </div>
+                )}
+                {selectedRequest.reference_photos && selectedRequest.reference_photos.length > 0 && (
+                  <div className="col-span-2">
+                    <Label className="text-sm font-medium">Reference Photos</Label>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-2">
+                      {selectedRequest.reference_photos.map((photoUrl, index) => (
+                        <div key={index} className="group relative">
+                          <img 
+                            src={photoUrl} 
+                            alt={`Reference photo ${index + 1}`}
+                            className="w-full h-20 object-cover rounded-lg cursor-pointer hover:opacity-80 transition-opacity"
+                            onClick={() => window.open(photoUrl, '_blank')}
+                          />
+                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                            <Eye className="h-4 w-4 text-white" />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>

@@ -41,6 +41,8 @@ const AnasFlowers = () => {
     preferences: ""
   });
   const [submitting, setSubmitting] = useState(false);
+  const [uploadedPhotos, setUploadedPhotos] = useState<string[]>([]);
+  const [uploading, setUploading] = useState(false);
   const { toast } = useToast();
 
   const scrollToForm = () => {
@@ -59,6 +61,77 @@ const AnasFlowers = () => {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleFileUpload = async (files: FileList) => {
+    if (!files || files.length === 0) return;
+    
+    setUploading(true);
+    const uploadedUrls: string[] = [];
+    
+    try {
+      for (let i = 0; i < Math.min(files.length, 5); i++) { // Limit to 5 files
+        const file = files[i];
+        
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+          toast({
+            title: "Invalid file type",
+            description: `${file.name} is not an image file`,
+            variant: "destructive"
+          });
+          continue;
+        }
+        
+        // Validate file size (max 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+          toast({
+            title: "File too large",
+            description: `${file.name} exceeds 5MB limit`,
+            variant: "destructive"
+          });
+          continue;
+        }
+        
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const filePath = `bouquet-references/${fileName}`;
+        
+        const { data, error } = await supabase.storage
+          .from('product-images')
+          .upload(filePath, file);
+        
+        if (error) throw error;
+        
+        const { data: publicUrlData } = supabase.storage
+          .from('product-images')
+          .getPublicUrl(filePath);
+        
+        uploadedUrls.push(publicUrlData.publicUrl);
+      }
+      
+      setUploadedPhotos(prev => [...prev, ...uploadedUrls]);
+      
+      if (uploadedUrls.length > 0) {
+        toast({
+          title: "Photos uploaded",
+          description: `Successfully uploaded ${uploadedUrls.length} photo(s)`
+        });
+      }
+    } catch (error) {
+      console.error('Error uploading photos:', error);
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload photos. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removePhoto = (photoUrl: string) => {
+    setUploadedPhotos(prev => prev.filter(url => url !== photoUrl));
   };
 
   const handleFormSubmit = async (e: React.FormEvent) => {
@@ -82,7 +155,7 @@ const AnasFlowers = () => {
         event_date: formData.eventDate || null,
         color_palette: formData.colorPalette || null,
         preferences: formData.preferences || null,
-        reference_photos: null // TODO: Implement file upload
+        reference_photos: uploadedPhotos.length > 0 ? uploadedPhotos : null
       };
 
       const { error } = await supabase
@@ -105,6 +178,7 @@ const AnasFlowers = () => {
         colorPalette: "",
         preferences: ""
       });
+      setUploadedPhotos([]);
     } catch (error) {
       console.error('Error submitting bouquet request:', error);
       toast({
@@ -446,17 +520,53 @@ const AnasFlowers = () => {
                 </div>
 
                 {/* Upload Section */}
-                <div className="space-y-2">
+                <div className="space-y-4">
                   <Label>Reference Photos (Optional)</Label>
                   <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
                     <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                    <p className="text-sm text-muted-foreground mb-2">
-                      Upload inspiration photos to help us understand your vision
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Upload inspiration photos to help us understand your vision (max 5 photos, 5MB each)
                     </p>
-                    <Button variant="outline" size="sm">
-                      Choose Files
+                    <input
+                      type="file"
+                      id="photo-upload"
+                      multiple
+                      accept="image/*"
+                      onChange={(e) => e.target.files && handleFileUpload(e.target.files)}
+                      className="hidden"
+                    />
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      type="button"
+                      disabled={uploading}
+                      onClick={() => document.getElementById('photo-upload')?.click()}
+                    >
+                      {uploading ? "Uploading..." : "Choose Files"}
                     </Button>
                   </div>
+                  
+                  {/* Display uploaded photos */}
+                  {uploadedPhotos.length > 0 && (
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {uploadedPhotos.map((photoUrl, index) => (
+                        <div key={index} className="relative group">
+                          <img 
+                            src={photoUrl} 
+                            alt={`Reference photo ${index + 1}`}
+                            className="w-full h-24 object-cover rounded-lg"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => removePhoto(photoUrl)}
+                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                   <Button type="submit" className="w-full" size="lg" disabled={submitting}>
