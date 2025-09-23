@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Switch } from '@/components/ui/switch';
-import { Plus, Edit, Trash2, Search, Fish, Wheat, Package } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, Fish, Wheat, Package, Apple, Salad, Cookie } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { ImageUpload } from './ImageUpload';
 
@@ -31,10 +31,10 @@ export const AdminProducts = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [currentView, setCurrentView] = useState('all'); // 'all', 'proteins', 'carbs'
+  const [currentCategory, setCurrentCategory] = useState('all');
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
@@ -49,21 +49,32 @@ export const AdminProducts = () => {
     unit_description: ''
   });
 
-  const categories = ['vegetables', 'fruits', 'herbs', 'dairy', 'meat', 'fish', 'bakery', 'proteins', 'carbs', 'other'];
+  const allCategories = ['vegetables', 'fruits', 'herbs', 'dairy', 'meat', 'fish', 'bakery', 'proteins', 'carbs', 'other', 'addons'];
   
-  const getViewIcon = (view: string) => {
-    switch (view) {
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
       case 'proteins': return <Fish className="h-4 w-4" />;
       case 'carbs': return <Wheat className="h-4 w-4" />;
+      case 'fruits': return <Apple className="h-4 w-4" />;
+      case 'vegetables': return <Salad className="h-4 w-4" />;
+      case 'bakery': return <Cookie className="h-4 w-4" />;
       default: return <Package className="h-4 w-4" />;
     }
   };
 
-  const isProteinOrCarb = currentView === 'proteins' || currentView === 'carbs';
+  const getCategoryDisplayName = (category: string) => {
+    return category.charAt(0).toUpperCase() + category.slice(1);
+  };
 
   useEffect(() => {
     fetchProducts();
   }, []);
+
+  useEffect(() => {
+    // Get unique categories from products
+    const uniqueCategories = [...new Set(products.map(p => p.category))].sort();
+    setAvailableCategories(uniqueCategories);
+  }, [products]);
 
   const fetchProducts = async () => {
     try {
@@ -89,21 +100,10 @@ export const AdminProducts = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validation for all products
-    if (!formData.name || !formData.price) {
+    if (!formData.name || !formData.price || !formData.category) {
       toast({
         title: "Error",
-        description: "Name and price are required",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    // Additional validation for regular products (non-proteins/carbs)
-    if (!isProteinOrCarb && !formData.category) {
-      toast({
-        title: "Error",
-        description: "Category is required",
+        description: "Name, price, and category are required",
         variant: "destructive"
       });
       return;
@@ -112,7 +112,7 @@ export const AdminProducts = () => {
     try {
       const productData = {
         name: formData.name,
-        category: isProteinOrCarb ? currentView : formData.category, // Auto-set category for proteins/carbs
+        category: formData.category,
         price: parseFloat(formData.price),
         description: formData.description || null,
         image: formData.image || null,
@@ -202,7 +202,7 @@ export const AdminProducts = () => {
   const resetForm = () => {
     setFormData({
       name: '',
-      category: isProteinOrCarb ? currentView : '',
+      category: currentCategory === 'all' ? '' : currentCategory,
       price: '',
       description: '',
       image: '',
@@ -241,26 +241,17 @@ export const AdminProducts = () => {
     const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          product.description?.toLowerCase().includes(searchTerm.toLowerCase());
     
-    // Filter by current view first
-    let matchesView = true;
-    if (currentView === 'proteins') {
-      matchesView = product.category === 'proteins';
-    } else if (currentView === 'carbs') {
-      matchesView = product.category === 'carbs';
-    } else if (currentView === 'all') {
-      matchesView = true;
-    }
+    const matchesCategory = currentCategory === 'all' || product.category === currentCategory;
     
-    // Then filter by category if not viewing proteins/carbs specifically
-    const matchesCategory = (currentView === 'proteins' || currentView === 'carbs') ? true :
-      (selectedCategory === 'all' || product.category === selectedCategory);
-    
-    return matchesSearch && matchesView && matchesCategory;
+    return matchesSearch && matchesCategory;
   });
 
   if (loading) {
     return <div className="flex justify-center p-8">Loading products...</div>;
   }
+
+  // Create tab options: "All Products" + individual categories
+  const tabOptions = ['all', ...availableCategories];
 
   return (
     <div className="space-y-6">
@@ -268,42 +259,39 @@ export const AdminProducts = () => {
         <h2 className="text-2xl font-bold">Product Management</h2>
       </div>
 
-      <Tabs value={currentView} onValueChange={setCurrentView} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3 max-w-md">
+      <Tabs value={currentCategory} onValueChange={setCurrentCategory} className="space-y-6">
+        <TabsList className={`grid w-full ${tabOptions.length <= 3 ? 'max-w-md grid-cols-3' : tabOptions.length <= 4 ? 'max-w-2xl grid-cols-4' : 'max-w-4xl grid-cols-5'}`}>
           <TabsTrigger value="all" className="flex items-center gap-2">
             <Package className="h-4 w-4" />
             All Products
           </TabsTrigger>
-          <TabsTrigger value="proteins" className="flex items-center gap-2">
-            <Fish className="h-4 w-4" />
-            Proteins
-          </TabsTrigger>
-          <TabsTrigger value="carbs" className="flex items-center gap-2">
-            <Wheat className="h-4 w-4" />
-            Carbs
-          </TabsTrigger>
+          {availableCategories.map(category => (
+            <TabsTrigger key={category} value={category} className="flex items-center gap-2">
+              {getCategoryIcon(category)}
+              {getCategoryDisplayName(category)}
+            </TabsTrigger>
+          ))}
         </TabsList>
 
-        <TabsContent value={currentView} className="space-y-6">
+        <TabsContent value={currentCategory} className="space-y-6">
           <div className="flex justify-between items-center">
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button onClick={resetForm}>
                   <Plus className="h-4 w-4 mr-2" />
-                  Add {currentView === 'all' ? 'Product' : currentView.slice(0, -1)} 
+                  Add {currentCategory === 'all' ? 'Product' : getCategoryDisplayName(currentCategory)}
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-2xl">
                 <DialogHeader>
                   <DialogTitle>
-                    {editingProduct ? `Edit ${isProteinOrCarb ? currentView.slice(0, -1) : 'Product'}` : 
-                     `Add New ${isProteinOrCarb ? currentView.slice(0, -1) : 'Product'}`}
+                    {editingProduct ? 'Edit Product' : 'Add New Product'}
                   </DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="name">{isProteinOrCarb ? `${currentView.slice(0, -1)} Name` : 'Product Name'} *</Label>
+                      <Label htmlFor="name">Product Name *</Label>
                       <Input
                         id="name"
                         value={formData.name}
@@ -311,34 +299,21 @@ export const AdminProducts = () => {
                         required
                       />
                     </div>
-                    {isProteinOrCarb ? (
-                      <div>
-                        <Label htmlFor="unit_description">Unit Description *</Label>
-                        <Input
-                          id="unit_description"
-                          value={formData.unit_description}
-                          onChange={(e) => setFormData({...formData, unit_description: e.target.value})}
-                          placeholder="e.g., 1 lb fillet, 2 lb bag"
-                          required
-                        />
-                      </div>
-                    ) : (
-                      <div>
-                        <Label htmlFor="category">Category *</Label>
-                        <Select value={formData.category} onValueChange={(value) => setFormData({...formData, category: value})}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select category" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {categories.filter(cat => cat !== 'proteins' && cat !== 'carbs').map(category => (
-                              <SelectItem key={category} value={category}>
-                                {category.charAt(0).toUpperCase() + category.slice(1)}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    )}
+                    <div>
+                      <Label htmlFor="category">Category *</Label>
+                      <Select value={formData.category} onValueChange={(value) => setFormData({...formData, category: value})}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {allCategories.map(category => (
+                            <SelectItem key={category} value={category}>
+                              {getCategoryDisplayName(category)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
@@ -364,17 +339,15 @@ export const AdminProducts = () => {
                     </div>
                   </div>
                   
-                  {isProteinOrCarb && (
-                    <div>
-                      <Label htmlFor="unit_description_extra">Unit Description</Label>
-                      <Input
-                        id="unit_description_extra"
-                        value={formData.unit_description}
-                        onChange={(e) => setFormData({...formData, unit_description: e.target.value})}
-                        placeholder="e.g., 1 lb fillet, 2 lb bag"
-                      />
-                    </div>
-                  )}
+                  <div>
+                    <Label htmlFor="unit_description">Unit Description</Label>
+                    <Input
+                      id="unit_description"
+                      value={formData.unit_description}
+                      onChange={(e) => setFormData({...formData, unit_description: e.target.value})}
+                      placeholder="e.g., 1 lb fillet, 2 lb bag, per bunch"
+                    />
+                  </div>
 
                   <div>
                     <Label htmlFor="description">Description</Label>
@@ -417,7 +390,7 @@ export const AdminProducts = () => {
                       Cancel
                     </Button>
                     <Button type="submit">
-                      {editingProduct ? 'Update' : 'Create'} {isProteinOrCarb ? currentView.slice(0, -1) : 'Product'}
+                      {editingProduct ? 'Update' : 'Create'} Product
                     </Button>
                   </div>
                 </form>
@@ -430,28 +403,13 @@ export const AdminProducts = () => {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
-                  placeholder={`Search ${currentView === 'all' ? 'products' : currentView}...`}
+                  placeholder={`Search ${currentCategory === 'all' ? 'products' : currentCategory}...`}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
                 />
               </div>
             </div>
-            {currentView === 'all' && (
-              <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                <SelectTrigger className="w-48">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Categories</SelectItem>
-                  {categories.filter(cat => cat !== 'proteins' && cat !== 'carbs').map(category => (
-                    <SelectItem key={category} value={category}>
-                      {category.charAt(0).toUpperCase() + category.slice(1)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
           </div>
 
           <div className="grid gap-4">
@@ -469,13 +427,13 @@ export const AdminProducts = () => {
                       )}
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
-                          {getViewIcon(product.category)}
+                          {getCategoryIcon(product.category)}
                           <h3 className="font-semibold text-lg">{product.name}</h3>
                         </div>
                         <p className="text-muted-foreground mb-2">{product.description}</p>
                         <div className="flex items-center space-x-2 flex-wrap gap-1">
-                          <Badge variant="secondary">{product.category}</Badge>
-                          {currentView === 'all' && <span className="font-semibold">${product.price}</span>}
+                          <Badge variant="secondary">{getCategoryDisplayName(product.category)}</Badge>
+                          <span className="font-semibold">${product.price}</span>
                           {product.unit_description && (
                             <Badge variant="outline">{product.unit_description}</Badge>
                           )}
@@ -486,13 +444,11 @@ export const AdminProducts = () => {
                           >
                             {product.is_available ? "Available" : "Unavailable"}
                           </Badge>
-                          {currentView === 'all' && (
-                            <span className="text-sm text-muted-foreground">
-                              Stock: {product.inventory_count || 0}
-                            </span>
-                          )}
+                          <span className="text-sm text-muted-foreground">
+                            Stock: {product.inventory_count || 0}
+                          </span>
                         </div>
-                        {product.tags && product.tags.length > 0 && currentView === 'all' && (
+                        {product.tags && product.tags.length > 0 && (
                           <div className="flex space-x-1 mt-2">
                             {product.tags.map((tag, index) => (
                               <Badge key={index} variant="outline" className="text-xs">
@@ -528,7 +484,9 @@ export const AdminProducts = () => {
           {filteredProducts.length === 0 && (
             <Card>
               <CardContent className="text-center py-8">
-                <p className="text-muted-foreground">No {currentView === 'all' ? 'products' : currentView} found.</p>
+                <p className="text-muted-foreground">
+                  No {currentCategory === 'all' ? 'products' : currentCategory} found.
+                </p>
               </CardContent>
             </Card>
           )}
