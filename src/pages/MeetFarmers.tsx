@@ -32,7 +32,7 @@ const MeetFarmers = () => {
         className="relative h-[calc(100dvh-4rem)] sm:h-[calc(100vh-4rem)] md:h-[60vh] overflow-hidden bg-no-repeat bg-cover bg-center"
         style={{ backgroundImage: `url(${billyAna})` }}
       >
-        <div className="absolute inset-0 bg-black/20"></div>
+        <div className="absolute inset-0 bg-black/40"></div>
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center text-white max-w-4xl mx-auto px-4">
             <h1 className="text-5xl md:text-6xl font-bold mb-6">
