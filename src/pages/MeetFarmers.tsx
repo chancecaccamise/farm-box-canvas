@@ -28,13 +28,11 @@ const MeetFarmers = () => {
   return (
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
-      <div className="relative h-[60vh] bg-gradient-fresh overflow-hidden">
+      <div 
+        className="relative h-[60vh] bg-gradient-fresh overflow-hidden bg-cover bg-center sm:bg-[position:center_25%] md:bg-[position:center_20%] lg:bg-center xl:bg-[position:center_10%]"
+        style={{ backgroundImage: `url(${billyAna2})` }}
+      >
         <div className="absolute inset-0 bg-black/20"></div>
-        <img 
-          src={billyAna2} 
-          alt="Billy and Maria Thompson at their farmers market stand" 
-          className="w-full h-full object-cover"
-        />
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center text-white max-w-4xl mx-auto px-4">
             <h1 className="text-5xl md:text-6xl font-bold mb-6">
