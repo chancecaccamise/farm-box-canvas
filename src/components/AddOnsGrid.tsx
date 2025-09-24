@@ -25,7 +25,7 @@ interface AddOnsGridProps {
 }
 
 const PRODUCTS_PER_PAGE = 8;
-const CATEGORIES = ["All", "Vegetables", "Fruits", "Herbs", "Dairy", "Meat", "Fish", "Bakery", "Pantry", "Other"];
+const CATEGORIES = ["All"]; // Only show all since we're filtering to addons category
 
 export function AddOnsGrid({ bagItems, onUpdateQuantity, isLocked = false, confirmedAddons = [] }: AddOnsGridProps) {
   const [products, setProducts] = useState<Product[]>([]);
@@ -45,11 +45,12 @@ export function AddOnsGrid({ bagItems, onUpdateQuantity, isLocked = false, confi
 
   const fetchAddOnProducts = async () => {
     try {
-      // Fetch ALL available products that users can add as add-ons
+      // Fetch only products categorized as add-ons
       const { data, error } = await supabase
         .from("products")
         .select("*")
         .eq("is_available", true)
+        .eq("category", "addons")
         .order("name");
 
       if (error) throw error;
@@ -129,7 +130,7 @@ export function AddOnsGrid({ bagItems, onUpdateQuantity, isLocked = false, confi
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {displayedProducts.map((product) => (
           <ProductCard
             key={product.id}

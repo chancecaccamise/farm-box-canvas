@@ -38,7 +38,7 @@ const AddOns = () => {
         .from('products')
         .select('*')
         .eq('is_available', true)
-        .neq('category', 'vegetables') // Exclude basic vegetables - they're in the box
+        .eq('category', 'addons') // Only show products categorized as add-ons
         .order('name');
 
       if (error) throw error;
@@ -127,7 +127,7 @@ const AddOns = () => {
             <p className="text-muted-foreground">No add-ons available at the moment.</p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 gap-6 mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
             {addOns.map((addOn) => {
               const quantity = selectedAddOns[addOn.id] || 0;
               const isSelected = quantity > 0;
