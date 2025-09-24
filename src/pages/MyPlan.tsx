@@ -12,7 +12,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 import { SubscriptionManager } from "@/components/SubscriptionManager";
 import { EditableDeliveryForm } from "@/components/EditableDeliveryForm";
-import { ContactForm } from "@/components/ContactForm";
 import NotificationPreferences from "@/components/NotificationPreferences";
 import { SubscriptionRecovery } from "@/components/SubscriptionRecovery";
 
@@ -67,7 +66,6 @@ const MyPlan = () => {
   const [weeklyBag, setWeeklyBag] = useState<WeeklyBag | null>(null);
   const [loading, setLoading] = useState(true);
   const [promoCode, setPromoCode] = useState("");
-  const [nextDeliveryDate, setNextDeliveryDate] = useState<string>("");
   const [orderHistory, setOrderHistory] = useState<any[]>([]);
 
   useEffect(() => {
@@ -179,17 +177,6 @@ const MyPlan = () => {
         setOrderHistory(ordersData);
       }
 
-      // Calculate next delivery date (next Friday)
-      const today = new Date();
-      const daysUntilFriday = (5 - today.getDay() + 7) % 7 || 7;
-      const nextFriday = new Date(today);
-      nextFriday.setDate(today.getDate() + daysUntilFriday);
-      setNextDeliveryDate(nextFriday.toLocaleDateString('en-US', { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-      }));
 
     } catch (error) {
       console.error('Error loading user data:', error);
@@ -265,18 +252,6 @@ const MyPlan = () => {
             {/* Notification Preferences */}
             <NotificationPreferences />
 
-            {/* Next Delivery Info */}
-            <Card>
-              <CardContent className="pt-6">
-                <div>
-                  <Label className="text-sm font-medium">Next Delivery</Label>
-                  <p className="text-sm text-muted-foreground">{nextDeliveryDate}</p>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Contact Support */}
-            <ContactForm />
           </div>
 
           {/* Right Side - Summary & Actions */}
