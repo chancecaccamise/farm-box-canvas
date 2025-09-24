@@ -70,10 +70,27 @@ serve(async (req) => {
 
       // Cancel Stripe subscription if exists
       if (subscription.stripe_subscription_id) {
-        logStep("Canceling Stripe subscription", { stripeSubId: subscription.stripe_subscription_id });
-        await stripe.subscriptions.cancel(subscription.stripe_subscription_id);
+        // Handle case where stripe_subscription_id might be a full object or just an ID string
+        let stripeSubId: string;
+        try {
+          if (typeof subscription.stripe_subscription_id === 'string') {
+            // Try to parse as JSON in case it's a stringified object
+            const parsed = JSON.parse(subscription.stripe_subscription_id);
+            stripeSubId = parsed.id || subscription.stripe_subscription_id;
+          } else if (typeof subscription.stripe_subscription_id === 'object' && subscription.stripe_subscription_id.id) {
+            stripeSubId = subscription.stripe_subscription_id.id;
+          } else {
+            stripeSubId = String(subscription.stripe_subscription_id);
+          }
+        } catch {
+          // If parsing fails, assume it's already a plain ID string
+          stripeSubId = String(subscription.stripe_subscription_id);
+        }
+        
+        logStep("Canceling Stripe subscription", { stripeSubId });
+        await stripe.subscriptions.cancel(stripeSubId);
         logStep("Stripe subscription canceled");
-        cancelledStripeSubId = subscription.stripe_subscription_id;
+        cancelledStripeSubId = stripeSubId;
       } else {
         // Fallback: try to find an active subscription at Stripe
         const customers = await stripe.customers.list({ email: user.email!, limit: 1 });
