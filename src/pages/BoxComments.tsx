@@ -17,18 +17,19 @@ const BoxComments = () => {
   }, [comments, updateComments]);
 
   const handleContinue = () => {
-    // Navigate to next page based on box type
-    if (checkoutState.boxSize === 'protein-pack') {
-      navigate("/protein-selection");
-    } else if (checkoutState.boxSize === 'full_farm_bag') {
-      navigate("/full-farm-bag-protein-selection");
-    } else {
-      navigate("/add-ons");
-    }
+    // Always go to add-ons since comments is now always before add-ons
+    navigate("/add-ons");
   };
 
   const handleBack = () => {
-    navigate("/box-selection");
+    // Navigate back based on box type
+    if (checkoutState.boxSize === 'protein-pack') {
+      navigate("/protein-selection");
+    } else if (checkoutState.boxSize === 'full_farm_bag') {
+      navigate("/full-farm-bag-carb-selection");
+    } else {
+      navigate("/box-selection");
+    }
   };
 
   return (

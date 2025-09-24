@@ -32,7 +32,7 @@ const ProteinSelection = () => {
     }
 
     updateProteinSelections(selectedProteins);
-    navigate("/add-ons");
+    navigate("/box-comments");
   };
 
   return (
@@ -75,7 +75,7 @@ const ProteinSelection = () => {
             className="w-full md:w-auto"
             disabled={selectedProteins.length !== 5}
           >
-            Continue to Add-ons ({selectedProteins.length}/5 selected)
+            Continue to Special Requests ({selectedProteins.length}/5 selected)
           </Button>
           <p className="text-sm text-muted-foreground mt-4">
             You must select exactly 5 proteins to continue.

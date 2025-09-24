@@ -80,13 +80,8 @@ const AddOns = () => {
   const totalSelected = Object.values(selectedAddOns).reduce((sum, qty) => sum + qty, 0);
 
   const getBackRoute = () => {
-    if (checkoutState.boxSize === 'full_farm_bag') {
-      return '/full-farm-bag-carb-selection';
-    } else if (checkoutState.boxSize === 'protein-pack') {
-      return '/protein-selection';
-    } else {
-      return '/box-comments';
-    }
+    // All box types now go through box-comments before add-ons
+    return "/box-comments";
   };
 
   const handleContinue = () => {

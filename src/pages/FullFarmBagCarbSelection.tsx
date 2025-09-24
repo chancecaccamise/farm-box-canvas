@@ -44,7 +44,7 @@ const FullFarmBagCarbSelection = () => {
       updateFullFarmBagSelections({ protein, carb });
     }
     
-    navigate("/add-ons");
+    navigate("/box-comments");
   };
 
   return (
@@ -87,7 +87,7 @@ const FullFarmBagCarbSelection = () => {
             className="w-full md:w-auto"
             disabled={selectedCarbs.length !== 1}
           >
-            Continue to Add-ons ({selectedCarbs.length}/1 selected)
+            Continue to Special Requests ({selectedCarbs.length}/1 selected)
           </Button>
           <p className="text-sm text-muted-foreground mt-4">
             You must select exactly 1 carb to continue.

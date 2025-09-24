@@ -68,8 +68,15 @@ const BoxSelection = () => {
   };
 
   const handleContinue = () => {
-    // Navigate to comments page for all box types
-    navigate("/box-comments");
+    // Navigate based on box type
+    if (boxSize === 'protein-pack') {
+      navigate("/protein-selection");
+    } else if (boxSize === 'full_farm_bag') {
+      navigate("/full-farm-bag-protein-selection");
+    } else {
+      // Regular boxes go to comments
+      navigate("/box-comments");
+    }
   };
 
   return (
