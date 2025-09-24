@@ -36,11 +36,7 @@ serve(async (req) => {
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
     
-    if (isSubscription && (!priceVeggieBagWeekly || !priceFullFarmBagWeekly || !priceProteinPackWeekly)) {
-      throw new Error("Missing Stripe price ID secrets for subscription mode");
-    }
-    
-    logStep("Stripe key and price IDs verified");
+    logStep("Stripe key loaded");
 
     // Use service role key for database operations
     const supabaseServiceClient = createClient(
@@ -83,6 +79,11 @@ serve(async (req) => {
       isSubscription,
       requestedMode: isSubscription ? "subscription" : "payment"
     });
+
+    // Validate required Price IDs for subscription mode
+    if (isSubscription && (!priceVeggieBagWeekly || !priceFullFarmBagWeekly || !priceProteinPackWeekly)) {
+      throw new Error("Missing Stripe price ID secrets for subscription mode");
+    }
 
     if (!weeklyBag && !checkoutState) {
       throw new Error("Missing order data");
