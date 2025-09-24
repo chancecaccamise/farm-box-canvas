@@ -405,16 +405,16 @@ serve(async (req) => {
       has_active_subscription: hasActiveSubscription,
       week_start_date: actualWeeklyBag?.week_start_date || null,
       week_end_date: actualWeeklyBag?.week_end_date || null,
-      order_type: 'subscription',
+      order_type: isSubscription ? 'subscription' : 'one_time',
       status: 'pending',
       // New enhanced fields
       delivery_day_preference: checkoutState?.deliveryDay || null,
       delivery_time_preference: checkoutState?.deliveryMethod || null,
       customer_notes: checkoutState?.comments || null,
-      user_protein_selections: actualWeeklyBag?.user_protein_selections || null,
-      user_carb_selections: actualWeeklyBag?.user_carb_selections || null,
-      user_full_farm_bag_protein: actualWeeklyBag?.user_full_farm_bag_protein || null,
-      user_full_farm_bag_carb: actualWeeklyBag?.user_full_farm_bag_carb || null
+      user_protein_selections: checkoutState?.proteinSelections || actualWeeklyBag?.user_protein_selections || null,
+      user_carb_selections: checkoutState?.carbSelections || actualWeeklyBag?.user_carb_selections || null,
+      user_full_farm_bag_protein: checkoutState?.fullFarmBagSelections?.protein || actualWeeklyBag?.user_full_farm_bag_protein || null,
+      user_full_farm_bag_carb: checkoutState?.fullFarmBagSelections?.carb || actualWeeklyBag?.user_full_farm_bag_carb || null
     };
 
     const { data: order, error: orderError } = await supabaseServiceClient

@@ -109,14 +109,7 @@ const MyPlan = () => {
       // Load recent order data first to get current subscription info
       const { data: recentOrderData } = await supabase
         .from('orders')
-        .select(`
-          *,
-          box_sizes!inner(
-            display_name,
-            base_price,
-            subscriber_price
-          )
-        `)
+        .select('*')
         .eq('user_id', user?.id)
         .eq('payment_status', 'paid')
         .order('order_date', { ascending: false })
@@ -125,13 +118,27 @@ const MyPlan = () => {
 
       // If we have a recent paid order use it for plan summary (regardless of subscription status)
       if (recentOrderData) {
+        // Fetch box_sizes data separately
+        const { data: boxSizeData } = await supabase
+          .from('box_sizes')
+          .select('display_name, base_price, subscriber_price')
+          .eq('name', recentOrderData.box_size)
+          .single();
+
+        // Determine if this was a subscription at purchase time
+        const wasSubscriptionAtPurchase = recentOrderData.order_type === 'subscription' || recentOrderData.has_active_subscription;
+        
         // Transform order data to match WeeklyBag interface for display
         const orderAsWeeklyBag = {
           ...recentOrderData,
-          subtotal: recentOrderData.total_amount - 9.00, // Remove delivery fee
-          delivery_fee: 9.00,
+          subtotal: recentOrderData.box_price + (recentOrderData.addons_total || 0),
+          delivery_fee: recentOrderData.delivery_fee || 9.00,
           is_confirmed: true,
-          box_sizes: recentOrderData.box_sizes
+          box_sizes: boxSizeData ? {
+            ...boxSizeData,
+            // Add subscription suffix based on order type, not current subscription status
+            display_name: boxSizeData.display_name + (wasSubscriptionAtPurchase ? " Subscription" : " One-Time Purchase")
+          } : null
         };
         setWeeklyBag(orderAsWeeklyBag as any);
       } else {
