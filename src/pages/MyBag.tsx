@@ -51,6 +51,7 @@ function MyBag() {
   const [hasActiveSubscription, setHasActiveSubscription] = useState<boolean>(false);
   const [isLocked, setIsLocked] = useState<boolean>(false);
   const [hasPaidForThisWeek, setHasPaidForThisWeek] = useState<boolean>(false);
+  const [hasPendingOrderThisWeek, setHasPendingOrderThisWeek] = useState<boolean>(false);
   const [templateStatus, setTemplateStatus] = useState<{hasTemplates: boolean, isConfirmed: boolean}>({hasTemplates: false, isConfirmed: false});
 
   useEffect(() => {
@@ -127,6 +128,18 @@ function MyBag() {
 
       if (orderError) throw orderError;
       setHasPaidForThisWeek(paidOrders && paidOrders.length > 0);
+
+      // Check if user has pending orders for this week
+      const { data: pendingOrders, error: pendingOrderError } = await supabase
+        .from("orders")
+        .select("id")
+        .eq("user_id", user?.id)
+        .eq("payment_status", "pending")
+        .eq("week_start_date", currentWeekStartString)
+        .limit(1);
+
+      if (pendingOrderError) throw pendingOrderError;
+      setHasPendingOrderThisWeek(pendingOrders && pendingOrders.length > 0);
 
       // Initialize current week bag
       await initializeCurrentWeekBag();
@@ -469,8 +482,8 @@ function MyBag() {
     );
   }
 
-  // Show Start Farm Box Journey if no current bag
-  if (!currentWeekBag) {
+  // Show Start Farm Box Journey if user has no current purchases
+  if (!hasActiveSubscription && !hasPaidForThisWeek && !hasPendingOrderThisWeek) {
     return (
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8">
