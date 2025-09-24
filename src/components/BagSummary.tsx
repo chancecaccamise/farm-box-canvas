@@ -22,9 +22,10 @@ interface BagSummaryProps {
   bagItems: Record<string, number>;
   isSubscription: boolean;
   onConfirmOrder: () => void;
+  deliveryMethod?: 'delivery' | 'market-pickup' | 'farm-pickup';
 }
 
-export function BagSummary({ bagItems, isSubscription, onConfirmOrder }: BagSummaryProps) {
+export function BagSummary({ bagItems, isSubscription, onConfirmOrder, deliveryMethod = 'delivery' }: BagSummaryProps) {
   const [bagDetails, setBagDetails] = useState<BagItem[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -69,7 +70,7 @@ export function BagSummary({ bagItems, isSubscription, onConfirmOrder }: BagSumm
 
   const totalItems = Object.values(bagItems).reduce((sum, quantity) => sum + quantity, 0);
   const subtotal = bagDetails.reduce((sum, item) => sum + (item.products.price * item.quantity), 0);
-  const deliveryFee = 9.00;
+  const deliveryFee = deliveryMethod === 'delivery' ? 9.00 : 0.00;
   const total = subtotal + deliveryFee;
 
   const categoryCount = bagDetails.reduce((acc, item) => {
@@ -142,7 +143,11 @@ export function BagSummary({ bagItems, isSubscription, onConfirmOrder }: BagSumm
             </div>
             <div className="flex items-center justify-between text-sm">
               <span>Delivery</span>
-              <span>${deliveryFee.toFixed(2)}</span>
+              {deliveryMethod === 'delivery' ? (
+                <span>${deliveryFee.toFixed(2)}</span>
+              ) : (
+                <span className="text-green-600">Free - Pickup</span>
+              )}
             </div>
             <Separator />
             <div className="flex items-center justify-between font-semibold">

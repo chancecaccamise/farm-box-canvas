@@ -7,18 +7,20 @@ interface SimplifiedOrderSummaryProps {
   weeklyBag: any;
   bagItems: any[];
   hasActiveSubscription: boolean;
+  deliveryMethod?: 'delivery' | 'market-pickup' | 'farm-pickup';
 }
 
 export default function SimplifiedOrderSummary({ 
   weeklyBag, 
   bagItems, 
-  hasActiveSubscription 
+  hasActiveSubscription,
+  deliveryMethod = 'delivery'
 }: SimplifiedOrderSummaryProps) {
   const addonItems = bagItems.filter((item: any) => item.item_type === 'addon');
   
   const boxPrice = weeklyBag.box_price || 0;
   const addonsTotal = weeklyBag.addons_total || 0;
-  const deliveryFee = 9.00; // $9 delivery fee for all orders
+  const deliveryFee = deliveryMethod === 'delivery' ? 9.00 : 0.00;
   
   const getTotal = () => {
     if (hasActiveSubscription) {
@@ -114,7 +116,11 @@ export default function SimplifiedOrderSummary({
           )}
           <div className="flex items-center justify-between text-sm">
             <span>Delivery fee</span>
-            <span>${deliveryFee.toFixed(2)}</span>
+            {deliveryMethod === 'delivery' ? (
+              <span>${deliveryFee.toFixed(2)}</span>
+            ) : (
+              <span className="text-green-600">Free - Pickup</span>
+            )}
           </div>
           {hasActiveSubscription && (
             <div className="flex items-center justify-between text-sm text-muted-foreground">
@@ -132,7 +138,11 @@ export default function SimplifiedOrderSummary({
         {hasActiveSubscription && total <= deliveryFee && (
           <div className="bg-green-50 border border-green-200 rounded-lg p-3">
             <p className="text-sm text-green-700 text-center">
-              Your subscription box will be delivered automatically. You'll only pay the ${deliveryFee.toFixed(2)} delivery fee.
+              Your subscription box will be delivered automatically. 
+              {deliveryMethod === 'delivery' 
+                ? `You'll only pay the $${deliveryFee.toFixed(2)} delivery fee.`
+                : "No additional charges for pickup."
+              }
             </p>
           </div>
         )}

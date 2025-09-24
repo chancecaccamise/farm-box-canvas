@@ -24,6 +24,7 @@ interface WeeklyBagSummaryProps {
   hasActiveSubscription?: boolean;
   unpaidAddonsTotal?: number;
   hasPaidForThisWeek?: boolean;
+  deliveryMethod?: 'delivery' | 'market-pickup' | 'farm-pickup';
 }
 
 export function WeeklyBagSummary({ 
@@ -34,7 +35,8 @@ export function WeeklyBagSummary({
   loading,
   hasActiveSubscription = false,
   unpaidAddonsTotal = 0,
-  hasPaidForThisWeek = false
+  hasPaidForThisWeek = false,
+  deliveryMethod = 'delivery'
 }: WeeklyBagSummaryProps) {
   const [promoCode, setPromoCode] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
@@ -42,8 +44,8 @@ export function WeeklyBagSummary({
   const boxPrice = weeklyBag?.box_price || 0;
   const addonsTotal = weeklyBag?.addons_total || 0;
   
-  // Delivery fee for all orders
-  const deliveryFee = 9.00;
+  // Conditional delivery fee based on delivery method
+  const deliveryFee = deliveryMethod === 'delivery' ? 9.00 : 0.00;
   
   const subtotal = boxPrice + addonsTotal;
   
@@ -189,7 +191,11 @@ export function WeeklyBagSummary({
             {!hasPaidForThisWeek && (
               <div className="flex items-center justify-between text-sm">
                 <span>Delivery fee</span>
-                <span>${deliveryFee.toFixed(2)}</span>
+                {deliveryMethod === 'delivery' ? (
+                  <span>${deliveryFee.toFixed(2)}</span>
+                ) : (
+                  <span className="text-green-600">Free - Pickup</span>
+                )}
               </div>
             )}
             {/* Show tax line */}

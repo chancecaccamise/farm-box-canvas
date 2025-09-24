@@ -288,7 +288,7 @@ const OrderSummary = () => {
     return total + (product.price * quantity);
   }, 0);
 
-  const deliveryFee = 9.00; // $9 delivery fee
+  const deliveryFee = checkoutState.deliveryMethod === 'delivery' ? 9.00 : 0.00;
   const effectiveBoxPrice = hasActiveSubscription ? 0 : boxPrice;
   const totalAmount = effectiveBoxPrice + addOnTotal + deliveryFee;
 
@@ -574,7 +574,11 @@ const OrderSummary = () => {
                   )}
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Delivery Fee:</span>
-                    <span>${deliveryFee.toFixed(2)}</span>
+                    {checkoutState.deliveryMethod === 'delivery' ? (
+                      <span>${deliveryFee.toFixed(2)}</span>
+                    ) : (
+                      <span className="text-green-600">Free - Pickup</span>
+                    )}
                   </div>
                   <div className="flex justify-between text-muted-foreground">
                     <span>Tax:</span>
