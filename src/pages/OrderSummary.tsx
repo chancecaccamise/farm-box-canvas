@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ArrowLeft, Package, Calendar, ShoppingCart, CheckCircle } from "lucide-react";
+import { ArrowLeft, Package, Calendar, ShoppingCart, CheckCircle, MessageCircle } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
@@ -364,6 +364,31 @@ const OrderSummary = () => {
                   <span className="text-muted-foreground">ZIP Code:</span>
                   <span className="font-medium">{checkoutState.zipCode || 'Not provided'}</span>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Special Requests */}
+            <Card className="shadow-soft">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageCircle className="w-5 h-5" />
+                  Special Requests
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {checkoutState.comments && checkoutState.comments.trim() ? (
+                  <div className="p-4 bg-muted/50 rounded-lg">
+                    <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                      {checkoutState.comments}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="p-4 bg-muted/30 rounded-lg">
+                    <p className="text-sm text-muted-foreground italic">
+                      No special requests provided
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
