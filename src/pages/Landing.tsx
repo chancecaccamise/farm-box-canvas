@@ -21,7 +21,7 @@ const Landing = () => {
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <section 
-        className="relative h-screen flex items-center justify-center bg-cover bg-center md:bg-center bg-[position:center_20%]"
+        className="relative h-screen flex items-center justify-center bg-cover bg-center sm:bg-[position:center_25%] md:bg-[position:center_20%] lg:bg-center xl:bg-[position:center_10%]"
         style={{ backgroundImage: `url(${heroImage})` }}
       >
         <div className="absolute inset-0 bg-black opacity-30"></div>
