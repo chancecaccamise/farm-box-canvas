@@ -29,7 +29,7 @@ const MeetFarmers = () => {
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <div 
-        className="relative h-[60vh] bg-gradient-fresh overflow-hidden bg-cover bg-center sm:bg-[position:center_25%] md:bg-[position:center_20%] lg:bg-center xl:bg-[position:center_10%]"
+        className="relative h-[calc(100dvh-4rem)] sm:h-[calc(100vh-4rem)] md:h-[60vh] overflow-hidden bg-no-repeat bg-cover bg-center sm:bg-[position:center_30%] md:bg-[position:center_20%] lg:bg-center xl:bg-[position:center_10%]"
         style={{ backgroundImage: `url(${billyAna2})` }}
       >
         <div className="absolute inset-0 bg-black/20"></div>
