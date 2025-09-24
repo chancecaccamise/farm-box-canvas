@@ -10,14 +10,14 @@ const FullFarmBagProteinSelection = () => {
   const [selectedProteins, setSelectedProteins] = useState<string[]>([]);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { updateProteinSelections, checkoutState } = useCheckout();
+  const { updateFullFarmBagSelections, checkoutState } = useCheckout();
 
   useEffect(() => {
     // Initialize with existing selections from checkout context
-    if (checkoutState.proteinSelections) {
-      setSelectedProteins(checkoutState.proteinSelections);
+    if (checkoutState.fullFarmBagSelections?.protein) {
+      setSelectedProteins([checkoutState.fullFarmBagSelections.protein]);
     }
-  }, [checkoutState.proteinSelections]);
+  }, [checkoutState.fullFarmBagSelections]);
 
   const handleSelectionChange = (proteins: string[]) => {
     setSelectedProteins(proteins);
@@ -33,7 +33,12 @@ const FullFarmBagProteinSelection = () => {
       return;
     }
 
-    updateProteinSelections(selectedProteins);
+    // Update fullFarmBagSelections with protein, preserve existing carb
+    const currentSelections = checkoutState.fullFarmBagSelections || {};
+    updateFullFarmBagSelections({ 
+      ...currentSelections, 
+      protein: selectedProteins[0] 
+    });
     navigate("/full-farm-bag-carb-selection");
   };
 

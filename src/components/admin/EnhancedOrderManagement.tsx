@@ -173,6 +173,11 @@ export const EnhancedOrderManagement = () => {
     if (order.user_carb_selections && order.user_carb_selections.length > 0) {
       selections.push(`Carbs: ${order.user_carb_selections.join(', ')}`);
     }
+
+    // If no selections found, indicate the issue
+    if (selections.length === 0 && order.box_size === 'full_farm_bag') {
+      return 'Full Farm Bag (selections not saved)';
+    }
     
     return selections.length > 0 ? selections.join(' | ') : 'No selections';
   };

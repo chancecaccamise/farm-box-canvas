@@ -106,9 +106,9 @@ const MyPlan = () => {
         setSubscription(subData);
       }
 
-      // Load current weekly bag with box size details
-      const { data: bagData } = await supabase
-        .from('weekly_bags')
+      // Load recent order data first to get current subscription info
+      const { data: recentOrderData } = await supabase
+        .from('orders')
         .select(`
           *,
           box_sizes!inner(
@@ -118,13 +118,43 @@ const MyPlan = () => {
           )
         `)
         .eq('user_id', user?.id)
-        .gte('week_end_date', new Date().toISOString().split('T')[0])
-        .order('week_start_date', { ascending: true })
+        .eq('payment_status', 'paid')
+        .order('order_date', { ascending: false })
         .limit(1)
         .single();
-      
-      if (bagData) {
-        setWeeklyBag(bagData);
+
+      // If we have a recent paid order, use it for plan summary
+      if (recentOrderData && subData?.status === 'active') {
+        // Transform order data to match WeeklyBag interface for display
+        const orderAsWeeklyBag = {
+          ...recentOrderData,
+          subtotal: recentOrderData.total_amount - 9.00, // Remove delivery fee
+          delivery_fee: 9.00,
+          is_confirmed: true,
+          box_sizes: recentOrderData.box_sizes
+        };
+        setWeeklyBag(orderAsWeeklyBag as any);
+      } else {
+        // Fallback to weekly bag data
+        const { data: bagData } = await supabase
+          .from('weekly_bags')
+          .select(`
+            *,
+            box_sizes!inner(
+              display_name,
+              base_price,
+              subscriber_price
+            )
+          `)
+          .eq('user_id', user?.id)
+          .gte('week_end_date', new Date().toISOString().split('T')[0])
+          .order('week_start_date', { ascending: true })
+          .limit(1)
+          .single();
+        
+        if (bagData) {
+          setWeeklyBag(bagData);
+        }
       }
 
       // Load recent order history
