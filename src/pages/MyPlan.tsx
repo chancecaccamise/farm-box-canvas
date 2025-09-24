@@ -133,13 +133,14 @@ const MyPlan = () => {
           ...recentOrderData,
           subtotal: recentOrderData.box_price + (recentOrderData.addons_total || 0),
           delivery_fee: recentOrderData.delivery_fee || 9.00,
+          total_amount: recentOrderData.total_amount ?? (recentOrderData.box_price + (recentOrderData.addons_total || 0) + (recentOrderData.delivery_fee || 9.00)),
+          addons_total: recentOrderData.addons_total || 0,
           is_confirmed: true,
-          // Use actual charged price, not current box_sizes pricing
           box_price: recentOrderData.box_price,
+          from_recent_order: true,
+          order_type: recentOrderData.order_type,
           box_sizes: boxSizeData ? {
-            ...boxSizeData,
-            // Use clean display name with subscription suffix only if it was a subscription
-            display_name: wasSubscriptionAtPurchase ? boxSizeData.display_name + " Subscription" : boxSizeData.display_name + " One-Time Purchase"
+            ...boxSizeData
           } : null
         };
         setWeeklyBag(orderAsWeeklyBag as any);
@@ -289,13 +290,19 @@ const MyPlan = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>{(() => {
-                      if (!weeklyBag?.box_sizes?.display_name) return 'Farm Box';
-                      const displayName = weeklyBag.box_sizes.display_name;
-                      const isActiveSubscription = subscription?.status === 'active';
-                      const suffix = isActiveSubscription ? ' Subscription' : ' One-Time Purchase';
-                      return displayName + suffix;
+                      const baseName = weeklyBag?.box_sizes?.display_name || 'Farm Box';
+                      const isOrder = (weeklyBag as any)?.from_recent_order;
+                      const orderType = (weeklyBag as any)?.order_type;
+                      const suffix = isOrder
+                        ? (orderType === 'subscription' ? ' Subscription' : ' One-Time Purchase')
+                        : (subscription?.status === 'active' ? ' Subscription' : ' One-Time Purchase');
+                      return baseName + suffix;
                     })()}</span>
                     <span>${(() => {
+                      const isOrder = (weeklyBag as any)?.from_recent_order;
+                      if (isOrder) {
+                        return (weeklyBag?.box_price ?? 0).toFixed(2);
+                      }
                       if (!weeklyBag?.box_sizes) return '34.99';
                       const isActiveSubscription = subscription?.status === 'active';
                       const price = isActiveSubscription 
@@ -315,6 +322,12 @@ const MyPlan = () => {
                   <div className="flex justify-between">
                     <span>Subtotal</span>
                     <span>${(() => {
+                      const isOrder = (weeklyBag as any)?.from_recent_order;
+                      if (isOrder) {
+                        const boxPrice = weeklyBag?.box_price ?? 0;
+                        const addons = weeklyBag?.addons_total ?? 0;
+                        return (boxPrice + addons).toFixed(2);
+                      }
                       if (!weeklyBag?.box_sizes) return '34.99';
                       const isActiveSubscription = subscription?.status === 'active';
                       const boxPrice = isActiveSubscription 
@@ -324,26 +337,38 @@ const MyPlan = () => {
                       return subtotal.toFixed(2);
                     })()}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Delivery Fee</span>
-                    <span>$9.00</span>
-                  </div>
+                    <div className="flex justify-between">
+                      <span>Delivery Fee</span>
+                      <span>${(() => {
+                        const isOrder = (weeklyBag as any)?.from_recent_order;
+                        if (isOrder) {
+                          return (weeklyBag?.delivery_fee ?? 9.00).toFixed(2);
+                        }
+                        return '9.00';
+                      })()}</span>
+                    </div>
                 </div>
 
                 <Separator />
 
-                <div className="flex justify-between font-semibold">
-                  <span>Weekly Total</span>
-                  <span>${(() => {
-                    if (!weeklyBag?.box_sizes) return '39.98';
-                    const isActiveSubscription = subscription?.status === 'active';
-                    const boxPrice = isActiveSubscription 
-                      ? (weeklyBag.box_sizes.subscriber_price || weeklyBag.box_sizes.base_price)
-                      : weeklyBag.box_sizes.base_price;
-                    const total = boxPrice + (weeklyBag.addons_total || 0) + 9.00; // 9.00 delivery fee
-                    return total.toFixed(2);
-                  })()}</span>
-                </div>
+                  <div className="flex justify-between font-semibold">
+                    <span>Weekly Total</span>
+                    <span>${(() => {
+                      const isOrder = (weeklyBag as any)?.from_recent_order;
+                      if (isOrder) {
+                        const total = weeklyBag?.total_amount 
+                          ?? ((weeklyBag?.box_price ?? 0) + (weeklyBag?.addons_total ?? 0) + (weeklyBag?.delivery_fee ?? 9.00));
+                        return total.toFixed(2);
+                      }
+                      if (!weeklyBag?.box_sizes) return '39.98';
+                      const isActiveSubscription = subscription?.status === 'active';
+                      const boxPrice = isActiveSubscription 
+                        ? (weeklyBag.box_sizes.subscriber_price || weeklyBag.box_sizes.base_price)
+                        : weeklyBag.box_sizes.base_price;
+                      const total = boxPrice + (weeklyBag.addons_total || 0) + 9.00; // 9.00 delivery fee
+                      return total.toFixed(2);
+                    })()}</span>
+                  </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="promo">Promo Code</Label>
