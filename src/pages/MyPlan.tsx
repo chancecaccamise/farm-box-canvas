@@ -49,6 +49,11 @@ interface WeeklyBag {
   total_amount: number;
   addons_total: number;
   is_confirmed: boolean;
+  box_sizes?: {
+    display_name: string;
+    base_price: number;
+    subscriber_price?: number;
+  };
 }
 
 const MyPlan = () => {
@@ -101,10 +106,17 @@ const MyPlan = () => {
         setSubscription(subData);
       }
 
-      // Load current weekly bag
+      // Load current weekly bag with box size details
       const { data: bagData } = await supabase
         .from('weekly_bags')
-        .select('*')
+        .select(`
+          *,
+          box_sizes!inner(
+            display_name,
+            base_price,
+            subscriber_price
+          )
+        `)
         .eq('user_id', user?.id)
         .gte('week_end_date', new Date().toISOString().split('T')[0])
         .order('week_start_date', { ascending: true })
@@ -237,8 +249,21 @@ const MyPlan = () => {
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span>{weeklyBag?.box_size ? `${weeklyBag.box_size.charAt(0).toUpperCase() + weeklyBag.box_size.slice(1)} Box` : 'Farm Box'}</span>
-                    <span>${weeklyBag?.box_price?.toFixed(2) || '34.99'}</span>
+                    <span>{(() => {
+                      if (!weeklyBag?.box_sizes?.display_name) return 'Farm Box';
+                      const displayName = weeklyBag.box_sizes.display_name;
+                      const isActiveSubscription = subscription?.status === 'active';
+                      const suffix = isActiveSubscription ? ' Subscription' : ' One-Time Purchase';
+                      return displayName + suffix;
+                    })()}</span>
+                    <span>${(() => {
+                      if (!weeklyBag?.box_sizes) return '34.99';
+                      const isActiveSubscription = subscription?.status === 'active';
+                      const price = isActiveSubscription 
+                        ? (weeklyBag.box_sizes.subscriber_price || weeklyBag.box_sizes.base_price)
+                        : weeklyBag.box_sizes.base_price;
+                      return price.toFixed(2);
+                    })()}</span>
                   </div>
                   <div className="text-sm text-muted-foreground">
                     <span>Fresh seasonal produce</span>
@@ -250,7 +275,15 @@ const MyPlan = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span>${weeklyBag?.subtotal?.toFixed(2) || weeklyBag?.box_price?.toFixed(2) || '34.99'}</span>
+                    <span>${(() => {
+                      if (!weeklyBag?.box_sizes) return '34.99';
+                      const isActiveSubscription = subscription?.status === 'active';
+                      const boxPrice = isActiveSubscription 
+                        ? (weeklyBag.box_sizes.subscriber_price || weeklyBag.box_sizes.base_price)
+                        : weeklyBag.box_sizes.base_price;
+                      const subtotal = boxPrice + (weeklyBag.addons_total || 0);
+                      return subtotal.toFixed(2);
+                    })()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Delivery Fee</span>
@@ -262,7 +295,15 @@ const MyPlan = () => {
 
                 <div className="flex justify-between font-semibold">
                   <span>Weekly Total</span>
-                  <span>${weeklyBag?.total_amount?.toFixed(2) || '39.98'}</span>
+                  <span>${(() => {
+                    if (!weeklyBag?.box_sizes) return '39.98';
+                    const isActiveSubscription = subscription?.status === 'active';
+                    const boxPrice = isActiveSubscription 
+                      ? (weeklyBag.box_sizes.subscriber_price || weeklyBag.box_sizes.base_price)
+                      : weeklyBag.box_sizes.base_price;
+                    const total = boxPrice + (weeklyBag.addons_total || 0) + 9.00; // 9.00 delivery fee
+                    return total.toFixed(2);
+                  })()}</span>
                 </div>
 
                 <div className="space-y-2">
