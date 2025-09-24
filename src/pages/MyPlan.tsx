@@ -14,6 +14,7 @@ import { SubscriptionManager } from "@/components/SubscriptionManager";
 import { EditableDeliveryForm } from "@/components/EditableDeliveryForm";
 import { ContactForm } from "@/components/ContactForm";
 import NotificationPreferences from "@/components/NotificationPreferences";
+import { SubscriptionRecovery } from "@/components/SubscriptionRecovery";
 
 
 interface DeliveryAddress {
@@ -198,6 +199,9 @@ const MyPlan = () => {
               onSubscriptionUpdate={loadUserData}
               boxSize={weeklyBag?.box_size || undefined}
             />
+
+            {/* Subscription Recovery Tool */}
+            {!subscription && <SubscriptionRecovery />}
 
 
             {/* Delivery Information */}
