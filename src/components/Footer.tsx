@@ -24,11 +24,15 @@ const Footer = () => {
               Tapping the natural magic of sun, water, and land, Billy&apos;s Botanicals provides local, sustainably raised and harvested fish, fruit, herbs, vegetables, greens, & more. 
             </p>
             <div className="flex space-x-4">
-              <Button variant="outline" size="icon" className="border-primary/20 hover:bg-primary hover:text-primary-foreground">
-                <Instagram className="w-5 h-5" />
+              <Button variant="outline" size="icon" className="border-primary/20 hover:bg-primary hover:text-primary-foreground" asChild>
+                <a href="https://www.instagram.com/billysbotanicals" target="_blank" rel="noopener noreferrer" aria-label="Follow us on Instagram">
+                  <Instagram className="w-5 h-5" />
+                </a>
               </Button>
-              <Button variant="outline" size="icon" className="border-primary/20 hover:bg-primary hover:text-primary-foreground">
-                <Facebook className="w-5 h-5" />
+              <Button variant="outline" size="icon" className="border-primary/20 hover:bg-primary hover:text-primary-foreground" asChild>
+                <a href="https://www.facebook.com/Billysbotanicals/" target="_blank" rel="noopener noreferrer" aria-label="Follow us on Facebook">
+                  <Facebook className="w-5 h-5" />
+                </a>
               </Button>
             </div>
           </div>
@@ -74,21 +78,22 @@ const Footer = () => {
                 <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
                   <Phone className="w-5 h-5 text-primary" />
                 </div>
-                <span className="text-muted-foreground text-base">(555) 789-GROW</span>
+                <span className="text-muted-foreground text-base">912 727 3098</span>
               </div>
               <div className="flex items-center space-x-4">
                 <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
                   <Mail className="w-5 h-5 text-primary" />
                 </div>
-                <span className="text-muted-foreground text-base">hello@billysbotanicals.com</span>
+                <span className="text-muted-foreground text-base">duggerwd@billysbotanicals.com</span>
               </div>
               <div className="flex items-start space-x-4">
                 <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mt-1">
                   <MapPin className="w-5 h-5 text-primary" />
                 </div>
                 <span className="text-muted-foreground text-base leading-relaxed">
-                  456 Greenhouse Lane<br />
-                  Botanical Valley, CA 95420
+                  Billy's Botanicals<br />
+                  21897 Highway 144<br />
+                  Richmond Hill, GA 31324
                 </span>
               </div>
             </div>
@@ -100,7 +105,15 @@ const Footer = () => {
         {/* Bottom Section */}
         <div className="flex flex-col md:flex-row justify-between items-center space-y-6 md:space-y-0">
           <p className="text-muted-foreground text-base">
-            © 2025 Billy's Botanicals. All rights reserved. | Website Designed by Mangia DMA
+            © 2025 Billy's Botanicals. All rights reserved. | Website Designed by{" "}
+            <a 
+              href="https://www.mangiadma.com" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-primary hover:text-primary/80 transition-colors"
+            >
+              Mangia Digital Marketing Agency
+            </a>
           </p>
           
         </div>

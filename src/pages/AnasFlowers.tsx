@@ -660,8 +660,8 @@ const AnasFlowers = () => {
               <CardContent className="p-6 text-center">
                 <h3 className="font-semibold mb-4">Have Questions?</h3>
                 <div className="space-y-2 text-sm">
-                  <p><strong>Phone:</strong> (555) 123-BLOOM</p>
-                  <p><strong>Email:</strong> ana@anasflowers.com</p>
+                  <p><strong>Phone:</strong> 912 727 3098</p>
+                  <p><strong>Email:</strong> duggerwd@billysbotanicals.com</p>
                   <p><strong>Studio Hours:</strong> Tue-Sat, 9AM-5PM</p>
                 </div>
               </CardContent>
