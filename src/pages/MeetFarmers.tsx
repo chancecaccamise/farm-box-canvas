@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Calendar, Heart } from "lucide-react";
-import billyAna from "@/assets/BillyAna.jpg";
+import billyAna from "@/assets/billyAna.jpg";
 import billyPortrait from "@/assets/billyPortrait.png";
 import AnaPortrait from "@/assets/anaPortrait.png";
 import mtf1 from "@/assets/mtf1.jpg";
