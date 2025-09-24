@@ -1,17 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Leaf, Truck, Users, Star, Quote } from "lucide-react";
+import { CheckCircle, Leaf, Truck, Users, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroImage from "@/assets/billysBotanicals-hero.png";
-import rainbowCarrots from "@/assets/rainbow-carrots.jpg";
-import leafyGreens from "@/assets/leafy-greens.jpg";
-import tomatoes from "@/assets/tomatoes.jpg";
-import bellPeppers from "@/assets/bell-peppers.jpg";
 import whychoosebillys from "@/assets/whyChooseBillys.jpg";
-import greenhouse from "@/assets/greenhouse.jpg";
 import BoxComparison from "@/components/BoxComparison";
+import FreshAddOns from "@/components/FreshAddOns";
 
 const UnauthenticatedLanding = () => {
   return (
@@ -54,12 +49,27 @@ const UnauthenticatedLanding = () => {
                 <div className="w-16 h-16 bg-gradient-fresh rounded-full flex items-center justify-center mx-auto mb-4">
                   <Leaf className="w-8 h-8 text-white" />
                 </div>
-                <CardTitle className="text-2xl">1. Pick Your Produce</CardTitle>
+                <CardTitle className="text-2xl">1. Choose Your Box Size</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  Choose from Veggie Billy's Bag, Full Billy's Bag, or Protein Billy's Bag 
-                  filled with seasonal produce, local proteins, and artisan pantry items.
+                  Select from Veggie Billy's Bag, Full Billy's Bag, or Protein Billy's Bag 
+                  based on your household size and dietary preferences.
+                </CardDescription>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center">
+              <CardHeader>
+                <div className="w-16 h-16 bg-gradient-fresh rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-8 h-8 text-white" />
+                </div>
+                <CardTitle className="text-2xl">2. We Curate Your Selection</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-base">
+                  Our team carefully selects the freshest seasonal produce, proteins, 
+                  and artisan items based on what's available from local sources.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -69,27 +79,12 @@ const UnauthenticatedLanding = () => {
                 <div className="w-16 h-16 bg-gradient-fresh rounded-full flex items-center justify-center mx-auto mb-4">
                   <Truck className="w-8 h-8 text-white" />
                 </div>
-                <CardTitle className="text-2xl">2. Schedule Delivery</CardTitle>
+                <CardTitle className="text-2xl">3. Delivered Fresh</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  Select your preferred delivery day and frequency. We deliver fresh 
-                  from our greenhouse to your doorstep every week.
-                </CardDescription>
-              </CardContent>
-            </Card>
-
-            <Card className="text-center">
-              <CardHeader>
-                <div className="w-16 h-16 bg-gradient-fresh rounded-full flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle className="w-8 h-8 text-white" />
-                </div>
-                <CardTitle className="text-2xl">3. Enjoy Fresh Food</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-base">
-                  Unpack your weekly box and discover new seasonal favorites. 
-                  Cook with confidence knowing every ingredient is farm-fresh.
+                  Your weekly box arrives at your doorstep, packed with care and 
+                  ready to inspire your next home-cooked meal.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -97,46 +92,14 @@ const UnauthenticatedLanding = () => {
         </div>
       </section>
 
-      {/* Featured Products Section */}
-      <section className="py-20 px-4 bg-secondary/50">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-4">Billy's Personal Picks</h2>
-          <p className="text-xl text-muted-foreground text-center mb-16">
-            Hand-selected from our hydroponic greenhouse this week
-          </p>
-          
-          <div className="grid md:grid-cols-4 gap-6">
-            {[
-              { name: "Rainbow Carrots", description: "Sweet, colorful heirloom varieties", image: rainbowCarrots, badge: "Billy's Favorite" },
-              { name: "Leafy Greens Mix", description: "Fresh spinach, arugula, and kale", image: leafyGreens, badge: "From Billy's Greenhouse" },
-              { name: "Heritage Tomatoes", description: "Vine-ripened hydroponic varieties", image: tomatoes, badge: "Greenhouse Grown" },
-              { name: "Bell Pepper Trio", description: "Red, yellow, and orange peppers", image: bellPeppers, badge: "Seasonal Special" }
-            ].map((product, index) => (
-              <Card key={index} className="overflow-hidden hover:scale-105 transition-all duration-300">
-                <div className="relative aspect-square">
-                  <img 
-                    src={product.image} 
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute top-2 left-2">
-                    <span className="bg-accent text-white text-xs px-2 py-1 rounded-full font-medium">
-                      {product.badge}
-                    </span>
-                  </div>
-                </div>
-                <CardContent className="p-4">
-                  <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
-                  <p className="text-muted-foreground text-sm">{product.description}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
+      {/* Subscription Plans */}
+      <BoxComparison />
+
+      {/* Fresh Add-Ons */}
+      <FreshAddOns />
 
       {/* Why Choose Billy's */}
-      <section className="py-20 px-4">
+      <section className="py-20 px-4 bg-secondary/30">
         <div className="max-w-6xl mx-auto">
           <h2 className="text-4xl font-bold text-center mb-16">What sets Billy&apos;s Botanicals apart?</h2>
           
@@ -144,53 +107,50 @@ const UnauthenticatedLanding = () => {
             <div>
               <div className="space-y-8">
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-gradient-fresh rounded-full flex items-center justify-center flex-shrink-0">
-                    <Leaf className="w-6 h-6 text-white" />
-                  </div>
+                  <CheckCircle className="w-8 h-8 text-accent flex-shrink-0 mt-1" />
                   <div>
-                    <h3 className="text-xl font-semibold mb-2">100% Sustainable</h3>
-                    <p className="text-muted-foreground">Closed-loop aquaponics system is a soil-free growth method sans pesticides or synthetic fertilizers.
-                    </p>
+                    <h3 className="text-xl font-semibold mb-2">100% Local Sourcing</h3>
+                    <p className="text-muted-foreground">Every item in your box comes from within 50 miles of Savannah, supporting our local food ecosystem and reducing environmental impact.</p>
                   </div>
                 </div>
                 
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-gradient-fresh rounded-full flex items-center justify-center flex-shrink-0">
-                    <Users className="w-6 h-6 text-white" />
-                  </div>
+                  <CheckCircle className="w-8 h-8 text-accent flex-shrink-0 mt-1" />
                   <div>
-                    <h3 className="text-xl font-semibold mb-2">Family-Owned Since 2020</h3>
-                    <p className="text-muted-foreground">From sow to sale, owners Billy and Ana put their hearts and hands into the entire operation.</p>
+                    <h3 className="text-xl font-semibold mb-2">Sustainable Hydroponic Farming</h3>
+                    <p className="text-muted-foreground">Our closed-loop aquaponics system uses 95% less water than traditional farming while producing nutrient-dense vegetables year-round.</p>
                   </div>
                 </div>
                 
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-gradient-fresh rounded-full flex items-center justify-center flex-shrink-0">
-                    <Truck className="w-6 h-6 text-white" />
-                  </div>
+                  <CheckCircle className="w-8 h-8 text-accent flex-shrink-0 mt-1" />
                   <div>
-                    <h3 className="text-xl font-semibold mb-2">Community-loved</h3>
-                    <p className="text-muted-foreground">Dedicated to supporting fellow local growers, foragers, and makers in Savannah </p>
+                    <h3 className="text-xl font-semibold mb-2">Direct Partnerships</h3>
+                    <p className="text-muted-foreground">We work directly with local fishermen, artisan producers, and fellow farmers to bring you the freshest products at fair prices.</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-4">
+                  <CheckCircle className="w-8 h-8 text-accent flex-shrink-0 mt-1" />
+                  <div>
+                    <h3 className="text-xl font-semibold mb-2">Transparent Sourcing</h3>
+                    <p className="text-muted-foreground">Know exactly where your food comes from. Every product includes details about the local producer and harvest date.</p>
                   </div>
                 </div>
               </div>
             </div>
             
             <div className="relative">
-              <div className="aspect-square rounded-2xl overflow-hidden">
-                <img 
-                  src={whychoosebillys} 
-                  alt="Billy's hydroponic greenhouse" 
-                  className="w-full h-80 lg:h-96 object-cover object-center"
-                />
-              </div>
+              <img 
+                src={whychoosebillys} 
+                alt="Billy's hydroponic greenhouse operation" 
+                className="w-full h-80 lg:h-96 object-cover object-center rounded-2xl shadow-lg"
+              />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Subscription Plans */}
-      <BoxComparison />
 
       {/* Customer Testimonials */}
       <section className="py-20 px-4 bg-secondary/50">
@@ -293,9 +253,10 @@ const UnauthenticatedLanding = () => {
       {/* CTA Section */}
       <section className="py-20 px-4 bg-gradient-primary text-white">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold mb-6">Be nurtured by Billy&apos;s Botanicals</h2>
+          <h2 className="text-4xl font-bold mb-6">Ready to Start Your Weekly Deliveries?</h2>
           <p className="text-xl mb-8 opacity-90">
-            Experience the freshest produce grown with love since 2018.
+            Join hundreds of Savannah families enjoying fresh, local ingredients delivered weekly. 
+            Skip weeks anytime, pause, or cancel without hassle.
           </p>
           <div className="flex gap-4 justify-center">
             <Button asChild variant="organic" size="xl">
