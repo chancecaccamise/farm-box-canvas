@@ -46,7 +46,7 @@ const AnasFlowers = () => {
   const { toast } = useToast();
 
   const scrollToForm = () => {
-    const formElement = document.getElementById('bouquet-form');
+    const formElement = document.getElementById('consultation-form');
     if (formElement) {
       formElement.scrollIntoView({ behavior: 'smooth' });
       // Focus the first input for accessibility
@@ -165,8 +165,8 @@ const AnasFlowers = () => {
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: "Your bouquet request has been submitted! We'll respond within 24 hours with a custom proposal."
+        title: "Success", 
+        description: "Your consultation request has been submitted! We'll contact you within 24 hours to schedule your event consultation."
       });
 
       // Reset form
@@ -278,8 +278,8 @@ const AnasFlowers = () => {
           Combining her love of local flora and creative expression, Ana Dugger forages and designs custom floral arrangements — including grand installations and bespoke bouquets —  for any and every occasion.
           </p>
           <Button variant="organic" size="xl" className="animate-scale-in hover-scale" onClick={scrollToForm}>
-            <Flower className="w-5 h-5 mr-2" />
-            Request An Arrangement
+            <Calendar className="w-5 h-5 mr-2" />
+            Schedule A Consultation
           </Button>
         </div>
       </section>
@@ -287,9 +287,9 @@ const AnasFlowers = () => {
       <div className="max-w-6xl mx-auto px-4 py-12">
         {/* Services Grid */}
         <div className="mb-16">
-          <h2 className="text-3xl font-bold text-center mb-4">Bouquets by Occasion</h2>
+          <h2 className="text-3xl font-bold text-center mb-4">Events We Specialize In</h2>
           <p className="text-xl text-muted-foreground text-center mb-12 max-w-2xl mx-auto">
-          Cultivated and designed to fit your special day and aesthetic preferences
+          Professional floral design consultation for every special occasion and milestone event
           </p>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -425,16 +425,16 @@ const AnasFlowers = () => {
         </div>
 
         <div className="grid lg:grid-cols-2 gap-12">
-          {/* Bouquet Request Form */}
-          <div id="bouquet-form">
+          {/* Event Consultation Form */}
+          <div id="consultation-form">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center space-x-2">
-                  <Flower className="w-5 h-5 text-accent" />
-                  <span>Request Custom Bouquet</span>
+                  <Calendar className="w-5 h-5 text-accent" />
+                  <span>Request Event Consultation</span>
                 </CardTitle>
                 <CardDescription>
-                  Tell us about your vision and we'll create something beautiful together
+                  Schedule a consultation to discuss your event's floral needs and design vision
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -508,10 +508,10 @@ const AnasFlowers = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="preferences">Flower Preferences & Special Requests</Label>
+                    <Label htmlFor="preferences">Event Vision & Consultation Notes</Label>
                     <Textarea
                       id="preferences"
-                      placeholder="Tell us about your vision, preferred flowers, style, budget, or any special requests..."
+                      placeholder="Tell us about your event vision, style preferences, venue details, budget considerations, or specific consultation topics you'd like to discuss..."
                       rows={4}
                       value={formData.preferences}
                       onChange={(e) => handleInputChange("preferences", e.target.value)}
@@ -525,7 +525,7 @@ const AnasFlowers = () => {
                   <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-6 text-center">
                     <Upload className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
                     <p className="text-sm text-muted-foreground mb-4">
-                      Upload inspiration photos to help us understand your vision (max 5 photos, 5MB each)
+                      Upload inspiration photos to help us understand your event vision (max 5 photos, 5MB each)
                     </p>
                     <input
                       type="file"
@@ -570,8 +570,8 @@ const AnasFlowers = () => {
                 </div>
 
                   <Button type="submit" className="w-full" size="lg" disabled={submitting}>
-                    <Flower className="w-4 h-4 mr-2" />
-                    {submitting ? "Submitting..." : "Submit Bouquet Request"}
+                    <Calendar className="w-4 h-4 mr-2" />
+                    {submitting ? "Submitting..." : "Submit Consultation Request"}
                   </Button>
 
                   
