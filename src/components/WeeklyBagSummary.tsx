@@ -187,7 +187,7 @@ export function WeeklyBagSummary({
                 </div>
               )
             )}
-            {/* Only show delivery fee if user hasn't paid for this week yet */}
+            {/* Delivery Fee - not shown for users who already paid for this week's bag */}
             {!hasPaidForThisWeek && (
               <div className="flex items-center justify-between text-sm">
                 <span>Delivery fee</span>

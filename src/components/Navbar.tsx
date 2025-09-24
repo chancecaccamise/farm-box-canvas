@@ -189,12 +189,6 @@ const Navbar = () => {
                             My Plan
                           </Link>
                         </Button>
-                        <Button variant="ghost" className="w-full justify-start" asChild>
-                          <Link to="/account" onClick={() => setMobileMenuOpen(false)}>
-                            <Settings className="w-4 h-4 mr-3" />
-                            Account Settings
-                          </Link>
-                        </Button>
                         {isAdmin && (
                           <Button variant="ghost" className="w-full justify-start" asChild>
                             <Link to="/admin" onClick={() => setMobileMenuOpen(false)}>
@@ -251,12 +245,6 @@ const Navbar = () => {
                       <Link to="/my-plan" className="flex items-center space-x-2 transition-smooth">
                         <Calendar className="w-4 h-4" />
                         <span>My Plan</span>
-                      </Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/account" className="flex items-center space-x-2 transition-smooth">
-                        <Settings className="w-4 h-4" />
-                        <span>Account Settings</span>
                       </Link>
                     </DropdownMenuItem>
                     {isAdmin && (
