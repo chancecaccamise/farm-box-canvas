@@ -67,12 +67,18 @@ const OrderSummary = () => {
     try {
       // Fetch box price
       if (checkoutState.boxSize) {
+        // Fetch box pricing - get both base and subscriber prices
         const { data: boxData } = await supabase
           .from('box_sizes')
-          .select('base_price')
+          .select('base_price, subscriber_price')
           .eq('name', checkoutState.boxSize)
           .single();
-        setBoxPrice(boxData?.base_price || 0);
+        
+        // Use subscriber price for subscriptions, base price for one-time purchases
+        const price = checkoutState.boxType === 'subscription' 
+          ? (boxData?.subscriber_price || boxData?.base_price || 0)
+          : (boxData?.base_price || 0);
+        setBoxPrice(price);
       }
 
       // Fetch add-on products

@@ -180,12 +180,17 @@ serve(async (req) => {
       // New checkout flow with add-ons
       // Fetch box price from database
       if (checkoutState.boxSize && !hasActiveSubscription) {
+        // Get box pricing - fetch both base and subscriber prices
         const { data: boxSizeData } = await supabaseClient
           .from('box_sizes')
-          .select('base_price')
+          .select('base_price, subscriber_price')
           .eq('name', checkoutState.boxSize)
           .single();
-        boxPrice = boxSizeData?.base_price || 0;
+        
+        // Use subscriber price for subscriptions, base price for one-time purchases
+        boxPrice = isSubscription 
+          ? (boxSizeData?.subscriber_price || boxSizeData?.base_price || 0)
+          : (boxSizeData?.base_price || 0);
       }
 
       // Fetch add-on product details and calculate total
@@ -204,7 +209,8 @@ serve(async (req) => {
       }
     }
 
-    const deliveryFee = 9.00; // $9 delivery fee for all orders
+    // Apply delivery fee only for home delivery, not for pickups
+    const deliveryFee = checkoutState?.deliveryMethod === 'delivery' ? 9.00 : 0.00;
     const totalAmount = boxPrice + addonsTotal + deliveryFee;
 
     logStep("Calculated totals", { boxPrice, addonsTotal, deliveryFee, totalAmount });
