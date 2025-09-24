@@ -28,6 +28,12 @@ interface OrderData {
   delivery_fee: number;
   order_confirmation_number: string;
   week_start_date?: string;
+  delivery_time_preference?: string;
+  delivery_day_preference?: string;
+  user_protein_selections?: string[];
+  user_carb_selections?: string[];
+  user_full_farm_bag_protein?: string;
+  user_full_farm_bag_carb?: string;
   order_items?: Array<{
     id: string;
     product_name: string;
@@ -126,7 +132,9 @@ const ThankYou = () => {
         <h1 className="text-4xl font-bold mb-4">Thank You for Your Order!</h1>
         <p className="text-xl text-muted-foreground mb-12 max-w-lg mx-auto">
           {orderData ? 
-            `Your order has been confirmed and will be delivered to your address.` :
+            orderData.delivery_time_preference === 'delivery' ? 
+              `Your order has been confirmed and will be delivered to your address.` :
+              `Your order has been confirmed and will be ready for pickup.` :
             'Your payment has been processed successfully! Your order details are being finalized.'
           }
         </p>
@@ -158,30 +166,60 @@ const ThankYou = () => {
                 <div className="grid md:grid-cols-2 gap-6">
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mt-1">
-                      <Calendar className="w-5 h-5 text-primary" />
+                      <MapPin className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold mb-1">Delivery Address</h3>
+                      <h3 className="font-semibold mb-1">
+                        {orderData.delivery_time_preference === 'delivery' ? 'Delivery Address' : 'Pickup Location'}
+                      </h3>
                       <p className="text-sm text-muted-foreground">
-                        {orderData.shipping_address_street}
-                        {orderData.shipping_address_apartment && `, ${orderData.shipping_address_apartment}`}<br />
-                        {orderData.shipping_address_city}, {orderData.shipping_address_state} {orderData.shipping_address_zip}
+                        {orderData.delivery_time_preference === 'delivery' ? (
+                          <>
+                            {orderData.shipping_address_street}
+                            {orderData.shipping_address_apartment && `, ${orderData.shipping_address_apartment}`}<br />
+                            {orderData.shipping_address_city}, {orderData.shipping_address_state} {orderData.shipping_address_zip}
+                          </>
+                        ) : orderData.delivery_time_preference === 'market-pickup' ? (
+                          <>
+                            Farmers Market<br />
+                            Check your email for exact location details
+                          </>
+                        ) : (
+                          <>
+                            Billy's Farm<br />
+                            Check your email for exact location details
+                          </>
+                        )}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center mt-1">
-                      <Truck className="w-5 h-5 text-primary" />
+                      <Clock className="w-5 h-5 text-primary" />
                     </div>
                     <div>
-                      <h3 className="font-semibold mb-1">Delivery Window</h3>
+                      <h3 className="font-semibold mb-1">
+                        {orderData.delivery_time_preference === 'delivery' ? 'Delivery Window' : 'Pickup Schedule'}
+                      </h3>
                       <p className="text-sm text-muted-foreground">
-                        {orderData.week_start_date ? 
-                          `Week of ${new Date(orderData.week_start_date).toLocaleDateString()}` : 
-                          'Next available delivery window'
-                        }<br />
-                        Between 8 AM - 12 PM
+                        {orderData.delivery_time_preference === 'delivery' ? (
+                          <>
+                            {orderData.week_start_date ? 
+                              `Week of ${new Date(orderData.week_start_date).toLocaleDateString()}` : 
+                              'Next available delivery window'
+                            }<br />
+                            Between 8 AM - 12 PM
+                          </>
+                        ) : (
+                          <>
+                            {orderData.delivery_day_preference || 'Check your email for pickup day'}<br />
+                            {orderData.delivery_time_preference === 'market-pickup' ? 
+                              'Market hours: 8 AM - 2 PM' : 
+                              'Farm hours: 9 AM - 5 PM'
+                            }
+                          </>
+                        )}
                       </p>
                     </div>
                   </div>
@@ -202,6 +240,29 @@ const ThankYou = () => {
                     </div>
                   </div>
                 </div>
+
+                {/* User Selections */}
+                {(orderData.user_full_farm_bag_protein || orderData.user_full_farm_bag_carb || 
+                  (orderData.user_protein_selections && orderData.user_protein_selections.length > 0) ||
+                  (orderData.user_carb_selections && orderData.user_carb_selections.length > 0)) && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h4 className="font-medium mb-2">✨ Your Selections</h4>
+                    <div className="text-sm space-y-1">
+                      {orderData.user_full_farm_bag_protein && (
+                        <p><strong>Selected Protein:</strong> {orderData.user_full_farm_bag_protein}</p>
+                      )}
+                      {orderData.user_full_farm_bag_carb && (
+                        <p><strong>Selected Carb:</strong> {orderData.user_full_farm_bag_carb}</p>
+                      )}
+                      {orderData.user_protein_selections && orderData.user_protein_selections.length > 0 && (
+                        <p><strong>Protein Selections:</strong> {orderData.user_protein_selections.join(', ')}</p>
+                      )}
+                      {orderData.user_carb_selections && orderData.user_carb_selections.length > 0 && (
+                        <p><strong>Carb Selections:</strong> {orderData.user_carb_selections.join(', ')}</p>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {orderData.delivery_instructions && (
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
@@ -233,12 +294,24 @@ const ThankYou = () => {
               <div className="text-center">
                 <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-2 text-xs font-bold">1</div>
                 <p className="font-medium">We Pack Your Box</p>
-                <p className="text-muted-foreground">Fresh from the farm the night before delivery</p>
+                <p className="text-muted-foreground">
+                  {orderData?.delivery_time_preference === 'delivery' ? 
+                    'Fresh from the farm the night before delivery' :
+                    'Fresh from the farm ready for pickup'
+                  }
+                </p>
               </div>
               <div className="text-center">
                 <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-2 text-xs font-bold">2</div>
-                <p className="font-medium">Out for Delivery</p>
-                <p className="text-muted-foreground">You'll get a text when it's on the way</p>
+                <p className="font-medium">
+                  {orderData?.delivery_time_preference === 'delivery' ? 'Out for Delivery' : 'Ready for Pickup'}
+                </p>
+                <p className="text-muted-foreground">
+                  {orderData?.delivery_time_preference === 'delivery' ? 
+                    "You'll get a text when it's on the way" :
+                    "We'll notify you when your order is ready"
+                  }
+                </p>
               </div>
               <div className="text-center">
                 <div className="w-8 h-8 bg-primary text-white rounded-full flex items-center justify-center mx-auto mb-2 text-xs font-bold">3</div>
@@ -270,9 +343,6 @@ const ThankYou = () => {
           </div>
         )}
 
-        <p className="text-sm text-muted-foreground mt-8">
-          Questions? Contact our team at hello@farmbox.com or (555) 123-4567
-        </p>
       </div>
     </div>
   );
