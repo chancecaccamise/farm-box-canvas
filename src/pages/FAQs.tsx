@@ -11,26 +11,50 @@ const FAQs = () => {
   const generalFAQs = [
     {
       id: "1",
-      question: "How do farm boxes work?",
-      answer: "Billy's bags are weekly deliveries of fresh, hydroponically-grown produce. Billy personally curates each bag with the best seasonal vegetables and herbs from his greenhouse. You choose your bag size (Small $35, Medium $50, or Large $70), and can add optional extras like fresh fish or proteins. You can skip weeks, pause your subscription, or cancel anytime.",
+      question: "What types of Billy's Bags do you offer?",
+      answer: "We offer three types of Billy's Bags: Veggie Billy's Bag ($30 or $25 for subscribers) with fresh vegetables and herbs, Full Billy's Bag ($55 or $50 for subscribers) with vegetables, herbs, protein, and carb, and Protein Billy's Bag ($100 or $95 for subscribers) with premium proteins and seafood. All bags feature Billy's fresh, hydroponically-grown produce.",
       icon: <Leaf className="w-5 h-5 text-accent" />
     },
     {
+      id: "2",
+      question: "How much do Billy's Bags cost?",
+      answer: "Our bags are priced affordably with subscriber discounts: Veggie Billy's Bag is $30 ($25 for subscribers), Full Billy's Bag is $55 ($50 for subscribers), and Protein Billy's Bag is $100 ($95 for subscribers). You can choose between one-time purchases or weekly subscriptions to save money.",
+      icon: <HelpCircle className="w-5 h-5 text-accent" />
+    },
+    {
       id: "3",
-      question: "Can I pause or skip a week?",
-      answer: "Absolutely! You have complete control over your deliveries. You can skip any week, pause your subscription for up to 8 weeks, or cancel anytime through your account dashboard. Just make sure to make changes before Wednesday at 11:59 PM for the following week's delivery.",
+      question: "What delivery options are available?",
+      answer: "We offer flexible fulfillment options including home delivery on Thursdays, Saturdays, and Sundays, as well as convenient pickup locations at local markets and directly from our farm. Choose the option that works best for your schedule during checkout.",
+      icon: <Truck className="w-5 h-5 text-accent" />
+    },
+    {
+      id: "4",
+      question: "Can I add fresh fish and other extras?",
+      answer: "Yes! Through our Fresh Catch program, you can add premium Georgia coast seafood caught by our fishing team. We also offer various add-ons and you can sign up for Fresh Fish Alerts to be notified when new catches are available.",
+      icon: <Fish className="w-5 h-5 text-accent" />
+    },
+    {
+      id: "5",
+      question: "Do you offer floral arrangements?",
+      answer: "Absolutely! Ana's Arrangements provides beautiful custom floral designs for weddings, events, and special occasions. From bridal bouquets to centerpieces, Ana creates stunning arrangements using fresh, locally-sourced flowers and greenery.",
+      icon: <Leaf className="w-5 h-5 text-accent" />
+    },
+    {
+      id: "6",
+      question: "Can I pause or skip deliveries?",
+      answer: "Yes! You have complete control over your subscription. You can skip any week, pause your subscription, or cancel anytime through your account dashboard. Just make sure to make changes before the weekly cutoff for your next scheduled delivery.",
       icon: <Clock className="w-5 h-5 text-accent" />
     },
     {
       id: "7",
-      question: "Can I change my preferences?",
-      answer: "Yes! You can change your box size (Small, Medium, or Large) and delivery frequency anytime through your account. You can also add or remove optional add-ons like fresh fish and proteins for any upcoming delivery. Changes take effect for your next scheduled delivery.",
+      question: "How do I manage my subscription?",
+      answer: "You can easily manage everything through your account dashboard - change bag types, update delivery preferences, add or remove add-ons, view order history, and modify your subscription settings. You have full control over your Billy's Botanicals experience.",
       icon: <Settings className="w-5 h-5 text-accent" />
     },
     {
       id: "8",
-      question: "What if I don't like something in my box?",
-      answer: "Billy stands behind every item! If you receive something you don't enjoy, let us know and we'll credit your account. Since Billy curates each bag based on what's fresh and seasonal from his greenhouse, the contents may vary weekly, but quality is always guaranteed.",
+      question: "What if I'm not satisfied with my order?",
+      answer: "Billy stands behind every item! If you receive something you don't enjoy or have any quality concerns, contact us and we'll make it right. Our commitment to quality means we guarantee the freshness and taste of everything in your Billy's Bag.",
       icon: <HelpCircle className="w-5 h-5 text-accent" />
     }
   ];
@@ -134,11 +158,11 @@ const FAQs = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <div className="text-center">
                 <p className="font-medium">Email Support</p>
-                <p className="text-accent">hello@farmbox.com</p>
+                <p className="text-accent">duggerwd@billysbotanicals.com</p>
               </div>
               <div className="text-center">
                 <p className="font-medium">Phone Support</p>
-                <p className="text-accent">(555) 123-FARM</p>
+                <p className="text-accent">912 727 3098</p>
               </div>
             </div>
           </CardContent>
