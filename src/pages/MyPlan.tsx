@@ -201,7 +201,7 @@ const MyPlan = () => {
             />
 
             {/* Subscription Recovery Tool */}
-            {!subscription && <SubscriptionRecovery />}
+            {(!subscription || subscription.status !== 'active') && <SubscriptionRecovery />}
 
 
             {/* Delivery Information */}
