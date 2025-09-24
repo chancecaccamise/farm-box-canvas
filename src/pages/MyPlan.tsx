@@ -126,7 +126,7 @@ const MyPlan = () => {
           .single();
 
         // Determine if this was a subscription at purchase time
-        const wasSubscriptionAtPurchase = recentOrderData.order_type === 'subscription' || recentOrderData.has_active_subscription;
+        const wasSubscriptionAtPurchase = recentOrderData.order_type === 'subscription';
         
         // Transform order data to match WeeklyBag interface for display
         const orderAsWeeklyBag = {
@@ -134,10 +134,12 @@ const MyPlan = () => {
           subtotal: recentOrderData.box_price + (recentOrderData.addons_total || 0),
           delivery_fee: recentOrderData.delivery_fee || 9.00,
           is_confirmed: true,
+          // Use actual charged price, not current box_sizes pricing
+          box_price: recentOrderData.box_price,
           box_sizes: boxSizeData ? {
             ...boxSizeData,
-            // Add subscription suffix based on order type, not current subscription status
-            display_name: boxSizeData.display_name + (wasSubscriptionAtPurchase ? " Subscription" : " One-Time Purchase")
+            // Use clean display name with subscription suffix only if it was a subscription
+            display_name: wasSubscriptionAtPurchase ? boxSizeData.display_name + " Subscription" : boxSizeData.display_name + " One-Time Purchase"
           } : null
         };
         setWeeklyBag(orderAsWeeklyBag as any);
