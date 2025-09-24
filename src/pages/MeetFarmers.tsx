@@ -14,7 +14,6 @@ const MeetFarmers = () => {
     title: "Co-Founder & Head Grower",
     image: billyPortrait,
     bio: "Billy co-founded Billy's Botanicals and can be found every weekend working the farmers market stand at Forsyth Park. With a deep passion for sustainable growing, he leads all the planting, harvesting, and behind-the-scenes operations that keep the farm thriving.",
-    funFact: "Billy knows nearly every regular customer by name and starts each market day with a cup of black coffee and a weather check — he swears he can feel the rain before it hits.",
     experience: "18 years"
   },
   {
@@ -22,7 +21,6 @@ const MeetFarmers = () => {
     title: "Co-Founder & Floral Artist",
     image: AnaPortrait,
     bio: "Ana is the creative heart of Billy's Botanicals and co-runs the stand with Billy at Forsyth Park. In addition to farming, she operates her own flower business, designing custom bouquets for weddings, events, and local deliveries — always using fresh, seasonal blooms.",
-    funFact: "Ana has a signature flower for every month of the year and once built an entire wedding arch using only wildflowers and reclaimed driftwood.",
     experience: "15 years"
   }
 ];
@@ -106,19 +104,9 @@ const MeetFarmers = () => {
                     </Badge>
                   </div>
                   
-                  <p className="text-muted-foreground mb-4 leading-relaxed">
+                  <p className="text-muted-foreground leading-relaxed">
                     {member.bio}
                   </p>
-                  
-                  <div className="bg-accent/10 p-4 rounded-lg">
-                    <div className="flex items-start space-x-2">
-                      <Heart className="w-4 h-4 text-accent mt-1 flex-shrink-0" />
-                      <div>
-                        <h4 className="font-medium text-sm mb-1">Fun Fact:</h4>
-                        <p className="text-sm text-muted-foreground">{member.funFact}</p>
-                      </div>
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
             ))}

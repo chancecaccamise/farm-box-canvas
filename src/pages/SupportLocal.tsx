@@ -34,15 +34,15 @@ const SupportLocal = () => {
   const [partnerPreviews, setPartnerPreviews] = useState<{
     restaurants: Partner[];
     bakery: Partner[];
-    fisherman: Partner[];
-  }>({ restaurants: [], bakery: [], fisherman: [] });
+    // fisherman: Partner[]; // Commented out until fishing partners are available
+  }>({ restaurants: [], bakery: [] /* fisherman: [] */ });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchPartnerPreviews = async () => {
       try {
         // Fetch 2 partners from each category for preview
-        const categories = ['restaurants', 'bakery', 'fisherman'] as const;
+        const categories = ['restaurants', 'bakery' /* 'fisherman' */] as const;
         const previews: any = {};
 
         for (const category of categories) {
@@ -88,13 +88,14 @@ const SupportLocal = () => {
       route: '/partners/bakery',
       color: 'bg-amber-100 text-amber-800'
     },
-    fisherman: {
-      title: 'Fishing Partners',
-      icon: Fish,
-      description: 'Sustainable seafood providers',
-      route: '/partners/fisherman',
-      color: 'bg-blue-100 text-blue-800'
-    }
+    // Commented out until fishing partners are available
+    // fisherman: {
+    //   title: 'Fishing Partners',
+    //   icon: Fish,
+    //   description: 'Sustainable seafood providers',
+    //   route: '/partners/fisherman',
+    //   color: 'bg-blue-100 text-blue-800'
+    // }
   };
 
   return (
