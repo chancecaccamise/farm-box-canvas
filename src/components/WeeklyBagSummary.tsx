@@ -209,11 +209,16 @@ export function WeeklyBagSummary({
                 <span>-$5.00</span>
               </div>
             )}
-            <Separator />
-            <div className="flex items-center justify-between font-semibold">
-              <span>Total to pay</span>
-              <span>${(promoApplied ? Math.max(0, total - 5) : total).toFixed(2)}</span>
-            </div>
+            {/* Only show total to pay if user hasn't already paid, or if there are unpaid add-ons */}
+            {(!hasPaidForThisWeek || unpaidAddonsTotal > 0) && (
+              <>
+                <Separator />
+                <div className="flex items-center justify-between font-semibold">
+                  <span>Total to pay</span>
+                  <span>${(promoApplied ? Math.max(0, total - 5) : total).toFixed(2)}</span>
+                </div>
+              </>
+            )}
           </div>
 
           {/* Promo Code Section - only show if not locked/confirmed and there's something to checkout */}
