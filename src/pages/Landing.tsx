@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { CheckCircle, Leaf, Truck, Users, Star } from "lucide-react";
-import heroImage from "@/assets/billysBotanicals-hero.png";
+import heroImage from "@/assets/billysBotanicalsHeroNew.png";
 import BoxComparison from "@/components/BoxComparison";
 import FreshAddOns from "@/components/FreshAddOns";
 import whychoosebillys from "@/assets/whyChooseBillys.jpg";
