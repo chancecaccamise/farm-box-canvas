@@ -67,7 +67,7 @@ serve(async (req) => {
       logStep("Event verified and constructed", { type: event.type, id: event.id });
     } catch (err) {
       logStep("ERROR: Webhook signature verification failed", { 
-        error: err.message, 
+        error: err instanceof Error ? err.message : 'Unknown error', 
         bodyLength: rawBody.length,
         bodyType: typeof rawBody,
         signaturePresent: !!signature,
@@ -79,6 +79,14 @@ serve(async (req) => {
       });
     }
 
+    // Create Supabase client with service role key FIRST
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } }
+    );
+    logStep("Supabase client created");
+
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
       logStep("Processing checkout session completed", { sessionId: session.id });
@@ -87,14 +95,6 @@ serve(async (req) => {
       if (session.mode === 'subscription' && session.subscription) {
         await handleSubscriptionCreated(session, supabase);
       }
-
-      // Create Supabase client with service role key
-      const supabase = createClient(
-        Deno.env.get("SUPABASE_URL") ?? "",
-        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-        { auth: { persistSession: false } }
-      );
-      logStep("Supabase client created");
 
       // First check if order exists
       const { data: existingOrder, error: fetchError } = await supabase
@@ -128,22 +128,34 @@ serve(async (req) => {
         hasShipping: !!fullSession.shipping_details 
       });
 
-      // Update the order with complete information
+      // Update the order with complete information while preserving enhanced data
+      const updateData: any = {
+        payment_status: "paid",
+        status: "confirmed",
+        updated_at: new Date().toISOString(),
+      };
+
+      // Only update customer info if it's provided by Stripe
+      if (fullSession.customer_details?.name || fullSession.shipping_details?.name) {
+        updateData.customer_name = fullSession.customer_details?.name || fullSession.shipping_details?.name;
+      }
+      if (fullSession.customer_details?.email) {
+        updateData.customer_email = fullSession.customer_details?.email;
+      }
+      if (fullSession.customer_details?.phone) {
+        updateData.customer_phone = fullSession.customer_details?.phone;
+      }
+      if (fullSession.shipping_details?.address) {
+        updateData.shipping_address_street = fullSession.shipping_details.address.line1;
+        updateData.shipping_address_apartment = fullSession.shipping_details.address.line2;
+        updateData.shipping_address_city = fullSession.shipping_details.address.city;
+        updateData.shipping_address_state = fullSession.shipping_details.address.state;
+        updateData.shipping_address_zip = fullSession.shipping_details.address.postal_code;
+      }
+
       const { error } = await supabase
         .from("orders")
-        .update({
-          payment_status: "paid",
-          status: "confirmed",
-          customer_name: fullSession.customer_details?.name || fullSession.shipping_details?.name,
-          customer_email: fullSession.customer_details?.email,
-          customer_phone: fullSession.customer_details?.phone,
-          shipping_address_street: fullSession.shipping_details?.address?.line1,
-          shipping_address_apartment: fullSession.shipping_details?.address?.line2,
-          shipping_address_city: fullSession.shipping_details?.address?.city,
-          shipping_address_state: fullSession.shipping_details?.address?.state,
-          shipping_address_zip: fullSession.shipping_details?.address?.postal_code,
-          updated_at: new Date().toISOString(),
-        })
+        .update(updateData)
         .eq("stripe_session_id", session.id);
 
       if (error) {

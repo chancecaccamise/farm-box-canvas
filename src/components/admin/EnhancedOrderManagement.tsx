@@ -2,13 +2,12 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Download, Search, Calendar, Truck, MapPin, Package, Users } from 'lucide-react';
+import { Download, Search, Package, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { OrderInsights } from './OrderInsights';
 
@@ -37,6 +36,14 @@ interface EnhancedOrder {
   assigned_driver_id: string | null;
   delivery_sequence: number | null;
   payment_status: string | null;
+  // New enhanced fields
+  delivery_day_preference: string | null;
+  delivery_time_preference: string | null;
+  customer_notes: string | null;
+  user_protein_selections: string[] | null;
+  user_carb_selections: string[] | null;
+  user_full_farm_bag_protein: string | null;
+  user_full_farm_bag_carb: string | null;
   order_items: {
     quantity: number;
     price: number;
@@ -48,20 +55,11 @@ interface EnhancedOrder {
   }[];
 }
 
-interface DeliveryDay {
-  date: string;
-  orders: EnhancedOrder[];
-  totalValue: number;
-  routeOptimized: boolean;
-}
-
 export const EnhancedOrderManagement = () => {
   const [orders, setOrders] = useState<EnhancedOrder[]>([]);
-  const [deliveryDays, setDeliveryDays] = useState<DeliveryDay[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [selectedDeliveryDay, setSelectedDeliveryDay] = useState<string>('all');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -91,10 +89,6 @@ export const EnhancedOrderManagement = () => {
     };
   }, []);
 
-  useEffect(() => {
-    processDeliveryDays();
-  }, [orders]);
-
   const fetchOrders = async () => {
     try {
       const { data, error } = await supabase
@@ -104,33 +98,28 @@ export const EnhancedOrderManagement = () => {
           order_items(
             quantity,
             price,
+            product_name,
+            item_type,
             products(name)
           )
         `)
-        .order('delivery_date', { ascending: true });
+        .order('order_date', { ascending: false });
 
       if (error) throw error;
       
-      // Transform data to match EnhancedOrder interface, setting defaults for new fields
+      // Transform data to match EnhancedOrder interface
       const enhancedOrders: EnhancedOrder[] = (data || []).map(order => ({
         ...order,
-        customer_name: (order as any).customer_name || null,
-        customer_email: (order as any).customer_email || null,
-        customer_phone: (order as any).customer_phone || null,
-        shipping_address_street: (order as any).shipping_address_street || null,
-        shipping_address_apartment: (order as any).shipping_address_apartment || null,
-        shipping_address_city: (order as any).shipping_address_city || null,
-        shipping_address_state: (order as any).shipping_address_state || null,
-        shipping_address_zip: (order as any).shipping_address_zip || null,
-        delivery_instructions: (order as any).delivery_instructions || null,
-        box_size: (order as any).box_size || null,
-        box_price: (order as any).box_price || null,
-        addons_total: (order as any).addons_total || null,
-        delivery_fee: (order as any).delivery_fee || null,
+        delivery_day_preference: (order as any).delivery_day_preference || null,
+        delivery_time_preference: (order as any).delivery_time_preference || null,
+        customer_notes: (order as any).customer_notes || null,
+        user_protein_selections: (order as any).user_protein_selections || null,
+        user_carb_selections: (order as any).user_carb_selections || null,
+        user_full_farm_bag_protein: (order as any).user_full_farm_bag_protein || null,
+        user_full_farm_bag_carb: (order as any).user_full_farm_bag_carb || null,
         route_batch_id: (order as any).route_batch_id || null,
         assigned_driver_id: (order as any).assigned_driver_id || null,
         delivery_sequence: (order as any).delivery_sequence || null,
-        payment_status: (order as any).payment_status || null,
         order_items: order.order_items.map(item => ({
           ...item,
           product_name: (item as any).product_name || null,
@@ -151,61 +140,70 @@ export const EnhancedOrderManagement = () => {
     }
   };
 
-  const processDeliveryDays = () => {
-    const dayMap = new Map<string, EnhancedOrder[]>();
+  const getDisplayName = (boxSize: string | null): string => {
+    if (!boxSize) return 'Unknown';
     
-    orders.forEach(order => {
-      if (order.delivery_date) {
-        const deliveryDate = new Date(order.delivery_date).toISOString().split('T')[0];
-        if (!dayMap.has(deliveryDate)) {
-          dayMap.set(deliveryDate, []);
-        }
-        dayMap.get(deliveryDate)!.push(order);
-      }
-    });
-
-    const days: DeliveryDay[] = Array.from(dayMap.entries()).map(([date, dayOrders]) => ({
-      date,
-      orders: dayOrders.sort((a, b) => (a.delivery_sequence || 999) - (b.delivery_sequence || 999)),
-      totalValue: dayOrders.reduce((sum, order) => sum + order.total_amount, 0),
-      routeOptimized: dayOrders.some(order => order.route_batch_id !== null)
-    }));
-
-    days.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    setDeliveryDays(days);
+    const displayNames = {
+      'small': 'Small Farm Box',
+      'medium': 'Medium Farm Box', 
+      'large': 'Large Farm Box',
+      'veggie_bag': 'Veggie Bag',
+      'full_farm_bag': 'Full Farm Bag',
+      'protein-pack': 'Protein Pack'
+    };
+    
+    return displayNames[boxSize as keyof typeof displayNames] || boxSize;
   };
 
-  const exportDeliveryData = async (deliveryDate?: string) => {
+  const getCustomerSelections = (order: EnhancedOrder): string => {
+    const selections = [];
+    
+    if (order.user_full_farm_bag_protein) {
+      selections.push(`Protein: ${order.user_full_farm_bag_protein}`);
+    }
+    
+    if (order.user_full_farm_bag_carb) {
+      selections.push(`Carb: ${order.user_full_farm_bag_carb}`);
+    }
+    
+    if (order.user_protein_selections && order.user_protein_selections.length > 0) {
+      selections.push(`Proteins: ${order.user_protein_selections.join(', ')}`);
+    }
+    
+    if (order.user_carb_selections && order.user_carb_selections.length > 0) {
+      selections.push(`Carbs: ${order.user_carb_selections.join(', ')}`);
+    }
+    
+    return selections.length > 0 ? selections.join(' | ') : 'No selections';
+  };
+
+  const exportOrderData = async () => {
     try {
-      const ordersToExport = deliveryDate 
-        ? orders.filter(order => order.delivery_date && 
-            new Date(order.delivery_date).toISOString().split('T')[0] === deliveryDate)
-        : getFilteredOrders();
+      const ordersToExport = getFilteredOrders();
       
-      // Enhanced CSV with delivery route information
+      // Enhanced CSV with all customer information
       const headers = [
         'Order ID',
+        'Order Date',
         'Customer Name',
         'Customer Email', 
         'Customer Phone',
+        'Box Type',
+        'Customer Selections',
+        'Delivery Preference',
+        'Customer Notes',
         'Delivery Address',
         'Apartment/Unit',
         'City',
         'State',
         'ZIP',
         'Delivery Instructions',
-        'Order Date',
-        'Delivery Date',
-        'Delivery Sequence',
         'Status',
         'Payment Status',
-        'Box Size',
         'Box Price',
         'Addons Total',
         'Delivery Fee',
         'Total Amount',
-        'Route Batch ID',
-        'Assigned Driver',
         'Items Summary'
       ];
 
@@ -213,27 +211,26 @@ export const EnhancedOrderManagement = () => {
         headers.join(','),
         ...ordersToExport.map(order => [
           order.id,
+          new Date(order.order_date).toLocaleDateString(),
           `"${order.customer_name || getCustomerName(order)}"`,
           `"${order.customer_email || ''}"`,
           `"${order.customer_phone || ''}"`,
+          `"${getDisplayName(order.box_size)}"`,
+          `"${getCustomerSelections(order)}"`,
+          `"${order.delivery_day_preference || ''} ${order.delivery_time_preference || ''}".trim()`,
+          `"${order.customer_notes || ''}"`,
           `"${order.shipping_address_street || ''}"`,
           `"${order.shipping_address_apartment || ''}"`,
           `"${order.shipping_address_city || ''}"`,
           `"${order.shipping_address_state || ''}"`,
           `"${order.shipping_address_zip || ''}"`,
           `"${order.delivery_instructions || ''}"`,
-          new Date(order.order_date).toLocaleDateString(),
-          order.delivery_date ? new Date(order.delivery_date).toLocaleDateString() : 'Not scheduled',
-          order.delivery_sequence || '',
           order.status,
           order.payment_status || 'unknown',
-          order.box_size || '',
           order.box_price || 0,
           order.addons_total || 0,
           order.delivery_fee || 0,
           order.total_amount,
-          order.route_batch_id || '',
-          order.assigned_driver_id || '',
           `"${order.order_items.map(item => 
             `${item.quantity}x ${item.product_name || item.products?.name || 'Unknown'}`
           ).join('; ')}"`,
@@ -245,9 +242,7 @@ export const EnhancedOrderManagement = () => {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      const fileName = deliveryDate 
-        ? `delivery-${deliveryDate}-orders.csv`
-        : `all-orders-export-${new Date().toISOString().split('T')[0]}.csv`;
+      const fileName = `enhanced-orders-export-${new Date().toISOString().split('T')[0]}.csv`;
       a.download = fileName;
       a.click();
       window.URL.revokeObjectURL(url);
@@ -290,10 +285,7 @@ export const EnhancedOrderManagement = () => {
       
       const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
       
-      const matchesDeliveryDay = selectedDeliveryDay === 'all' || 
-        (order.delivery_date && new Date(order.delivery_date).toISOString().split('T')[0] === selectedDeliveryDay);
-      
-      return matchesSearch && matchesStatus && matchesDeliveryDay;
+      return matchesSearch && matchesStatus;
     });
   };
 
@@ -322,20 +314,20 @@ export const EnhancedOrderManagement = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header with insights and main export */}
+      {/* Header with insights and export */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Enhanced Order Management</h2>
         <div className="flex gap-2">
           <OrderInsights />
-          <Button onClick={() => exportDeliveryData()}>
+          <Button onClick={exportOrderData}>
             <Download className="h-4 w-4 mr-2" />
-            Export All Orders
+            Export Orders
           </Button>
         </div>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
@@ -343,28 +335,6 @@ export const EnhancedOrderManagement = () => {
               <div>
                 <p className="text-sm text-muted-foreground">Total Orders</p>
                 <p className="text-2xl font-bold">{orders.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-5 w-5 text-primary" />
-              <div>
-                <p className="text-sm text-muted-foreground">Delivery Days</p>
-                <p className="text-2xl font-bold">{deliveryDays.length}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <Truck className="h-5 w-5 text-primary" />
-              <div>
-                <p className="text-sm text-muted-foreground">Route Optimized</p>
-                <p className="text-2xl font-bold">{deliveryDays.filter(d => d.routeOptimized).length}</p>
               </div>
             </div>
           </CardContent>
@@ -384,275 +354,146 @@ export const EnhancedOrderManagement = () => {
         </Card>
       </div>
 
-      {/* Tabs for different views */}
-      <Tabs defaultValue="by-delivery-day" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="by-delivery-day">By Delivery Day</TabsTrigger>
-          <TabsTrigger value="all-orders">All Orders Table</TabsTrigger>
-        </TabsList>
+      {/* Filters */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
+          <Label htmlFor="search">Search Orders</Label>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              id="search"
+              placeholder="Customer, email, or order ID..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </div>
+        
+        <div>
+          <Label htmlFor="status">Filter by Status</Label>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="All statuses" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Statuses</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="confirmed">Confirmed</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="cancelled">Cancelled</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
 
-        <TabsContent value="by-delivery-day" className="space-y-6">
-          {deliveryDays.length === 0 ? (
-            <Card>
-              <CardContent className="text-center py-8">
-                <p className="text-muted-foreground">No scheduled deliveries found.</p>
-              </CardContent>
-            </Card>
-          ) : (
-            deliveryDays.map((day) => (
-              <Card key={day.date}>
-                <CardHeader>
-                  <div className="flex justify-between items-center">
+      {/* Enhanced Orders Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>All Orders ({filteredOrders.length})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Customer</TableHead>
+                <TableHead>Box Type</TableHead>
+                <TableHead>Customer Selections</TableHead>
+                <TableHead>Delivery Preference</TableHead>
+                <TableHead>Address</TableHead>
+                <TableHead>Notes</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Payment</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredOrders.map((order) => (
+                <TableRow key={order.id}>
+                  <TableCell>
                     <div>
-                      <CardTitle className="flex items-center gap-2">
-                        <Calendar className="h-5 w-5" />
-                        {new Date(day.date).toLocaleDateString('en-US', { 
-                          weekday: 'long', 
-                          year: 'numeric', 
-                          month: 'long', 
-                          day: 'numeric' 
-                        })}
-                        {day.routeOptimized && (
-                          <Badge variant="default" className="ml-2">
-                            <Truck className="h-3 w-3 mr-1" />
-                            Route Optimized
-                          </Badge>
-                        )}
-                      </CardTitle>
-                      <p className="text-muted-foreground">
-                        {day.orders.length} orders • ${day.totalValue.toFixed(2)} total value
+                      <p className="font-medium">{getCustomerName(order)}</p>
+                      {order.customer_email && (
+                        <p className="text-sm text-muted-foreground">{order.customer_email}</p>
+                      )}
+                      {order.customer_phone && (
+                        <p className="text-sm text-muted-foreground">{order.customer_phone}</p>
+                      )}
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(order.order_date).toLocaleDateString()}
                       </p>
                     </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => exportDeliveryData(day.date)}
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm">
+                      <p className="font-medium">{getDisplayName(order.box_size)}</p>
+                      <p className="text-muted-foreground">${order.box_price?.toFixed(2) || '0.00'}</p>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm max-w-xs">
+                      <p className="text-muted-foreground">{getCustomerSelections(order)}</p>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm">
+                      {order.delivery_day_preference && (
+                        <p className="font-medium">{order.delivery_day_preference}</p>
+                      )}
+                      {order.delivery_time_preference && (
+                        <p className="text-muted-foreground">{order.delivery_time_preference}</p>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm max-w-xs">
+                      <p>{getFullAddress(order)}</p>
+                      {order.delivery_instructions && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          Instructions: {order.delivery_instructions}
+                        </p>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm max-w-xs">
+                      {order.customer_notes ? (
+                        <p className="text-muted-foreground">{order.customer_notes}</p>
+                      ) : (
+                        <p className="text-muted-foreground italic">No notes</p>
+                      )}
+                    </div>
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    ${order.total_amount.toFixed(2)}
+                    <div className="text-xs text-muted-foreground">
+                      +${order.addons_total?.toFixed(2) || '0.00'} add-ons
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={getStatusBadgeVariant(order.status)}>
+                      {order.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge 
+                      variant={order.payment_status === 'paid' ? 'default' : 'secondary'}
                     >
-                      <Download className="h-4 w-4 mr-2" />
-                      Export Day
-                    </Button>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Seq</TableHead>
-                        <TableHead>Customer</TableHead>
-                        <TableHead>Address</TableHead>
-                        <TableHead>Items</TableHead>
-                        <TableHead>Amount</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead>Payment</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {day.orders.map((order) => (
-                        <TableRow key={order.id}>
-                          <TableCell className="font-mono text-sm">
-                            {order.delivery_sequence || '-'}
-                          </TableCell>
-                          <TableCell>
-                            <div>
-                              <p className="font-medium">{getCustomerName(order)}</p>
-                              {order.customer_email && (
-                                <p className="text-sm text-muted-foreground">{order.customer_email}</p>
-                              )}
-                              {order.customer_phone && (
-                                <p className="text-sm text-muted-foreground">{order.customer_phone}</p>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="max-w-xs">
-                              <p className="text-sm">{getFullAddress(order)}</p>
-                              {order.delivery_instructions && (
-                                <p className="text-xs text-muted-foreground mt-1">
-                                  Note: {order.delivery_instructions}
-                                </p>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="text-sm">
-                              {order.box_size && (
-                                <p className="font-medium">{order.box_size} box</p>
-                              )}
-                              {order.order_items.map((item, idx) => (
-                                <p key={idx} className="text-muted-foreground">
-                                  {item.quantity}x {item.product_name || item.products?.name || 'Unknown'}
-                                </p>
-                              ))}
-                            </div>
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            ${order.total_amount.toFixed(2)}
-                          </TableCell>
-                          <TableCell>
-                            <Badge variant={getStatusBadgeVariant(order.status)}>
-                              {order.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell>
-                            <Badge 
-                              variant={order.payment_status === 'paid' ? 'default' : 'secondary'}
-                            >
-                              {order.payment_status || 'unknown'}
-                            </Badge>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            ))
-          )}
-        </TabsContent>
-
-        <TabsContent value="all-orders" className="space-y-6">
-          {/* Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <div>
-              <Label htmlFor="search">Search Orders</Label>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input
-                  id="search"
-                  placeholder="Customer, email, or order ID..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-
-            <div>
-              <Label htmlFor="status">Status Filter</Label>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Statuses</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="confirmed">Confirmed</SelectItem>
-                  <SelectItem value="out_for_delivery">Out for Delivery</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
-                  <SelectItem value="cancelled">Cancelled</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="delivery-day">Delivery Day</Label>
-              <Select value={selectedDeliveryDay} onValueChange={setSelectedDeliveryDay}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Days</SelectItem>
-                  {deliveryDays.map((day) => (
-                    <SelectItem key={day.date} value={day.date}>
-                      {new Date(day.date).toLocaleDateString()}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex items-end">
-              <div className="text-sm text-muted-foreground">
-                Showing: {filteredOrders.length} orders
-                <br />
-                Value: ${filteredOrders.reduce((sum, order) => sum + order.total_amount, 0).toFixed(2)}
-              </div>
-            </div>
-          </div>
-
-          {/* Orders Table */}
-          <Card>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Order</TableHead>
-                    <TableHead>Customer</TableHead>
-                    <TableHead>Delivery</TableHead>
-                    <TableHead>Address</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Payment</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredOrders.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell>
-                        <div>
-                          <p className="font-mono text-sm">#{order.id.slice(0, 8)}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {new Date(order.order_date).toLocaleDateString()}
-                          </p>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium">{getCustomerName(order)}</p>
-                          {order.customer_email && (
-                            <p className="text-sm text-muted-foreground">{order.customer_email}</p>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <p className="text-sm">
-                            {order.delivery_date 
-                              ? new Date(order.delivery_date).toLocaleDateString()
-                              : 'Not scheduled'
-                            }
-                          </p>
-                          {order.delivery_sequence && (
-                            <p className="text-xs text-muted-foreground">Seq: {order.delivery_sequence}</p>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="max-w-xs">
-                          <p className="text-sm">{getFullAddress(order)}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        ${order.total_amount.toFixed(2)}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={getStatusBadgeVariant(order.status)}>
-                          {order.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge 
-                          variant={order.payment_status === 'paid' ? 'default' : 'secondary'}
-                        >
-                          {order.payment_status || 'unknown'}
-                        </Badge>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
-
+                      {order.payment_status || 'unknown'}
+                    </Badge>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          
           {filteredOrders.length === 0 && (
-            <Card>
-              <CardContent className="text-center py-8">
-                <p className="text-muted-foreground">No orders found matching your criteria.</p>
-              </CardContent>
-            </Card>
+            <div className="text-center py-8">
+              <p className="text-muted-foreground">No orders found matching your criteria.</p>
+            </div>
           )}
-        </TabsContent>
-      </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 };

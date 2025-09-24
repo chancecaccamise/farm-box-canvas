@@ -540,10 +540,13 @@ export type Database = {
           created_at: string
           customer_email: string | null
           customer_name: string | null
+          customer_notes: string | null
           customer_phone: string | null
           delivery_date: string | null
+          delivery_day_preference: string | null
           delivery_fee: number | null
           delivery_instructions: string | null
+          delivery_time_preference: string | null
           has_active_subscription: boolean | null
           id: string
           order_confirmation_number: string | null
@@ -559,7 +562,11 @@ export type Database = {
           stripe_session_id: string | null
           total_amount: number
           updated_at: string
+          user_carb_selections: string[] | null
+          user_full_farm_bag_carb: string | null
+          user_full_farm_bag_protein: string | null
           user_id: string
+          user_protein_selections: string[] | null
           week_end_date: string | null
           week_start_date: string | null
           weekly_bag_id: string | null
@@ -571,10 +578,13 @@ export type Database = {
           created_at?: string
           customer_email?: string | null
           customer_name?: string | null
+          customer_notes?: string | null
           customer_phone?: string | null
           delivery_date?: string | null
+          delivery_day_preference?: string | null
           delivery_fee?: number | null
           delivery_instructions?: string | null
+          delivery_time_preference?: string | null
           has_active_subscription?: boolean | null
           id?: string
           order_confirmation_number?: string | null
@@ -590,7 +600,11 @@ export type Database = {
           stripe_session_id?: string | null
           total_amount?: number
           updated_at?: string
+          user_carb_selections?: string[] | null
+          user_full_farm_bag_carb?: string | null
+          user_full_farm_bag_protein?: string | null
           user_id: string
+          user_protein_selections?: string[] | null
           week_end_date?: string | null
           week_start_date?: string | null
           weekly_bag_id?: string | null
@@ -602,10 +616,13 @@ export type Database = {
           created_at?: string
           customer_email?: string | null
           customer_name?: string | null
+          customer_notes?: string | null
           customer_phone?: string | null
           delivery_date?: string | null
+          delivery_day_preference?: string | null
           delivery_fee?: number | null
           delivery_instructions?: string | null
+          delivery_time_preference?: string | null
           has_active_subscription?: boolean | null
           id?: string
           order_confirmation_number?: string | null
@@ -621,7 +638,11 @@ export type Database = {
           stripe_session_id?: string | null
           total_amount?: number
           updated_at?: string
+          user_carb_selections?: string[] | null
+          user_full_farm_bag_carb?: string | null
+          user_full_farm_bag_protein?: string | null
           user_id?: string
+          user_protein_selections?: string[] | null
           week_end_date?: string | null
           week_start_date?: string | null
           weekly_bag_id?: string | null

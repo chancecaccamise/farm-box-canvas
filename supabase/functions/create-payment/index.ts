@@ -382,7 +382,7 @@ serve(async (req) => {
 
     logStep("Stripe session created", { sessionId: session.id, url: session.url });
 
-    // Create order record in database
+    // Create order record in database with enhanced data capture
     const orderData = {
       user_id: user.id,
       stripe_session_id: session.id,
@@ -397,7 +397,7 @@ serve(async (req) => {
       shipping_address_city: null, // Will be filled from Stripe checkout
       shipping_address_state: null, // Will be filled from Stripe checkout
       shipping_address_zip: null, // Will be filled from Stripe checkout
-      delivery_instructions: null, // Will be filled from Stripe checkout
+      delivery_instructions: checkoutState?.deliveryInstructions || null,
       box_size: checkoutState?.boxSize || actualWeeklyBag?.box_size || 'medium',
       box_price: boxPrice,
       addons_total: addonsTotal,
@@ -406,7 +406,15 @@ serve(async (req) => {
       week_start_date: actualWeeklyBag?.week_start_date || null,
       week_end_date: actualWeeklyBag?.week_end_date || null,
       order_type: 'subscription',
-      status: 'pending'
+      status: 'pending',
+      // New enhanced fields
+      delivery_day_preference: checkoutState?.deliveryDay || null,
+      delivery_time_preference: checkoutState?.deliveryMethod || null,
+      customer_notes: checkoutState?.comments || null,
+      user_protein_selections: actualWeeklyBag?.user_protein_selections || null,
+      user_carb_selections: actualWeeklyBag?.user_carb_selections || null,
+      user_full_farm_bag_protein: actualWeeklyBag?.user_full_farm_bag_protein || null,
+      user_full_farm_bag_carb: actualWeeklyBag?.user_full_farm_bag_carb || null
     };
 
     const { data: order, error: orderError } = await supabaseServiceClient
