@@ -17,7 +17,10 @@ interface OrderWithDetails {
   delivery_date: string | null;
   total_amount: number;
   status: string;
+  payment_status: string;
   order_type: string;
+  customer_name?: string;
+  customer_email?: string;
   order_items: {
     quantity: number;
     price: number;
@@ -78,6 +81,7 @@ export const AdminOrders = () => {
         'Order Date',
         'Delivery Date',
         'Status',
+        'Payment Status',
         'Order Type',
         'Total Amount',
         'Items'
@@ -91,6 +95,7 @@ export const AdminOrders = () => {
           new Date(order.order_date).toLocaleDateString(),
           order.delivery_date ? new Date(order.delivery_date).toLocaleDateString() : 'Not scheduled',
           order.status,
+          order.payment_status,
           order.order_type,
           `$${order.total_amount}`,
           `"${order.order_items.map(item => `${item.quantity}x ${item.products.name}`).join('; ')}"`,
@@ -121,7 +126,7 @@ export const AdminOrders = () => {
   };
 
   const getCustomerName = (order: OrderWithDetails) => {
-    return `Customer ${order.user_id.slice(0, 8)}`;
+    return order.customer_name || order.customer_email || `Customer ${order.user_id.slice(0, 8)}`;
   };
 
   const getFilteredOrders = () => {
@@ -138,10 +143,24 @@ export const AdminOrders = () => {
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
       case 'completed':
+      case 'confirmed':
         return 'default';
       case 'pending':
         return 'secondary';
       case 'cancelled':
+        return 'destructive';
+      default:
+        return 'outline';
+    }
+  };
+
+  const getPaymentStatusBadgeVariant = (paymentStatus: string) => {
+    switch (paymentStatus) {
+      case 'paid':
+        return 'default';
+      case 'pending':
+        return 'secondary';
+      case 'failed':
         return 'destructive';
       default:
         return 'outline';
@@ -191,6 +210,7 @@ export const AdminOrders = () => {
             <SelectContent>
               <SelectItem value="all">All Statuses</SelectItem>
               <SelectItem value="pending">Pending</SelectItem>
+              <SelectItem value="confirmed">Confirmed</SelectItem>
               <SelectItem value="completed">Completed</SelectItem>
               <SelectItem value="cancelled">Cancelled</SelectItem>
             </SelectContent>
@@ -229,11 +249,16 @@ export const AdminOrders = () => {
                   <h3 className="font-semibold text-lg">Order #{order.id.slice(0, 8)}</h3>
                   <p className="text-muted-foreground">Customer: {getCustomerName(order)}</p>
                 </div>
-                <div className="text-right">
-                  <Badge variant={getStatusBadgeVariant(order.status)}>
-                    {order.status}
-                  </Badge>
-                  <p className="text-sm text-muted-foreground mt-1">
+                <div className="text-right space-y-2">
+                  <div className="space-y-1">
+                    <Badge variant={getStatusBadgeVariant(order.status)}>
+                      {order.status}
+                    </Badge>
+                    <Badge variant={getPaymentStatusBadgeVariant(order.payment_status)} className="ml-2">
+                      {order.payment_status}
+                    </Badge>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
                     {order.order_type}
                   </p>
                 </div>
