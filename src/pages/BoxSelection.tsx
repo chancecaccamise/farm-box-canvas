@@ -8,12 +8,12 @@ import { useCheckout } from "@/contexts/CheckoutContext";
 import { supabase } from "@/integrations/supabase/client";
 
 type BoxType = "one-time" | "subscription";
-type BoxSize = "small" | "medium" | "large" | "protein-pack" | "full_farm_bag";
+type BoxSize = "small" | "medium" | "large" | "protein-pack" | "full_farm_bag" | "veggie_bag";
 
 const BoxSelection = () => {
   const { checkoutState, updateBoxType, updateBoxSize } = useCheckout();
   const [boxType, setBoxType] = useState<BoxType>(checkoutState.boxType);
-  const [boxSize, setBoxSize] = useState<BoxSize>(checkoutState.boxSize || "small");
+  const [boxSize, setBoxSize] = useState<BoxSize>(checkoutState.boxSize || "full_farm_bag");
   const [boxSizes, setBoxSizes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();

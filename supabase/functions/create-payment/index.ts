@@ -20,9 +20,27 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
+    // Get all Stripe Price IDs for the new box types
+    const priceVeggieBagWeekly = Deno.env.get("STRIPE_PRICE_ID_VEGGIE_BAG_WEEKLY");
+    const priceFullFarmBagWeekly = Deno.env.get("STRIPE_PRICE_ID_FULL_FARM_BAG_WEEKLY");
+    const priceProteinPackWeekly = Deno.env.get("STRIPE_PRICE_ID_PROTEIN_PACK_WEEKLY");
+    const priceVeggieBagOneTime = Deno.env.get("STRIPE_PRICE_ID_VEGGIE_BAG_ONETIME");
+    const priceFullFarmBagOneTime = Deno.env.get("STRIPE_PRICE_ID_FULL_FARM_BAG_ONETIME");
+    const priceProteinPackOneTime = Deno.env.get("STRIPE_PRICE_ID_PROTEIN_PACK_ONETIME");
+
+    // Keep legacy support for old naming
+    const priceSmall = Deno.env.get("STRIPE_PRICE_ID_SMALL_WEEKLY");
+    const priceMedium = Deno.env.get("STRIPE_PRICE_ID_MEDIUM_WEEKLY");
+    const priceLarge = Deno.env.get("STRIPE_PRICE_ID_LARGE_WEEKLY");
+
     const stripeKey = Deno.env.get("STRIPE_SECRET_KEY");
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
-    logStep("Stripe key verified");
+    
+    if (isSubscription && (!priceVeggieBagWeekly || !priceFullFarmBagWeekly || !priceProteinPackWeekly)) {
+      throw new Error("Missing Stripe price ID secrets for subscription mode");
+    }
+    
+    logStep("Stripe key and price IDs verified");
 
     // Use service role key for database operations
     const supabaseServiceClient = createClient(
@@ -222,8 +240,36 @@ serve(async (req) => {
     // Create line items for Stripe
     const lineItems = [];
 
-    // Add box if not subscription
-    if (!hasActiveSubscription && boxPrice > 0) {
+    // For subscription mode, use Stripe Price IDs for the box
+    if (isSubscription && boxPrice > 0) {
+      // Map box types to subscription Price IDs
+      const subscriptionPriceMap: Record<string, string | undefined> = {
+        veggie_bag: priceVeggieBagWeekly,
+        full_farm_bag: priceFullFarmBagWeekly,
+        'protein-pack': priceProteinPackWeekly,
+        'protein_pack': priceProteinPackWeekly, // Handle both naming conventions
+        // Legacy support
+        small: priceSmall || priceVeggieBagWeekly,
+        medium: priceMedium || priceFullFarmBagWeekly,
+        large: priceLarge || priceProteinPackWeekly,
+      };
+
+      const boxType = checkoutState?.boxSize || actualWeeklyBag?.box_size || 'full_farm_bag';
+      const stripePriceId = subscriptionPriceMap[boxType];
+      
+      if (!stripePriceId) {
+        throw new Error(`No subscription Price ID found for box type: ${boxType}`);
+      }
+
+      lineItems.push({
+        price: stripePriceId,
+        quantity: 1,
+      });
+      
+      logStep("Added subscription box item", { boxType, stripePriceId });
+    }
+    // For one-time payments or non-subscribers, use price_data
+    else if (!hasActiveSubscription && boxPrice > 0) {
       const boxName = actualWeeklyBag ? 
         `${actualWeeklyBag.box_size || 'Medium'} Farm Box - Week of ${new Date(actualWeeklyBag.week_start_date).toLocaleDateString()}` :
         `${checkoutState.boxSize?.charAt(0).toUpperCase() + checkoutState.boxSize?.slice(1) || 'Medium'} Farm Box`;
@@ -236,6 +282,8 @@ serve(async (req) => {
         },
         quantity: 1,
       });
+      
+      logStep("Added one-time box item", { boxName, boxPrice });
     }
 
     // Add add-ons (support both flows)
@@ -266,23 +314,36 @@ serve(async (req) => {
       }
     }
 
-    // Add delivery fee
-    lineItems.push({
-      price_data: {
-        currency: "usd",
-        product_data: { name: "Delivery Fee" },
-        unit_amount: Math.round(deliveryFee * 100),
-      },
-      quantity: 1,
-    });
+    // Add delivery fee (always use price_data for delivery fee, even in subscription mode)
+    if (deliveryFee > 0) {
+      lineItems.push({
+        price_data: {
+          currency: "usd",
+          product_data: { name: "Delivery Fee" },
+          unit_amount: Math.round(deliveryFee * 100),
+        },
+        quantity: 1,
+      });
+    }
 
     logStep("Created line items", { itemCount: lineItems.length });
 
-    // Validate that we're not mixing subscription mode with price_data
-    if (isSubscription && lineItems.some(item => item.price_data)) {
-      logStep("ERROR: Cannot use subscription mode with price_data objects");
-      throw new Error("Cannot use subscription mode with one-time price_data objects. Use recurring prices for subscriptions.");
+    // Updated validation - subscription mode can have price_data for add-ons and delivery
+    const hasOnlyPriceData = lineItems.every(item => item.price_data && !item.price);
+    const hasOnlyPriceIds = lineItems.every(item => item.price && !item.price_data);
+    const hasMixedItems = lineItems.some(item => item.price) && lineItems.some(item => item.price_data);
+    
+    if (isSubscription && hasOnlyPriceData) {
+      logStep("ERROR: Subscription mode requires at least one recurring price");
+      throw new Error("Subscription mode requires at least one recurring Stripe Price ID");
     }
+    
+    logStep("Validation passed", { 
+      isSubscription, 
+      hasOnlyPriceData, 
+      hasOnlyPriceIds, 
+      hasMixedItems 
+    });
 
     // Get the correct origin URL for redirects
     const origin = req.headers.get("origin") || req.headers.get("referer")?.split('/').slice(0, 3).join('/') || "https://f78f5142-250a-4339-adfa-6897bce152ea.lovableproject.com";
