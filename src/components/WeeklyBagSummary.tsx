@@ -19,6 +19,7 @@ interface WeeklyBagSummaryProps {
   } | null;
   itemCount: number;
   onCheckout: () => void;
+  onUnconfirm?: () => void;
   isLocked: boolean;
   loading: boolean;
   hasActiveSubscription?: boolean;
@@ -31,6 +32,7 @@ export function WeeklyBagSummary({
   weeklyBag, 
   itemCount, 
   onCheckout, 
+  onUnconfirm,
   isLocked, 
   loading,
   hasActiveSubscription = false,
@@ -272,9 +274,20 @@ export function WeeklyBagSummary({
                 <CheckCircle className="h-4 w-4" />
                 Bag Confirmed
               </div>
-              <div className="text-xs text-green-700">
+              <div className="text-xs text-green-700 mb-2">
                 Your bag is confirmed and ready for delivery.
               </div>
+              {/* Show unconfirm option if cutoff hasn't passed and onUnconfirm is provided */}
+              {!isLocked && onUnconfirm && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onUnconfirm}
+                  className="text-xs h-7 text-green-700 border-green-300 hover:bg-green-100"
+                >
+                  Unconfirm Bag
+                </Button>
+              )}
             </div>
           )}
 

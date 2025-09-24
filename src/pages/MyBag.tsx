@@ -8,6 +8,7 @@ import { BagItemCard } from "@/components/BagItemCard";
 import { ReadOnlyBagItem } from "@/components/ReadOnlyBagItem";
 import { AddOnsGrid } from "@/components/AddOnsGrid";
 import { StartFarmBoxJourney } from "@/components/StartFarmBoxJourney";
+import { UnconfirmBagDialog } from "@/components/UnconfirmBagDialog";
 import { Badge } from "@/components/ui/badge";
 
 interface WeeklyBag {
@@ -53,6 +54,8 @@ function MyBag() {
   const [hasPaidForThisWeek, setHasPaidForThisWeek] = useState<boolean>(false);
   const [hasPendingOrderThisWeek, setHasPendingOrderThisWeek] = useState<boolean>(false);
   const [templateStatus, setTemplateStatus] = useState<{hasTemplates: boolean, isConfirmed: boolean}>({hasTemplates: false, isConfirmed: false});
+  const [showUnconfirmDialog, setShowUnconfirmDialog] = useState(false);
+  const [unconfirmLoading, setUnconfirmLoading] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -404,6 +407,35 @@ function MyBag() {
     }
   };
 
+  const handleUnconfirmBag = async () => {
+    if (!currentWeekBag || !currentWeekBag.is_confirmed) return;
+
+    setUnconfirmLoading(true);
+    try {
+      const { error } = await supabase
+        .rpc('unconfirm_weekly_bag', { bag_id: currentWeekBag.id });
+
+      if (error) throw error;
+
+      toast({
+        title: "Bag Unconfirmed",
+        description: "Your bag has been unconfirmed and updated with the latest contents.",
+      });
+
+      // Refresh the bag data
+      await initializeCurrentWeekBag();
+    } catch (error) {
+      console.error("Error unconfirming bag:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to unconfirm bag. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setUnconfirmLoading(false);
+    }
+  };
+
   const getBoxItems = () => {
     return bagItems.filter(item => item.item_type === 'box_item');
   };
@@ -619,6 +651,7 @@ function MyBag() {
                   weeklyBag={currentWeekBag}
                   itemCount={bagItems.length}
                   onCheckout={handleCheckout}
+                  onUnconfirm={() => setShowUnconfirmDialog(true)}
                   isLocked={isLocked}
                   hasActiveSubscription={hasActiveSubscription}
                   loading={loading}
@@ -630,6 +663,17 @@ function MyBag() {
           </div>
         </div>
       </div>
+      
+      {/* Unconfirm Dialog */}
+      {currentWeekBag && (
+        <UnconfirmBagDialog
+          isOpen={showUnconfirmDialog}
+          onClose={() => setShowUnconfirmDialog(false)}
+          onConfirm={handleUnconfirmBag}
+          loading={unconfirmLoading}
+          boxSize={currentWeekBag.box_size}
+        />
+      )}
     </div>
   );
 }

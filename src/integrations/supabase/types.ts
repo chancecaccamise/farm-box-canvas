@@ -1395,6 +1395,10 @@ export type Database = {
         Args: { bag_id: string; box_size_name: string; week_start: string }
         Returns: undefined
       }
+      unconfirm_weekly_bag: {
+        Args: { bag_id: string }
+        Returns: undefined
+      }
       update_all_user_bags_for_template_change: {
         Args: {
           template_box_size: string
