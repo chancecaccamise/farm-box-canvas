@@ -10,22 +10,22 @@ import bellPeppers from "@/assets/bell-peppers.jpg";
 const FreshAddOns = () => {
   const addOnCategories = [
     {
-      name: "Fresh Catch",
-      description: "Daily fresh fish from local fishermen",
-      image: leafyGreens,
-      examples: "Salmon, Halibut, Dungeness Crab"
+      name: "Fresh Seafood & Proteins",
+      description: "Daily fresh catch from local fishermen",
+      image: "https://umfjwvucdqmzufczisca.supabase.co/storage/v1/object/public/product-images/products/gnyvhcnat4j-1758657183940.jpg",
+      examples: "Atlantic Scallops, GA Shrimp, Local Fish"
     },
     {
-      name: "Artisan Breads",
-      description: "Freshly baked from local bakeries",
-      image: tomatoes,
-      examples: "Sourdough, Focaccia, Seasonal Pastries"
+      name: "Artisan Pantry Items",
+      description: "Small-batch local treasures",
+      image: "https://umfjwvucdqmzufczisca.supabase.co/storage/v1/object/public/product-images/products/qzfpmtx6yn8-1758658017874.webp",
+      examples: "Wild Light Honey, Hot Sauces, Local Jams"
     },
     {
-      name: "Seasonal Specialties",
-      description: "Limited-time local treasures",
-      image: bellPeppers,
-      examples: "Local Honey, Preserved Goods, Herbs"
+      name: "Fresh Flowers & Herbs",
+      description: "Beautiful seasonal arrangements and extra herbs",
+      image: "https://umfjwvucdqmzufczisca.supabase.co/storage/v1/object/public/product-images/products/imy97712ge-1758658115305.png",
+      examples: "Mini Bouquet Arrangements, Fresh Herbs, Edible Flowers"
     }
   ];
 

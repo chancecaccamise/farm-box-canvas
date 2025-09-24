@@ -56,8 +56,8 @@ const Landing = () => {
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  Select Small, Medium, or Large based on your household size. 
-                  Each box is the perfect amount for your family.
+                  Select from Veggie Billy's Bag, Full Billy's Bag, or Protein Billy's Bag 
+                  based on your household size and dietary preferences.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -151,7 +151,7 @@ const Landing = () => {
               <img 
                 src={whychoosebillys} 
                 alt="Billy's hydroponic greenhouse operation" 
-                className="w-full h-full object-cover rounded-2xl shadow-lg"
+                className="w-full h-80 lg:h-96 object-cover object-center rounded-2xl shadow-lg"
               />
             </div>
           </div>

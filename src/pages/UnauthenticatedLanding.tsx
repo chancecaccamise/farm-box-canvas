@@ -58,8 +58,8 @@ const UnauthenticatedLanding = () => {
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  Choose your box size and select from seasonal produce, local proteins, 
-                  and artisan pantry items. Every item is sourced from our hydroponic farm.
+                  Choose from Veggie Billy's Bag, Full Billy's Bag, or Protein Billy's Bag 
+                  filled with seasonal produce, local proteins, and artisan pantry items.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -181,7 +181,7 @@ const UnauthenticatedLanding = () => {
                 <img 
                   src={whychoosebillys} 
                   alt="Billy's hydroponic greenhouse" 
-                  className="w-full h-full object-cover"
+                  className="w-full h-80 lg:h-96 object-cover object-center"
                 />
               </div>
             </div>
