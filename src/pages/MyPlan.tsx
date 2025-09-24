@@ -123,8 +123,8 @@ const MyPlan = () => {
         .limit(1)
         .single();
 
-      // If we have a recent paid order, use it for plan summary
-      if (recentOrderData && subData?.status === 'active') {
+      // If we have a recent paid order use it for plan summary (regardless of subscription status)
+      if (recentOrderData) {
         // Transform order data to match WeeklyBag interface for display
         const orderAsWeeklyBag = {
           ...recentOrderData,
