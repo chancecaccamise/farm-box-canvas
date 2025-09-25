@@ -10,9 +10,10 @@ import { AdminProducts } from '@/components/admin/AdminProducts';
 import { AdminBoxTemplates } from '@/components/admin/AdminBoxTemplates';
 import { EnhancedOrderManagement } from '@/components/admin/EnhancedOrderManagement';
 import { AdminFreshCatch } from '@/components/admin/AdminFreshCatch';
-import { AdminDeliveryAreas } from '@/components/admin/AdminDeliveryAreas';
+import { AdminRecentNews } from '@/components/admin/AdminRecentNews';
 import { AdminFormSubmissions } from '@/components/admin/AdminFormSubmissions';
 import { AdminGallery } from '@/components/admin/AdminGallery';
+import { AdminDeliveryAreas } from '@/components/admin/AdminDeliveryAreas';
 import { TestCleanup } from '@/components/TestCleanup';
 
 const Admin = () => {
@@ -73,7 +74,7 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="products" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-8">
+          <TabsList className="grid w-full grid-cols-9">
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               Products
@@ -89,6 +90,10 @@ const Admin = () => {
             <TabsTrigger value="fresh-catch" className="flex items-center gap-2">
               <Fish className="h-4 w-4" />
               Fresh Catch
+            </TabsTrigger>
+            <TabsTrigger value="recent-news" className="flex items-center gap-2">
+              <Flower className="h-4 w-4" />
+              Recent News
             </TabsTrigger>
             <TabsTrigger value="form-submissions" className="flex items-center gap-2">
               <Users className="h-4 w-4" />
@@ -127,6 +132,17 @@ const Admin = () => {
               </CardHeader>
               <CardContent>
                 <AdminFreshCatch />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="recent-news">
+            <Card>
+              <CardHeader>
+                <CardTitle>Recent News Management</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AdminRecentNews />
               </CardContent>
             </Card>
           </TabsContent>

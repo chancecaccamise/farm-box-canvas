@@ -94,6 +94,10 @@ const Navbar = () => {
               Fresh Catch
             </Link>
 
+            <Link to="/recent-news" className="text-foreground hover:text-primary transition-smooth font-medium">
+              Recent News
+            </Link>
+
             <Link to="/anas-flowers" className="text-foreground hover:text-primary transition-smooth font-medium">
               Ana's Arrangements
             </Link>
@@ -169,6 +173,12 @@ const Navbar = () => {
                     <Button variant="ghost" className="w-full justify-start" asChild>
                       <Link to="/fresh-catch" onClick={() => setMobileMenuOpen(false)}>
                         Fresh Catch
+                      </Link>
+                    </Button>
+
+                    <Button variant="ghost" className="w-full justify-start" asChild>
+                      <Link to="/recent-news" onClick={() => setMobileMenuOpen(false)}>
+                        Recent News
                       </Link>
                     </Button>
 

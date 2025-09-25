@@ -22,6 +22,7 @@ import FAQs from "./pages/FAQs";
 import GiftCards from "./pages/GiftCards";
 import SupportLocal from "./pages/SupportLocal";
 import FreshCatch from "./pages/FreshCatch";
+import RecentNews from "./pages/RecentNews";
 import BecomeAPartner from "./pages/BecomeAPartner";
 import AnasFlowers from "./pages/AnasFlowers";
 import Gallery from "./pages/Gallery";
@@ -86,6 +87,7 @@ const AppRoutes = () => {
         <Route path="/faqs" element={<FAQs />} />
         <Route path="/support-local" element={<SupportLocal />} />
         <Route path="/fresh-catch" element={<FreshCatch />} />
+        <Route path="/recent-news" element={<RecentNews />} />
         <Route path="/become-a-partner" element={<BecomeAPartner />} />
         <Route path="/partners/restaurants" element={<PartnerCategory category="restaurants" />} />
         <Route path="/partners/bakery" element={<PartnerCategory category="bakery" />} />
