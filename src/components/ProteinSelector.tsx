@@ -116,7 +116,8 @@ export function ProteinSelector({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="animate-pulse space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-pulse">
+            <div className="h-20 bg-muted rounded"></div>
             <div className="h-20 bg-muted rounded"></div>
             <div className="h-20 bg-muted rounded"></div>
             <div className="h-20 bg-muted rounded"></div>
@@ -138,7 +139,7 @@ export function ProteinSelector({
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {proteins.map((protein) => {
             const quantity = selectedProteins[protein.id] || 0;
             const isSelected = quantity > 0;
