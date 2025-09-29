@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Fish, Package } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -15,19 +14,19 @@ interface Product {
 
 interface ProteinSelectorProps {
   maxSelections?: number;
-  onSelectionChange: (selectedProteins: string[]) => void;
-  currentSelections?: string[];
+  onSelectionChange: (selectedProteins: Record<string, number>) => void;
+  currentSelections?: Record<string, number>;
   weekStartDate?: string;
 }
 
 export function ProteinSelector({ 
   maxSelections = 5, 
   onSelectionChange, 
-  currentSelections = [],
+  currentSelections = {},
   weekStartDate 
 }: ProteinSelectorProps) {
   const [proteins, setProteins] = useState<Product[]>([]);
-  const [selectedProteins, setSelectedProteins] = useState<string[]>(currentSelections);
+  const [selectedProteins, setSelectedProteins] = useState<Record<string, number>>(currentSelections);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
@@ -63,31 +62,47 @@ export function ProteinSelector({
     }
   };
 
-  const handleProteinToggle = (proteinId: string) => {
-    let newSelections = [...selectedProteins];
+  const getTotalCount = () => {
+    return Object.values(selectedProteins).reduce((sum, qty) => sum + qty, 0);
+  };
+
+  const increaseQuantity = (proteinId: string) => {
+    const currentQty = selectedProteins[proteinId] || 0;
+    const totalCount = getTotalCount();
     
-    if (newSelections.includes(proteinId)) {
-      newSelections = newSelections.filter(id => id !== proteinId);
-    } else {
-      if (maxSelections === 1) {
-        // For single selection, replace existing selection
-        newSelections = [proteinId];
-      } else {
-        // For multiple selections, check limit
-        if (newSelections.length >= maxSelections) {
-          toast({
-            title: "Maximum Selection Reached",
-            description: `You can select up to ${maxSelections} proteins for your pack.`,
-            variant: "destructive",
-          });
-          return;
-        }
-        newSelections.push(proteinId);
-      }
+    if (totalCount >= maxSelections) {
+      toast({
+        title: "Selection Limit Reached",
+        description: `You can only select ${maxSelections} proteins total.`,
+        variant: "destructive",
+      });
+      return;
     }
     
-    setSelectedProteins(newSelections);
-    onSelectionChange(newSelections);
+    const updatedSelections = {
+      ...selectedProteins,
+      [proteinId]: currentQty + 1
+    };
+    
+    setSelectedProteins(updatedSelections);
+    onSelectionChange(updatedSelections);
+  };
+
+  const decreaseQuantity = (proteinId: string) => {
+    const currentQty = selectedProteins[proteinId] || 0;
+    
+    if (currentQty <= 0) return;
+    
+    const updatedSelections = { ...selectedProteins };
+    
+    if (currentQty === 1) {
+      delete updatedSelections[proteinId];
+    } else {
+      updatedSelections[proteinId] = currentQty - 1;
+    }
+    
+    setSelectedProteins(updatedSelections);
+    onSelectionChange(updatedSelections);
   };
 
 
@@ -116,58 +131,80 @@ export function ProteinSelector({
       <CardHeader>
         <CardTitle className="flex items-center space-x-2">
           <Fish className="w-5 h-5 text-primary" />
-          <span>Select Your Proteins ({selectedProteins.length}/{maxSelections})</span>
+          <span>Select Your Proteins ({getTotalCount()}/{maxSelections})</span>
         </CardTitle>
         <p className="text-sm text-muted-foreground">
-          Choose {maxSelections} proteins from our weekly selection of premium meats and seafood
+          Choose {maxSelections} proteins from our weekly selection (you can select multiple of the same item)
         </p>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {proteins.map((protein) => (
-            <div 
-              key={protein.id} 
-              className={`border rounded-lg p-4 cursor-pointer transition-colors ${
-                selectedProteins.includes(protein.id) 
-                  ? 'border-primary bg-primary/5' 
-                  : 'border-muted hover:border-primary/50'
-              }`}
-              onClick={() => handleProteinToggle(protein.id)}
-            >
-              <div className="flex items-start space-x-3">
-                <Checkbox
-                  checked={selectedProteins.includes(protein.id)}
-                  onChange={() => handleProteinToggle(protein.id)}
-                  disabled={!selectedProteins.includes(protein.id) && selectedProteins.length >= maxSelections}
-                />
-                <div className="flex-1">
-                  <div className="mb-2">
-                    <h3 className="font-medium">{protein.name}</h3>
+        <div className="grid grid-cols-1 gap-4">
+          {proteins.map((protein) => {
+            const quantity = selectedProteins[protein.id] || 0;
+            const isSelected = quantity > 0;
+            
+            return (
+              <div 
+                key={protein.id} 
+                className={`border-2 rounded-lg p-4 transition-colors ${
+                  isSelected 
+                    ? 'border-primary bg-primary/5' 
+                    : 'border-border'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-lg">{protein.name}</h3>
                     {protein.unit_description && (
                       <div className="text-sm text-muted-foreground mt-1">
                         {protein.unit_description}
                       </div>
                     )}
+                    {protein.description && (
+                      <p className="text-sm text-muted-foreground mt-2">
+                        {protein.description}
+                      </p>
+                    )}
                   </div>
-                  {protein.description && (
-                    <p className="text-sm text-muted-foreground mb-2">
-                      {protein.description}
-                    </p>
-                  )}
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => decreaseQuantity(protein.id)}
+                      disabled={quantity === 0}
+                      className="h-10 w-10"
+                    >
+                      -
+                    </Button>
+                    <span className="text-lg font-semibold min-w-[2rem] text-center">
+                      {quantity}
+                    </span>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="icon"
+                      onClick={() => increaseQuantity(protein.id)}
+                      disabled={getTotalCount() >= maxSelections}
+                      className="h-10 w-10"
+                    >
+                      +
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
-        {selectedProteins.length > 0 && (
+        {getTotalCount() > 0 && (
           <div className="border-t pt-4">
             <div className="text-sm text-muted-foreground">
-              {selectedProteins.length < maxSelections && (
-                <p>You can select {maxSelections - selectedProteins.length} more protein{maxSelections - selectedProteins.length !== 1 ? 's' : ''}.</p>
+              {getTotalCount() < maxSelections && (
+                <p>You can select {maxSelections - getTotalCount()} more protein{maxSelections - getTotalCount() !== 1 ? 's' : ''}.</p>
               )}
-              {selectedProteins.length === maxSelections && (
-                <p className="text-green-600">Perfect! You've selected all {maxSelections} proteins for your pack.</p>
+              {getTotalCount() === maxSelections && (
+                <p className="text-primary font-medium">✓ Perfect! You've selected all {maxSelections} proteins for your pack.</p>
               )}
             </div>
           </div>

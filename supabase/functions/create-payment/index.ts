@@ -12,6 +12,23 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CREATE-PAYMENT] ${step}${detailsStr}`);
 };
 
+// Helper function to expand quantity map to array of IDs
+const expandQuantitiesToArray = (quantities: Record<string, number> | string[]): string[] => {
+  // Handle legacy array format
+  if (Array.isArray(quantities)) {
+    return quantities;
+  }
+  
+  // Handle new Record format
+  const result: string[] = [];
+  for (const [id, qty] of Object.entries(quantities)) {
+    for (let i = 0; i < qty; i++) {
+      result.push(id);
+    }
+  }
+  return result;
+};
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -121,9 +138,9 @@ serve(async (req) => {
     if (actualWeeklyBag && checkoutState) {
       const updateData: any = {};
       
-      // Store protein selections for protein pack
-      if (checkoutState.boxSize === 'protein-pack' && checkoutState.proteinSelections?.length > 0) {
-        updateData.user_protein_selections = checkoutState.proteinSelections;
+      // Store protein selections for protein pack (expand quantities to array)
+      if (checkoutState.boxSize === 'protein-pack' && checkoutState.proteinSelections) {
+        updateData.user_protein_selections = expandQuantitiesToArray(checkoutState.proteinSelections);
       }
       
       // Store full farm bag selections
@@ -411,7 +428,7 @@ serve(async (req) => {
       delivery_day_preference: checkoutState?.deliveryDay || null,
       delivery_time_preference: checkoutState?.deliveryMethod || null,
       customer_notes: checkoutState?.comments || null,
-      user_protein_selections: checkoutState?.proteinSelections || actualWeeklyBag?.user_protein_selections || null,
+      user_protein_selections: checkoutState?.proteinSelections ? expandQuantitiesToArray(checkoutState?.proteinSelections) : actualWeeklyBag?.user_protein_selections || null,
       user_carb_selections: checkoutState?.carbSelections || actualWeeklyBag?.user_carb_selections || null,
       user_full_farm_bag_protein: checkoutState?.fullFarmBagSelections?.protein || actualWeeklyBag?.user_full_farm_bag_protein || null,
       user_full_farm_bag_carb: checkoutState?.fullFarmBagSelections?.carb || actualWeeklyBag?.user_full_farm_bag_carb || null

@@ -24,9 +24,10 @@ const FullFarmBagSelection = () => {
     }
   }, [checkoutState.fullFarmBagSelections]);
 
-  const handleProteinSelectionChange = (proteins: string[]) => {
-    const protein = proteins[0] || '';
-    setSelectedProtein(protein);
+  const handleProteinSelectionChange = (proteins: Record<string, number>) => {
+    // Get the first (and only) protein ID
+    const proteinId = Object.keys(proteins)[0] || '';
+    setSelectedProtein(proteinId);
   };
 
   const handleCarbSelectionChange = (carbs: string[]) => {
@@ -82,7 +83,7 @@ const FullFarmBagSelection = () => {
             <ProteinSelector
               maxSelections={1}
               onSelectionChange={handleProteinSelectionChange}
-              currentSelections={selectedProtein ? [selectedProtein] : []}
+              currentSelections={selectedProtein ? { [selectedProtein]: 1 } : {}}
             />
           </div>
 

@@ -7,7 +7,7 @@ import { useCheckout } from "@/contexts/CheckoutContext";
 import { ProteinSelector } from "@/components/ProteinSelector";
 
 const FullFarmBagProteinSelection = () => {
-  const [selectedProteins, setSelectedProteins] = useState<string[]>([]);
+  const [selectedProteins, setSelectedProteins] = useState<Record<string, number>>({});
   const navigate = useNavigate();
   const { toast } = useToast();
   const { updateFullFarmBagSelections, checkoutState } = useCheckout();
@@ -15,16 +15,21 @@ const FullFarmBagProteinSelection = () => {
   useEffect(() => {
     // Initialize with existing selections from checkout context
     if (checkoutState.fullFarmBagSelections?.protein) {
-      setSelectedProteins([checkoutState.fullFarmBagSelections.protein]);
+      setSelectedProteins({ [checkoutState.fullFarmBagSelections.protein]: 1 });
     }
   }, [checkoutState.fullFarmBagSelections]);
 
-  const handleSelectionChange = (proteins: string[]) => {
+  const handleSelectionChange = (proteins: Record<string, number>) => {
     setSelectedProteins(proteins);
   };
 
+  const getTotalCount = () => {
+    return Object.values(selectedProteins).reduce((sum, qty) => sum + qty, 0);
+  };
+
   const handleContinue = () => {
-    if (selectedProteins.length !== 1) {
+    const totalCount = getTotalCount();
+    if (totalCount !== 1) {
       toast({
         title: "Selection Required",
         description: "Please select exactly 1 protein for your full farm bag.",
@@ -33,11 +38,14 @@ const FullFarmBagProteinSelection = () => {
       return;
     }
 
+    // Get the first (and only) protein ID
+    const proteinId = Object.keys(selectedProteins)[0];
+    
     // Update fullFarmBagSelections with protein, preserve existing carb
     const currentSelections = checkoutState.fullFarmBagSelections || {};
     updateFullFarmBagSelections({ 
       ...currentSelections, 
-      protein: selectedProteins[0] 
+      protein: proteinId 
     });
     navigate("/full-farm-bag-carb-selection");
   };
@@ -80,9 +88,9 @@ const FullFarmBagProteinSelection = () => {
             variant="hero"
             size="xl"
             className="w-full md:w-auto"
-            disabled={selectedProteins.length !== 1}
+            disabled={getTotalCount() !== 1}
           >
-            Continue to Carb Selection ({selectedProteins.length}/1 selected)
+            Continue to Carb Selection ({getTotalCount()}/1 selected)
           </Button>
           <p className="text-sm text-muted-foreground mt-4">
             You must select exactly 1 protein to continue.

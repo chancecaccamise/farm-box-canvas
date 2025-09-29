@@ -7,25 +7,30 @@ import { useCheckout } from "@/contexts/CheckoutContext";
 import { ProteinSelector } from "@/components/ProteinSelector";
 
 const ProteinSelection = () => {
-  const [selectedProteins, setSelectedProteins] = useState<string[]>([]);
+  const [selectedProteins, setSelectedProteins] = useState<Record<string, number>>({});
   const navigate = useNavigate();
   const { toast } = useToast();
   const { updateProteinSelections, checkoutState } = useCheckout();
 
   useEffect(() => {
     // Initialize with existing selections from checkout context
-    setSelectedProteins(checkoutState.proteinSelections || []);
+    setSelectedProteins(checkoutState.proteinSelections || {});
   }, [checkoutState.proteinSelections]);
 
-  const handleSelectionChange = (proteins: string[]) => {
+  const handleSelectionChange = (proteins: Record<string, number>) => {
     setSelectedProteins(proteins);
   };
 
+  const getTotalCount = () => {
+    return Object.values(selectedProteins).reduce((sum, qty) => sum + qty, 0);
+  };
+
   const handleContinue = () => {
-    if (selectedProteins.length !== 5) {
+    const totalCount = getTotalCount();
+    if (totalCount !== 5) {
       toast({
         title: "Selection Required",
-        description: "Please select exactly 5 proteins for your seafood pack.",
+        description: `Please select exactly 5 proteins for your seafood pack. Currently selected: ${totalCount}`,
         variant: "destructive",
       });
       return;
@@ -73,9 +78,9 @@ const ProteinSelection = () => {
             variant="hero"
             size="xl"
             className="w-full md:w-auto"
-            disabled={selectedProteins.length !== 5}
+            disabled={getTotalCount() !== 5}
           >
-            Continue to Special Requests ({selectedProteins.length}/5 selected)
+            Continue to Special Requests ({getTotalCount()}/5 selected)
           </Button>
           <p className="text-sm text-muted-foreground mt-4">
             You must select exactly 5 proteins to continue.

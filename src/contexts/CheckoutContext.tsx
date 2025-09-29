@@ -5,7 +5,7 @@ interface CheckoutState {
   boxSize: 'small' | 'medium' | 'large' | 'protein-pack' | 'full_farm_bag' | 'veggie_bag';
   selectedItems: Record<string, number>;
   addOns: Record<string, number>; // Changed to Record<string, number> for quantities
-  proteinSelections: string[]; // Array of selected protein IDs
+  proteinSelections: Record<string, number>; // Map of protein ID to quantity
   carbSelections: string[]; // Array of selected carb IDs
   fullFarmBagSelections: { protein?: string; carb?: string }; // Full farm bag selections
   comments: string; // Comments/requests for Billy & Ana
@@ -20,7 +20,7 @@ interface CheckoutContextType {
   updateBoxSize: (size: 'small' | 'medium' | 'large' | 'protein-pack' | 'full_farm_bag' | 'veggie_bag') => void;
   updateSelectedItems: (items: Record<string, number>) => void;
   updateAddOns: (addOns: Record<string, number>) => void; // Updated type
-  updateProteinSelections: (proteins: string[]) => void;
+  updateProteinSelections: (proteins: Record<string, number>) => void;
   updateCarbSelections: (carbs: string[]) => void;
   updateFullFarmBagSelections: (selections: { protein?: string; carb?: string }) => void;
   updateComments: (comments: string) => void;
@@ -35,7 +35,7 @@ const initialState: CheckoutState = {
   boxSize: 'full_farm_bag', // Use the most popular box as default
   selectedItems: {},
   addOns: {}, // Changed to empty object
-  proteinSelections: [], // Empty array for protein selections
+  proteinSelections: {}, // Empty object for protein selections with quantities
   carbSelections: [], // Empty array for carb selections
   fullFarmBagSelections: {}, // Empty object for full farm bag selections
   comments: '', // Empty string for comments
@@ -77,7 +77,7 @@ export const CheckoutProvider: React.FC<CheckoutProviderProps> = ({ children }) 
     setCheckoutState(prev => ({ ...prev, addOns }));
   };
 
-  const updateProteinSelections = (proteins: string[]) => {
+  const updateProteinSelections = (proteins: Record<string, number>) => {
     setCheckoutState(prev => ({ ...prev, proteinSelections: proteins }));
   };
 
