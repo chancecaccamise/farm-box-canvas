@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Calendar, Truck, CheckCircle, MapPin, Store } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCheckout } from "@/contexts/CheckoutContext";
+import { format, startOfWeek, addDays } from "date-fns";
 
 type DeliveryDay = {
   id: string;
@@ -14,6 +15,45 @@ type DeliveryDay = {
   popular?: boolean;
 };
 
+const getCurrentWeekDeliveryDays = (): DeliveryDay[] => {
+  // Get the start of the current week (Sunday)
+  const weekStart = startOfWeek(new Date(), { weekStartsOn: 0 }); // 0 = Sunday
+  
+  // If today is past Thursday, show next week's dates
+  const today = new Date();
+  const currentDayOfWeek = today.getDay(); // 0 = Sunday, 4 = Thursday
+  
+  // If we're on Friday (5) or Saturday (6), or it's past Thursday, show next week
+  const needsNextWeek = currentDayOfWeek >= 5;
+  
+  const adjustedWeekStart = needsNextWeek ? addDays(weekStart, 7) : weekStart;
+  const thursday = addDays(adjustedWeekStart, 4);
+  const saturday = addDays(adjustedWeekStart, 6);
+  const sunday = addDays(adjustedWeekStart, 7); // Next Sunday
+  
+  return [
+    {
+      id: "thursday",
+      day: "Thursday",
+      date: format(thursday, "MMM d"),
+      available: true,
+    },
+    {
+      id: "saturday",
+      day: "Saturday",
+      date: format(saturday, "MMM d"),
+      available: true,
+      popular: true, // Most popular is now Saturday
+    },
+    {
+      id: "sunday",
+      day: "Sunday",
+      date: format(sunday, "MMM d"),
+      available: true,
+    },
+  ];
+};
+
 const Delivery = () => {
   const [selectedDay, setSelectedDay] = useState<string>("");
   const [selectedMethod, setSelectedMethod] = useState<string>("delivery");
@@ -21,28 +61,7 @@ const Delivery = () => {
   const { checkoutState, updateDeliveryDay, updateDeliveryMethod } = useCheckout();
 
   // Delivery options limited to Thursday, Saturday, and Sunday
-  const deliveryDays: DeliveryDay[] = [
-    {
-      id: "thursday",
-      day: "Thursday", 
-      date: "Jan 18",
-      available: true,
-      popular: true
-    },
-    {
-      id: "saturday",
-      day: "Saturday",
-      date: "Jan 20",
-      available: true
-    },
-    {
-      id: "sunday",
-      day: "Sunday",
-      date: "Jan 21",
-      available: true,
-      popular: true
-    }
-  ];
+  const deliveryDays: DeliveryDay[] = getCurrentWeekDeliveryDays();
 
   const handleContinue = () => {
     if (!selectedDay) return;
