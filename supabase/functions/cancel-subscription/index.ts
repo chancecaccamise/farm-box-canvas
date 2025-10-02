@@ -64,6 +64,7 @@ serve(async (req) => {
 
     let cancelledStripeSubId: string | null = null;
     let stripeCustomerId: string | null = null;
+    let stripeCancellationSucceeded = false;
 
     if (subscription) {
       logStep("Found active subscription in DB", { subscriptionId: subscription.id });
@@ -87,10 +88,26 @@ serve(async (req) => {
           stripeSubId = String(subscription.stripe_subscription_id);
         }
         
-        logStep("Canceling Stripe subscription", { stripeSubId });
-        await stripe.subscriptions.cancel(stripeSubId);
-        logStep("Stripe subscription canceled");
-        cancelledStripeSubId = stripeSubId;
+        try {
+          logStep("Canceling Stripe subscription", { stripeSubId });
+          // Add idempotency key to prevent duplicate cancellations
+          await stripe.subscriptions.cancel(stripeSubId, {
+            idempotencyKey: `cancel-${stripeSubId}-${user.id}-${Date.now()}`
+          });
+          stripeCancellationSucceeded = true;
+          logStep("Stripe subscription canceled successfully");
+          cancelledStripeSubId = stripeSubId;
+        } catch (stripeError: any) {
+          // If subscription is already canceled in Stripe, consider it a success
+          if (stripeError.code === 'resource_missing' || stripeError.message?.includes('No such subscription')) {
+            logStep("Subscription already canceled in Stripe", { stripeSubId });
+            stripeCancellationSucceeded = true;
+            cancelledStripeSubId = stripeSubId;
+          } else {
+            logStep("Error canceling Stripe subscription", { error: stripeError.message });
+            throw new Error(`Failed to cancel Stripe subscription: ${stripeError.message}`);
+          }
+        }
       } else {
         // Fallback: try to find an active subscription at Stripe
         const customers = await stripe.customers.list({ email: user.email!, limit: 1 });
@@ -98,33 +115,48 @@ serve(async (req) => {
           const customerId = customers.data[0].id;
           const activeSubs = await stripe.subscriptions.list({ customer: customerId, status: "active", limit: 1 });
           if (activeSubs.data.length > 0) {
-            await stripe.subscriptions.cancel(activeSubs.data[0].id);
-            cancelledStripeSubId = activeSubs.data[0].id;
-            stripeCustomerId = customerId;
-            logStep("Stripe subscription found and canceled by lookup", { stripeSubId: cancelledStripeSubId });
+            try {
+              await stripe.subscriptions.cancel(activeSubs.data[0].id, {
+                idempotencyKey: `cancel-${activeSubs.data[0].id}-${user.id}-${Date.now()}`
+              });
+              stripeCancellationSucceeded = true;
+              cancelledStripeSubId = activeSubs.data[0].id;
+              stripeCustomerId = customerId;
+              logStep("Stripe subscription found and canceled by lookup", { stripeSubId: cancelledStripeSubId });
+            } catch (stripeError: any) {
+              logStep("Error canceling Stripe subscription via lookup", { error: stripeError.message });
+              throw new Error(`Failed to cancel Stripe subscription: ${stripeError.message}`);
+            }
           }
         }
       }
 
-      // Update local subscription record
-      const { error: updateError } = await supabaseServiceClient
-        .from("user_subscriptions")
-        .update({
-          status: "cancelled",
-          cancelled_at: new Date().toISOString(),
-          cancellation_reason: reason,
-          updated_at: new Date().toISOString(),
-          stripe_subscription_id: cancelledStripeSubId ?? subscription.stripe_subscription_id ?? null,
-          stripe_customer_id: stripeCustomerId ?? subscription.stripe_customer_id ?? null,
-        })
-        .eq("id", subscription.id);
+      // Only update database if Stripe cancellation succeeded
+      if (stripeCancellationSucceeded) {
+        const { error: updateError } = await supabaseServiceClient
+          .from("user_subscriptions")
+          .update({
+            status: "cancelled",
+            cancelled_at: new Date().toISOString(),
+            cancellation_reason: reason,
+            updated_at: new Date().toISOString(),
+            stripe_subscription_id: cancelledStripeSubId ?? subscription.stripe_subscription_id ?? null,
+            stripe_customer_id: stripeCustomerId ?? subscription.stripe_customer_id ?? null,
+          })
+          .eq("id", subscription.id);
 
-      if (updateError) {
-        logStep("Error updating subscription", { error: updateError });
-        throw new Error(`Failed to update subscription: ${updateError.message}`);
+        if (updateError) {
+          logStep("CRITICAL: Stripe canceled but DB update failed", { error: updateError });
+          // Note: We cannot rollback Stripe cancellation, but we log this critical issue
+          // The webhook should eventually sync this state
+          throw new Error(`Failed to update subscription in database: ${updateError.message}`);
+        }
+
+        logStep("Subscription cancelled successfully (from DB record)", { 
+          hadReason: !!reason,
+          stripeId: cancelledStripeSubId 
+        });
       }
-
-      logStep("Subscription cancelled successfully (from DB record)");
     } else {
       // No local active record - attempt to find and cancel via Stripe
       logStep("No local active subscription found, searching Stripe");
@@ -140,9 +172,16 @@ serve(async (req) => {
       }
 
       const activeSub = activeSubs.data[0];
-      await stripe.subscriptions.cancel(activeSub.id);
-      cancelledStripeSubId = activeSub.id;
-      logStep("Stripe subscription canceled (no local record)", { stripeSubId: cancelledStripeSubId });
+      try {
+        await stripe.subscriptions.cancel(activeSub.id, {
+          idempotencyKey: `cancel-${activeSub.id}-${user.id}-${Date.now()}`
+        });
+        cancelledStripeSubId = activeSub.id;
+        logStep("Stripe subscription canceled (no local record)", { stripeSubId: cancelledStripeSubId });
+      } catch (stripeError: any) {
+        logStep("Error canceling Stripe subscription (no local record)", { error: stripeError.message });
+        throw new Error(`Failed to cancel Stripe subscription: ${stripeError.message}`);
+      }
 
       // Upsert local record to reflect cancellation
       const { error: upsertError } = await supabaseServiceClient

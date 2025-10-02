@@ -285,13 +285,32 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription, supab
     else if (status === 'incomplete') subscriptionStatus = 'paused';
     else if (status === 'unpaid') subscriptionStatus = 'paused';
 
+    // Get existing subscription data to preserve user-provided cancellation details
+    const { data: existingSub } = await supabase
+      .from("user_subscriptions")
+      .select("cancelled_at, cancellation_reason")
+      .eq("stripe_subscription_id", subscription.id)
+      .maybeSingle();
+
     const updateData: any = {
       status: subscriptionStatus,
       updated_at: new Date().toISOString()
     };
 
     if (subscriptionStatus === 'cancelled') {
-      updateData.cancelled_at = new Date().toISOString();
+      // Preserve existing cancellation data if it was set by the edge function
+      // Only overwrite if not already set (webhook arrived first)
+      if (!existingSub?.cancelled_at) {
+        updateData.cancelled_at = new Date().toISOString();
+      }
+      // Preserve cancellation_reason if it exists (user-provided via cancel-subscription function)
+      if (!existingSub?.cancellation_reason) {
+        updateData.cancellation_reason = subscription.cancellation_details?.reason || null;
+      }
+      logStep("Preserving cancellation details", { 
+        hasExistingReason: !!existingSub?.cancellation_reason,
+        hasExistingTimestamp: !!existingSub?.cancelled_at
+      });
     }
 
     const { error } = await supabase
