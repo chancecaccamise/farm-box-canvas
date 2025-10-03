@@ -165,50 +165,88 @@ serve(async (req) => {
 
       logStep("Order updated successfully", { sessionId: session.id, orderId: existingOrder.id });
 
-      // Also confirm the weekly bag if this was an add-on purchase for a subscriber
-      // Get weekly_bag_id from order record if not in metadata
-      let weeklyBagId = fullSession.metadata?.weekly_bag_id;
-      if (!weeklyBagId || weeklyBagId === 'checkout-only') {
-        // Try to get from the order record we just updated
-        const { data: orderRecord } = await supabase
-          .from("orders")
-          .select("weekly_bag_id")
-          .eq("stripe_session_id", session.id)
-          .single();
-        weeklyBagId = orderRecord?.weekly_bag_id;
+      // Get order details including user selections and weekly_bag_id
+      const { data: orderRecord, error: orderFetchError } = await supabase
+        .from("orders")
+        .select("weekly_bag_id, box_size, week_start_date, user_protein_selections, user_carb_selections, user_full_farm_bag_protein, user_full_farm_bag_carb")
+        .eq("stripe_session_id", session.id)
+        .single();
+      
+      if (orderFetchError) {
+        logStep("WARNING: Failed to fetch order for bag repopulation", { error: orderFetchError });
       }
       
+      const weeklyBagId = orderRecord?.weekly_bag_id;
       const hasActiveSubscription = fullSession.metadata?.has_active_subscription === 'true';
       
-      if (weeklyBagId && weeklyBagId !== 'checkout-only' && hasActiveSubscription) {
-        logStep("Confirming weekly bag for subscriber add-on purchase", { weeklyBagId });
+      // Repopulate bag with user selections for all new purchases (subscription or one-time)
+      if (weeklyBagId && weeklyBagId !== 'checkout-only' && orderRecord) {
+        logStep("Processing weekly bag after payment", { weeklyBagId, boxSize: orderRecord.box_size });
         
-        const { error: bagError } = await supabase
-          .from("weekly_bags")
-          .update({
-            is_confirmed: true,
-            confirmed_at: new Date().toISOString()
-          })
-          .eq("id", weeklyBagId);
+        // Update weekly bag with user selections from order
+        const bagUpdateData: any = {};
+        
+        if (orderRecord.box_size === 'protein-pack' && orderRecord.user_protein_selections) {
+          bagUpdateData.user_protein_selections = orderRecord.user_protein_selections;
+        }
+        
+        if (orderRecord.box_size === 'full_farm_bag') {
+          if (orderRecord.user_full_farm_bag_protein) {
+            bagUpdateData.user_full_farm_bag_protein = orderRecord.user_full_farm_bag_protein;
+          }
+          if (orderRecord.user_full_farm_bag_carb) {
+            bagUpdateData.user_full_farm_bag_carb = orderRecord.user_full_farm_bag_carb;
+          }
+        }
+        
+        // Confirm bag for subscribers
+        if (hasActiveSubscription) {
+          bagUpdateData.is_confirmed = true;
+          bagUpdateData.confirmed_at = new Date().toISOString();
+        }
+        
+        // Update the bag with selections and confirmation status
+        if (Object.keys(bagUpdateData).length > 0) {
+          const { error: bagError } = await supabase
+            .from("weekly_bags")
+            .update(bagUpdateData)
+            .eq("id", weeklyBagId);
 
-        if (bagError) {
-          logStep("WARNING: Failed to confirm weekly bag", { error: bagError, weeklyBagId });
+          if (bagError) {
+            logStep("WARNING: Failed to update weekly bag", { error: bagError, weeklyBagId });
+          } else {
+            logStep("Weekly bag updated with selections", { weeklyBagId, updates: bagUpdateData });
+          }
+        }
+        
+        // Repopulate bag items with user selections
+        const { error: populateError } = await supabase
+          .rpc('populate_weekly_bag_from_template', {
+            bag_id: weeklyBagId,
+            box_size_name: orderRecord.box_size,
+            week_start: orderRecord.week_start_date
+          });
+        
+        if (populateError) {
+          logStep("WARNING: Failed to repopulate bag", { error: populateError, weeklyBagId });
         } else {
-          logStep("Weekly bag confirmed successfully", { weeklyBagId });
+          logStep("Bag repopulated successfully with user selections", { weeklyBagId });
         }
 
-        // Mark add-on items as paid for this weekly bag
-        const { error: updateItemsError } = await supabase
-          .from("weekly_bag_items")
-          .update({ is_paid: true })
-          .eq("weekly_bag_id", weeklyBagId)
-          .eq("item_type", "addon")
-          .eq("is_paid", false); // Only update unpaid items
+        // Mark add-on items as paid for subscribers
+        if (hasActiveSubscription) {
+          const { error: updateItemsError } = await supabase
+            .from("weekly_bag_items")
+            .update({ is_paid: true })
+            .eq("weekly_bag_id", weeklyBagId)
+            .eq("item_type", "addon")
+            .eq("is_paid", false);
 
-        if (updateItemsError) {
-          logStep("WARNING: Failed to mark add-ons as paid", { error: updateItemsError, weeklyBagId });
-        } else {
-          logStep("Add-ons marked as paid successfully", { weeklyBagId });
+          if (updateItemsError) {
+            logStep("WARNING: Failed to mark add-ons as paid", { error: updateItemsError, weeklyBagId });
+          } else {
+            logStep("Add-ons marked as paid successfully", { weeklyBagId });
+          }
         }
       }
     } else if (event.type === "customer.subscription.created") {
