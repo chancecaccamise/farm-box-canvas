@@ -14,11 +14,20 @@ interface OrderInsightsData {
   totalRevenue: number;
   totalOrders: number;
   activeSubscriptions: number;
+  pausedSubscriptions: number;
+  cancelledSubscriptions: number;
   averageOrderValue: number;
+  cancellationRate: number;
+  monthlyRecurringRevenue: number;
+  subscriptionRevenue: number;
+  oneTimeRevenue: number;
   dailyOrders: Array<{ date: string; orders: number }>;
   revenueByBoxSize: Array<{ boxSize: string; revenue: number }>;
   subscriptionHealth: Array<{ status: string; count: number }>;
   monthlyGrowth: Array<{ month: string; revenue: number; orders: number }>;
+  cancellationsByReason: Array<{ reason: string; count: number }>;
+  revenueByType: Array<{ type: string; revenue: number }>;
+  subscriptionTypeBreakdown: Array<{ type: string; count: number }>;
 }
 
 const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))', '#8884d8'];
@@ -56,20 +65,64 @@ export const OrderInsights = () => {
 
       if (ordersError) throw ordersError;
 
-      // Fetch subscriptions
-      const { data: subscriptions, error: subsError } = await supabase
+      // Fetch ALL subscriptions (not just active)
+      const { data: allSubscriptions, error: subsError } = await supabase
         .from('user_subscriptions')
-        .select('*')
-        .eq('status', 'active');
+        .select('*');
 
       if (subsError) throw subsError;
 
-      // Calculate KPIs - using orders as primary source
+      // Fetch box sizes for MRR calculation
+      const { data: boxSizes, error: boxSizesError } = await supabase
+        .from('box_sizes')
+        .select('*');
+
+      if (boxSizesError) throw boxSizesError;
+
+      // Calculate subscription counts by status
+      const activeSubscriptions = allSubscriptions?.filter(s => s.status === 'active').length || 0;
+      const pausedSubscriptions = allSubscriptions?.filter(s => s.status === 'paused').length || 0;
+      const cancelledSubscriptions = allSubscriptions?.filter(s => s.status === 'cancelled').length || 0;
+      const totalSubscriptions = allSubscriptions?.length || 0;
+
+      // Calculate cancellation rate
+      const cancellationRate = totalSubscriptions > 0 
+        ? (cancelledSubscriptions / totalSubscriptions) * 100 
+        : 0;
+
+      // Calculate MRR (Monthly Recurring Revenue) from active subscriptions
+      let monthlyRecurringRevenue = 0;
+      const boxSizeMap = new Map(boxSizes?.map(bs => [bs.name, bs.subscriber_price || bs.base_price]) || []);
+      
+      allSubscriptions?.filter(s => s.status === 'active').forEach(sub => {
+        // Parse the subscription type to determine box size and frequency
+        const parts = sub.subscription_type?.split('_') || [];
+        const boxName = parts[0]; // 'veggie', 'full', 'protein'
+        
+        // Map to actual box size names
+        let actualBoxName = boxName;
+        if (boxName === 'veggie') actualBoxName = 'veggie_bag';
+        if (boxName === 'full') actualBoxName = 'full_farm_bag';
+        if (boxName === 'protein') actualBoxName = 'protein-pack';
+        
+        const price = boxSizeMap.get(actualBoxName) || 0;
+        monthlyRecurringRevenue += Number(price) + 9; // Add $9 delivery fee
+      });
+
+      // Calculate revenue split
+      const subscriptionRevenue = (orders || [])
+        .filter(o => o.order_type === 'subscription')
+        .reduce((sum, order) => sum + (Number(order.total_amount) || 0), 0);
+      
+      const oneTimeRevenue = (orders || [])
+        .filter(o => o.order_type === 'one-time')
+        .reduce((sum, order) => sum + (Number(order.total_amount) || 0), 0);
+
+      // Calculate KPIs
       const totalRevenue = (orders || [])
         .reduce((sum, order) => sum + (Number(order.total_amount) || 0), 0);
 
       const totalOrders = orders?.length || 0;
-      const activeSubscriptions = subscriptions?.length || 0;
       const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
 
       // Calculate daily orders
@@ -86,7 +139,6 @@ export const OrderInsights = () => {
       // Calculate revenue by box size from orders
       const revenueByBoxMap = new Map();
       (orders || []).forEach(order => {
-        // Try to get box_size from the order, fallback to 'Standard' if not available
         const boxSize = (order as any).box_size || 'Standard';
         revenueByBoxMap.set(boxSize, (revenueByBoxMap.get(boxSize) || 0) + (Number(order.total_amount) || 0));
       });
@@ -94,15 +146,39 @@ export const OrderInsights = () => {
       const revenueByBoxSize = Array.from(revenueByBoxMap.entries())
         .map(([boxSize, revenue]) => ({ boxSize, revenue }));
 
-      // Subscription health
-      const subscriptionHealthMap = new Map();
-      subscriptions?.forEach(sub => {
-        const status = sub.status;
-        subscriptionHealthMap.set(status, (subscriptionHealthMap.get(status) || 0) + 1);
+      // Subscription health - all statuses
+      const subscriptionHealth = [
+        { status: 'Active', count: activeSubscriptions },
+        { status: 'Paused', count: pausedSubscriptions },
+        { status: 'Cancelled', count: cancelledSubscriptions }
+      ].filter(item => item.count > 0);
+
+      // Cancellations by reason
+      const cancellationReasonMap = new Map();
+      allSubscriptions?.filter(s => s.status === 'cancelled' && s.cancellation_reason).forEach(sub => {
+        const reason = sub.cancellation_reason || 'No reason provided';
+        cancellationReasonMap.set(reason, (cancellationReasonMap.get(reason) || 0) + 1);
       });
 
-      const subscriptionHealth = Array.from(subscriptionHealthMap.entries())
-        .map(([status, count]) => ({ status, count }));
+      const cancellationsByReason = Array.from(cancellationReasonMap.entries())
+        .map(([reason, count]) => ({ reason, count }))
+        .sort((a, b) => b.count - a.count);
+
+      // Revenue by type
+      const revenueByType = [
+        { type: 'Subscription', revenue: subscriptionRevenue },
+        { type: 'One-Time', revenue: oneTimeRevenue }
+      ].filter(item => item.revenue > 0);
+
+      // Subscription type breakdown
+      const subscriptionTypeMap = new Map();
+      allSubscriptions?.filter(s => s.status === 'active').forEach(sub => {
+        const type = sub.subscription_type || 'Unknown';
+        subscriptionTypeMap.set(type, (subscriptionTypeMap.get(type) || 0) + 1);
+      });
+
+      const subscriptionTypeBreakdown = Array.from(subscriptionTypeMap.entries())
+        .map(([type, count]) => ({ type, count }));
 
       // Monthly growth (last 6 months)
       const monthlyGrowthMap = new Map();
@@ -129,11 +205,20 @@ export const OrderInsights = () => {
         totalRevenue,
         totalOrders,
         activeSubscriptions,
+        pausedSubscriptions,
+        cancelledSubscriptions,
         averageOrderValue,
+        cancellationRate,
+        monthlyRecurringRevenue,
+        subscriptionRevenue,
+        oneTimeRevenue,
         dailyOrders,
         revenueByBoxSize,
         subscriptionHealth,
-        monthlyGrowth
+        monthlyGrowth,
+        cancellationsByReason,
+        revenueByType,
+        subscriptionTypeBreakdown
       });
 
     } catch (error) {
@@ -184,7 +269,7 @@ export const OrderInsights = () => {
             </div>
 
             {/* KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Card>
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
@@ -213,10 +298,44 @@ export const OrderInsights = () => {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
+                      <p className="text-sm font-medium text-muted-foreground">Monthly Recurring Revenue</p>
+                      <p className="text-2xl font-bold">{formatCurrency(data.monthlyRecurringRevenue)}</p>
+                    </div>
+                    <TrendingUp className="h-8 w-8 text-emerald-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
                       <p className="text-sm font-medium text-muted-foreground">Active Subscriptions</p>
                       <p className="text-2xl font-bold">{data.activeSubscriptions}</p>
+                      {data.pausedSubscriptions > 0 && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {data.pausedSubscriptions} paused
+                        </p>
+                      )}
                     </div>
                     <Users className="h-8 w-8 text-purple-600" />
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-muted-foreground">Cancellation Rate</p>
+                      <p className="text-2xl font-bold">{data.cancellationRate.toFixed(1)}%</p>
+                      {data.cancelledSubscriptions > 0 && (
+                        <p className="text-xs text-muted-foreground mt-1">
+                          {data.cancelledSubscriptions} cancelled
+                        </p>
+                      )}
+                    </div>
+                    <TrendingDown className="h-8 w-8 text-red-600" />
                   </div>
                 </CardContent>
               </Card>
@@ -235,7 +354,7 @@ export const OrderInsights = () => {
             </div>
 
             {/* Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Daily Orders Line Chart */}
               <Card>
                 <CardHeader>
@@ -327,6 +446,80 @@ export const OrderInsights = () => {
                   </ChartContainer>
                 </CardContent>
               </Card>
+
+              {/* Cancellation Reasons */}
+              {data.cancellationsByReason.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Cancellation Reasons</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ChartContainer config={{ count: { label: 'Count', color: 'hsl(var(--destructive))' } }}>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={data.cancellationsByReason} layout="vertical">
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis type="number" />
+                          <YAxis dataKey="reason" type="category" width={150} />
+                          <ChartTooltip content={<ChartTooltipContent />} />
+                          <Bar dataKey="count" fill="hsl(var(--destructive))" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </ChartContainer>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Revenue by Order Type */}
+              {data.revenueByType.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Revenue by Order Type</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie
+                          data={data.revenueByType}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={({ type, percent }) => `${type} ${(percent * 100).toFixed(0)}%`}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="revenue"
+                        >
+                          {data.revenueByType.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <ChartTooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Subscription Type Breakdown */}
+              {data.subscriptionTypeBreakdown.length > 0 && (
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Active Subscription Types</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ChartContainer config={{ count: { label: 'Count', color: 'hsl(var(--chart-2))' } }}>
+                      <ResponsiveContainer width="100%" height={300}>
+                        <BarChart data={data.subscriptionTypeBreakdown}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="type" />
+                          <YAxis />
+                          <ChartTooltip content={<ChartTooltipContent />} />
+                          <Bar dataKey="count" fill="hsl(var(--chart-2))" />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </ChartContainer>
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </div>
         ) : null}
