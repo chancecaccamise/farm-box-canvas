@@ -60,11 +60,26 @@ const BoxComparison = () => {
   const getSampleItems = (boxSize) => {
     switch (boxSize) {
       case 'veggie_bag':
-        return ['6 items handpicked weekly by Billy and Ana, value of $30 or more'];
+        return [
+          '6 fresh items delivered weekly',
+          'Handpicked by Billy and Ana',
+          'Seasonal vegetables and greens',
+          'Value of $30 or more'
+        ];
       case 'full_farm_bag':
-        return ['1 protein chosen by the customer', '1 carb chosen by the customer', '5 items handpicked weekly by Billy and Ana', 'Value of $50 or more'];
+        return [
+          '1 protein chosen by the customer',
+          '1 carb chosen by the customer',
+          '5 items handpicked weekly by Billy and Ana',
+          'Value of $50 or more'
+        ];
       case 'protein-pack':
-        return ['5 proteins selected by the customer, value of $100 or more'];
+        return [
+          '5 premium proteins of your choice',
+          'Includes seafood and meat options',
+          'Customer selected weekly',
+          'Value of $100 or more'
+        ];
       default:
         return [];
     }
@@ -136,7 +151,7 @@ const BoxComparison = () => {
             const priceDisplay = getDisplayPrice(box.basePrice, box.subscriberPrice);
             
             return (
-            <Card key={box.size} className={`relative text-center ${box.popular ? 'ring-2 ring-accent shadow-lg scale-105' : ''}`}>
+            <Card key={box.size} className={`relative text-center flex flex-col justify-between h-full ${box.popular ? 'ring-2 ring-accent shadow-lg scale-105' : ''}`}>
               {box.popular && (
                 <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-accent text-white">
                   Most Popular
