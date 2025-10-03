@@ -50,6 +50,7 @@ const ThankYou = () => {
   const [searchParams] = useSearchParams();
   const [orderData, setOrderData] = useState<OrderData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [productNames, setProductNames] = useState<Record<string, string>>({});
 
   useEffect(() => {
     const loadOrderDetails = async () => {
@@ -99,6 +100,24 @@ const ThankYou = () => {
           }
 
           setOrderData(orderDetails as OrderData);
+          
+          // Fetch product names for all UUIDs in the order
+          const productIds = new Set<string>();
+          if (orderDetails.user_full_farm_bag_protein) productIds.add(orderDetails.user_full_farm_bag_protein);
+          if (orderDetails.user_full_farm_bag_carb) productIds.add(orderDetails.user_full_farm_bag_carb);
+          orderDetails.user_protein_selections?.forEach((id: string) => productIds.add(id));
+          orderDetails.user_carb_selections?.forEach((id: string) => productIds.add(id));
+          
+          if (productIds.size > 0) {
+            const { data: products } = await supabase
+              .from('products')
+              .select('id, name')
+              .in('id', Array.from(productIds));
+            
+            const nameMap: Record<string, string> = {};
+            products?.forEach(product => nameMap[product.id] = product.name);
+            setProductNames(nameMap);
+          }
         } else {
           toast({
             title: "Order not found",
@@ -249,16 +268,16 @@ const ThankYou = () => {
                     <h4 className="font-medium mb-2">✨ Your Selections</h4>
                     <div className="text-sm space-y-1">
                       {orderData.user_full_farm_bag_protein && (
-                        <p><strong>Selected Protein:</strong> {orderData.user_full_farm_bag_protein}</p>
+                        <p><strong>Selected Protein:</strong> {productNames[orderData.user_full_farm_bag_protein] || 'Loading...'}</p>
                       )}
                       {orderData.user_full_farm_bag_carb && (
-                        <p><strong>Selected Carb:</strong> {orderData.user_full_farm_bag_carb}</p>
+                        <p><strong>Selected Carb:</strong> {productNames[orderData.user_full_farm_bag_carb] || 'Loading...'}</p>
                       )}
                       {orderData.user_protein_selections && orderData.user_protein_selections.length > 0 && (
-                        <p><strong>Protein Selections:</strong> {orderData.user_protein_selections.join(', ')}</p>
+                        <p><strong>Protein Selections:</strong> {orderData.user_protein_selections.map(id => productNames[id] || 'Loading...').join(', ')}</p>
                       )}
                       {orderData.user_carb_selections && orderData.user_carb_selections.length > 0 && (
-                        <p><strong>Carb Selections:</strong> {orderData.user_carb_selections.join(', ')}</p>
+                        <p><strong>Carb Selections:</strong> {orderData.user_carb_selections.map(id => productNames[id] || 'Loading...').join(', ')}</p>
                       )}
                     </div>
                   </div>

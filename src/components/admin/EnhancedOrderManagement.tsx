@@ -60,6 +60,7 @@ export const EnhancedOrderManagement = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [productNames, setProductNames] = useState<Record<string, string>>({});
   const { toast } = useToast();
 
   useEffect(() => {
@@ -128,6 +129,26 @@ export const EnhancedOrderManagement = () => {
       }));
       
       setOrders(enhancedOrders);
+      
+      // Fetch all product names for selections
+      const productIds = new Set<string>();
+      enhancedOrders.forEach(order => {
+        if (order.user_full_farm_bag_protein) productIds.add(order.user_full_farm_bag_protein);
+        if (order.user_full_farm_bag_carb) productIds.add(order.user_full_farm_bag_carb);
+        order.user_protein_selections?.forEach(id => productIds.add(id));
+        order.user_carb_selections?.forEach(id => productIds.add(id));
+      });
+      
+      if (productIds.size > 0) {
+        const { data: products } = await supabase
+          .from('products')
+          .select('id, name')
+          .in('id', Array.from(productIds));
+        
+        const nameMap: Record<string, string> = {};
+        products?.forEach(product => nameMap[product.id] = product.name);
+        setProductNames(nameMap);
+      }
     } catch (error) {
       console.error('Error fetching orders:', error);
       toast({
@@ -159,19 +180,23 @@ export const EnhancedOrderManagement = () => {
     const selections = [];
     
     if (order.user_full_farm_bag_protein) {
-      selections.push(`Protein: ${order.user_full_farm_bag_protein}`);
+      const proteinName = productNames[order.user_full_farm_bag_protein] || order.user_full_farm_bag_protein;
+      selections.push(`Protein: ${proteinName}`);
     }
     
     if (order.user_full_farm_bag_carb) {
-      selections.push(`Carb: ${order.user_full_farm_bag_carb}`);
+      const carbName = productNames[order.user_full_farm_bag_carb] || order.user_full_farm_bag_carb;
+      selections.push(`Carb: ${carbName}`);
     }
     
     if (order.user_protein_selections && order.user_protein_selections.length > 0) {
-      selections.push(`Proteins: ${order.user_protein_selections.join(', ')}`);
+      const proteinNames = order.user_protein_selections.map(id => productNames[id] || id);
+      selections.push(`Proteins: ${proteinNames.join(', ')}`);
     }
     
     if (order.user_carb_selections && order.user_carb_selections.length > 0) {
-      selections.push(`Carbs: ${order.user_carb_selections.join(', ')}`);
+      const carbNames = order.user_carb_selections.map(id => productNames[id] || id);
+      selections.push(`Carbs: ${carbNames.join(', ')}`);
     }
 
     // If no selections found, indicate the issue
