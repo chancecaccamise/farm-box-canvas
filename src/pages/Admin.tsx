@@ -5,7 +5,7 @@ import { Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Package, ShoppingBag, Users, Fish, Flower, MapPin, UserCheck, Camera } from 'lucide-react';
+import { Package, ShoppingBag, Users, Fish, Flower, MapPin, UserCheck, Camera, Calendar } from 'lucide-react';
 import { AdminProducts } from '@/components/admin/AdminProducts';
 import { AdminBoxTemplates } from '@/components/admin/AdminBoxTemplates';
 import { EnhancedOrderManagement } from '@/components/admin/EnhancedOrderManagement';
@@ -15,6 +15,7 @@ import { AdminFormSubmissions } from '@/components/admin/AdminFormSubmissions';
 import { AdminGallery } from '@/components/admin/AdminGallery';
 import { AdminDeliveryAreas } from '@/components/admin/AdminDeliveryAreas';
 import { TestCleanup } from '@/components/TestCleanup';
+import { AdminDeliveryDays } from '@/components/admin/AdminDeliveryDays';
 
 const Admin = () => {
   const { user, loading } = useAuth();
@@ -74,7 +75,7 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="products" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-9">
+          <TabsList className="grid w-full grid-cols-10">
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               Products
@@ -106,6 +107,10 @@ const Admin = () => {
             <TabsTrigger value="delivery-areas" className="flex items-center gap-2">
               <MapPin className="h-4 w-4" />
               Delivery Areas
+            </TabsTrigger>
+            <TabsTrigger value="delivery-days" className="flex items-center gap-2">
+              <Calendar className="h-4 w-4" />
+              Delivery Days
             </TabsTrigger>
             <TabsTrigger value="test-cleanup" className="flex items-center gap-2">
               🧹
@@ -169,6 +174,20 @@ const Admin = () => {
               </CardHeader>
               <CardContent>
                 <AdminDeliveryAreas />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="delivery-days">
+            <Card>
+              <CardHeader>
+                <CardTitle>Delivery Days Management</CardTitle>
+                <CardDescription>
+                  Control which days are available for delivery. Disabled days will appear crossed out and non-selectable for customers.
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AdminDeliveryDays />
               </CardContent>
             </Card>
           </TabsContent>

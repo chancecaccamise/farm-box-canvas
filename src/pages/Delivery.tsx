@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,6 +6,8 @@ import { ArrowLeft, Calendar, Truck, CheckCircle, MapPin, Store } from "lucide-r
 import { Link, useNavigate } from "react-router-dom";
 import { useCheckout } from "@/contexts/CheckoutContext";
 import { format, startOfWeek, addDays } from "date-fns";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 type DeliveryDay = {
   id: string;
@@ -36,20 +38,20 @@ const getCurrentWeekDeliveryDays = (): DeliveryDay[] => {
       id: "thursday",
       day: "Thursday",
       date: format(thursday, "MMM d"),
-      available: true,
+      available: true, // Will be updated from database
     },
     {
       id: "saturday",
       day: "Saturday",
       date: format(saturday, "MMM d"),
-      available: true,
+      available: true, // Will be updated from database
       popular: true, // Most popular is now Saturday
     },
     {
       id: "sunday",
       day: "Sunday",
       date: format(sunday, "MMM d"),
-      available: true,
+      available: true, // Will be updated from database
     },
   ];
 };
@@ -57,11 +59,51 @@ const getCurrentWeekDeliveryDays = (): DeliveryDay[] => {
 const Delivery = () => {
   const [selectedDay, setSelectedDay] = useState<string>("");
   const [selectedMethod, setSelectedMethod] = useState<string>("delivery");
+  const [deliveryDays, setDeliveryDays] = useState<DeliveryDay[]>(getCurrentWeekDeliveryDays());
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { checkoutState, updateDeliveryDay, updateDeliveryMethod } = useCheckout();
+  const { toast } = useToast();
 
-  // Delivery options limited to Thursday, Saturday, and Sunday
-  const deliveryDays: DeliveryDay[] = getCurrentWeekDeliveryDays();
+  // Fetch delivery day availability from database
+  useEffect(() => {
+    const fetchDeliveryAvailability = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('delivery_day_settings')
+          .select('day_name, is_available');
+
+        if (error) throw error;
+
+        // Create a map of availability
+        const availabilityMap = new Map(
+          data.map(d => [d.day_name, d.is_available])
+        );
+
+        // Update delivery days with database availability
+        const baseDays = getCurrentWeekDeliveryDays();
+        const updatedDays = baseDays.map(day => ({
+          ...day,
+          available: availabilityMap.get(day.id) ?? true,
+        }));
+
+        setDeliveryDays(updatedDays);
+      } catch (error) {
+        console.error('Error fetching delivery availability:', error);
+        toast({
+          title: "Warning",
+          description: "Could not load delivery availability. Showing all days as available.",
+          variant: "destructive",
+        });
+        // Fallback to all days available
+        setDeliveryDays(getCurrentWeekDeliveryDays());
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDeliveryAvailability();
+  }, [toast]);
 
   const handleContinue = () => {
     if (!selectedDay) return;
@@ -220,7 +262,9 @@ const Delivery = () => {
             >
               <CardHeader className="text-center pb-2">
                 <div className="flex items-center justify-center gap-2 mb-2">
-                  <CardTitle className="text-lg">{day.day}</CardTitle>
+                  <CardTitle className={`text-lg ${!day.available ? 'line-through text-muted-foreground' : ''}`}>
+                    {day.day}
+                  </CardTitle>
                   {day.popular && day.available && (
                     <Badge variant="secondary" className="text-xs">Most Popular</Badge>
                   )}
