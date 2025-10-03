@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { CalendarDays, DollarSign, Users, ShoppingCart, TrendingUp, TrendingDown } from 'lucide-react';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, BarChart, Bar, PieChart, Pie, Cell, Legend, ResponsiveContainer } from 'recharts';
 import { useToast } from '@/hooks/use-toast';
 
 interface OrderInsightsData {
@@ -141,11 +141,21 @@ export const OrderInsights = () => {
       const revenueByBoxMap = new Map();
       (orders || []).forEach(order => {
         const boxSize = (order as any).box_size || 'Standard';
-        revenueByBoxMap.set(boxSize, (revenueByBoxMap.get(boxSize) || 0) + (Number(order.total_amount) || 0));
+        // Map box size to display name
+        let displayName = boxSize;
+        if (boxSize === 'protein-pack' || boxSize === 'protein_pack') displayName = 'Protein Pack';
+        else if (boxSize === 'full_farm_bag' || boxSize === 'full-farm-bag') displayName = 'Full Farm Bag';
+        else if (boxSize === 'veggie_bag' || boxSize === 'veggie-bag') displayName = 'Veggie Bag';
+        else if (boxSize === 'medium') displayName = 'Medium';
+        else if (boxSize === 'small') displayName = 'Small';
+        else if (boxSize === 'large') displayName = 'Large';
+        
+        revenueByBoxMap.set(displayName, (revenueByBoxMap.get(displayName) || 0) + (Number(order.total_amount) || 0));
       });
 
       const revenueByBoxSize = Array.from(revenueByBoxMap.entries())
-        .map(([boxSize, revenue]) => ({ boxSize, revenue }));
+        .map(([boxSize, revenue]) => ({ boxSize, revenue }))
+        .filter(item => item.revenue > 0);
 
       // Subscription health - all statuses
       const subscriptionHealth = [
@@ -388,7 +398,7 @@ export const OrderInsights = () => {
             </div>
 
             {/* Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
               {/* Daily Orders Line Chart */}
               <Card>
                 <CardHeader>
@@ -440,17 +450,18 @@ export const OrderInsights = () => {
                       <Pie
                         data={data.subscriptionHealth}
                         cx="50%"
-                        cy="50%"
+                        cy="40%"
                         labelLine={false}
-                        label={({ status, percent }) => `${status} ${(percent * 100).toFixed(0)}%`}
                         outerRadius={80}
                         fill="#8884d8"
                         dataKey="count"
+                        nameKey="status"
                       >
                         {data.subscriptionHealth.map((entry, index) => (
                           <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                       </Pie>
+                      <Legend />
                       <ChartTooltip />
                     </PieChart>
                   </ResponsiveContainer>
@@ -458,7 +469,7 @@ export const OrderInsights = () => {
               </Card>
 
               {/* Monthly Growth */}
-              <Card>
+              <Card className="lg:col-span-2">
                 <CardHeader>
                   <CardTitle>Monthly Growth</CardTitle>
                 </CardHeader>
@@ -481,28 +492,6 @@ export const OrderInsights = () => {
                 </CardContent>
               </Card>
 
-              {/* Cancellation Reasons */}
-              {data.cancellationsByReason.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Cancellation Reasons</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <ChartContainer config={{ count: { label: 'Count', color: 'hsl(var(--destructive))' } }}>
-                      <ResponsiveContainer width="100%" height={300}>
-                        <BarChart data={data.cancellationsByReason} layout="vertical">
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis type="number" />
-                          <YAxis dataKey="reason" type="category" width={150} />
-                          <ChartTooltip content={<ChartTooltipContent />} />
-                          <Bar dataKey="count" fill="hsl(var(--destructive))" />
-                        </BarChart>
-                      </ResponsiveContainer>
-                    </ChartContainer>
-                  </CardContent>
-                </Card>
-              )}
-
               {/* Revenue by Order Type */}
               {data.revenueByType.length > 0 && (
                 <Card>
@@ -515,18 +504,19 @@ export const OrderInsights = () => {
                         <Pie
                           data={data.revenueByType}
                           cx="50%"
-                          cy="50%"
+                          cy="40%"
                           labelLine={false}
-                          label={({ type, percent }) => `${type} ${(percent * 100).toFixed(0)}%`}
                           outerRadius={80}
                           fill="#8884d8"
                           dataKey="revenue"
+                          nameKey="type"
                         >
                           {data.revenueByType.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                           ))}
                         </Pie>
-                        <ChartTooltip />
+                        <Legend />
+                        <ChartTooltip formatter={(value) => formatCurrency(Number(value))} />
                       </PieChart>
                     </ResponsiveContainer>
                   </CardContent>
