@@ -107,9 +107,9 @@ serve(async (req) => {
       throw new Error("Missing order data");
     }
 
-    // For subscribers, ensure we have a weekly bag if we don't have one
+    // Ensure we have a weekly bag for all purchases with checkout state
     let actualWeeklyBag = weeklyBag;
-    if (hasActiveSubscription && !weeklyBag) {
+    if (!weeklyBag && checkoutState) {
       logStep("Fetching current week bag for subscriber");
       const { data: currentBag, error: bagError } = await supabaseClient
         .rpc('get_or_create_current_week_bag_with_size', {

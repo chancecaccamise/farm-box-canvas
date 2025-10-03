@@ -176,8 +176,70 @@ serve(async (req) => {
         logStep("WARNING: Failed to fetch order for bag repopulation", { error: orderFetchError });
       }
       
-      const weeklyBagId = orderRecord?.weekly_bag_id;
+      let weeklyBagId = orderRecord?.weekly_bag_id;
       const hasActiveSubscription = fullSession.metadata?.has_active_subscription === 'true';
+      
+      // If no bag exists, create one for this order
+      if ((!weeklyBagId || weeklyBagId === 'checkout-only') && orderRecord) {
+        logStep("Creating weekly bag for order without bag_id", { orderId: existingOrder.id });
+        
+        // Calculate current week
+        const currentDate = new Date();
+        const weekStart = new Date(currentDate);
+        weekStart.setDate(currentDate.getDate() - currentDate.getDay() + 1); // Monday
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6); // Sunday
+        
+        // Get cutoff time
+        const { data: cutoffTime, error: cutoffError } = await supabase
+          .rpc('get_next_cutoff_time', { input_date: weekStart.toISOString().split('T')[0] });
+        
+        if (cutoffError) {
+          logStep("ERROR: Failed to get cutoff time", { error: cutoffError });
+        }
+        
+        // Get box price
+        const { data: boxData } = await supabase
+          .from('box_sizes')
+          .select('base_price')
+          .eq('name', orderRecord.box_size)
+          .single();
+        
+        // Create weekly bag
+        const { data: newBag, error: bagCreateError } = await supabase
+          .from('weekly_bags')
+          .insert({
+            user_id: fullSession.metadata?.user_id,
+            week_start_date: weekStart.toISOString().split('T')[0],
+            week_end_date: weekEnd.toISOString().split('T')[0],
+            cutoff_time: cutoffTime || new Date(),
+            box_size: orderRecord.box_size,
+            box_price: boxData?.base_price || 0,
+            user_protein_selections: orderRecord.user_protein_selections,
+            user_full_farm_bag_protein: orderRecord.user_full_farm_bag_protein,
+            user_full_farm_bag_carb: orderRecord.user_full_farm_bag_carb,
+            is_confirmed: hasActiveSubscription
+          })
+          .select('id')
+          .single();
+        
+        if (bagCreateError) {
+          logStep("ERROR: Failed to create weekly bag", { error: bagCreateError });
+        } else {
+          weeklyBagId = newBag.id;
+          logStep("Created weekly bag", { bagId: weeklyBagId });
+          
+          // Update order with new bag_id
+          const { error: orderUpdateError } = await supabase
+            .from('orders')
+            .update({ weekly_bag_id: weeklyBagId })
+            .eq('id', existingOrder.id);
+          
+          if (orderUpdateError) {
+            logStep("ERROR: Failed to update order with bag_id", { error: orderUpdateError });
+          }
+        }
+      }
       
       // Repopulate bag with user selections for all new purchases (subscription or one-time)
       if (weeklyBagId && weeklyBagId !== 'checkout-only' && orderRecord) {
