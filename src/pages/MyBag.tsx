@@ -201,6 +201,38 @@ function MyBag() {
         const isConfirmed = hasTemplates && templateData.every(t => t.is_confirmed);
         setTemplateStatus({ hasTemplates, isConfirmed });
       }
+
+      // Check if bag has user selections but items are missing - repopulate if needed
+      if (bagData.box_size === 'full_farm_bag' || bagData.box_size === 'protein-pack') {
+        const hasUserSelections = 
+          (bagData.user_protein_selections && bagData.user_protein_selections.length > 0) || 
+          bagData.user_full_farm_bag_protein || 
+          bagData.user_full_farm_bag_carb;
+        
+        if (hasUserSelections) {
+          const currentItems = bagItems;
+          const hasUserSelectedItemsInBag = currentItems.some(
+            item => item.item_type === 'user_selected_protein' || item.item_type === 'user_selected_carb'
+          );
+          
+          // If selections exist but items don't, repopulate
+          if (!hasUserSelectedItemsInBag) {
+            console.log('Repopulating bag with user selections');
+            const { error: populateError } = await supabase.rpc('populate_weekly_bag_from_template', {
+              bag_id: bagData.id,
+              box_size_name: bagData.box_size,
+              week_start: bagData.week_start_date
+            });
+            
+            if (populateError) {
+              console.error('Failed to repopulate bag:', populateError);
+            } else {
+              // Refetch items after repopulation
+              await fetchBagItems(bagData.id);
+            }
+          }
+        }
+      }
       
       // Check if cutoff time has passed
       const cutoffTime = new Date(bagData.cutoff_time);
@@ -542,33 +574,50 @@ function MyBag() {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Main content - Bag Items */}
             <div className="lg:col-span-2 space-y-6">
-              {/* User Selected Items Section - Show for Full Farm Bag and Protein Pack */}
-              {(currentWeekBag.box_size === 'full_farm_bag' || currentWeekBag.box_size === 'protein-pack') && getUserSelectedItems().length > 0 && (
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h2 className="text-xl font-semibold">
-                      {currentWeekBag.box_size === 'full_farm_bag' ? 'Your Selected Items' : 'Your Selected Proteins'}
-                    </h2>
-                    <Badge variant="default" className="bg-blue-100 text-blue-800">Your Choice</Badge>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {getUserSelectedItems().map((item) => (
-                      <ReadOnlyBagItem
-                        key={item.id}
-                        item={item}
-                        showUserSelectedBadge={true}
-                      />
-                    ))}
-                  </div>
+            {/* User Selected Items - Protein Pack (5 proteins) */}
+            {currentWeekBag.box_size === 'protein-pack' && getUserSelectedItems().length > 0 && (
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-semibold">Your Selected Proteins</h2>
+                  <Badge variant="default" className="bg-blue-100 text-blue-800">Your 5 Protein Choices</Badge>
                 </div>
-              )}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {getUserSelectedItems().map((item) => (
+                    <ReadOnlyBagItem
+                      key={item.id}
+                      item={item}
+                      showUserSelectedBadge={true}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
 
-              {/* Box Items Section - Show vegetables for Full Farm Bag, all items for regular boxes */}
+            {/* User Selected Items - Full Farm Bag (protein + carb) */}
+            {currentWeekBag.box_size === 'full_farm_bag' && getUserSelectedItems().length > 0 && (
+              <div className="mb-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-semibold">Your Protein & Carb Choices</h2>
+                  <Badge variant="default" className="bg-blue-100 text-blue-800">Your Choice</Badge>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {getUserSelectedItems().map((item) => (
+                    <ReadOnlyBagItem
+                      key={item.id}
+                      item={item}
+                      showUserSelectedBadge={true}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Box Items Section - Not shown for protein-pack when they have selections */}
+            {!(currentWeekBag.box_size === 'protein-pack' && getUserSelectedItems().length > 0) && (
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-semibold">
-                    {currentWeekBag.box_size === 'full_farm_bag' ? 'Fresh Vegetables & Herbs' : 
-                     currentWeekBag.box_size === 'protein-pack' ? 'Additional Items' : 'Your Box Contents'}
+                    {currentWeekBag.box_size === 'full_farm_bag' ? 'Billy\'s Farm Selections' : 'Your Box Contents'}
                   </h2>
                   {hasBoxItems() && !templateStatus.isConfirmed && templateStatus.hasTemplates && (
                     <Badge variant="secondary">Preview - Not Confirmed</Badge>
@@ -614,6 +663,7 @@ function MyBag() {
                   </div>
                 )}
               </div>
+            )}
 
               {/* Current Add-ons */}
               {getConfirmedAddons().length > 0 && (
