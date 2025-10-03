@@ -70,12 +70,13 @@ const Delivery = () => {
     const fetchDeliveryAvailability = async () => {
       try {
         const { data, error } = await supabase
-          .from('delivery_day_settings')
-          .select('day_name, is_available');
+          .from('delivery_method_settings')
+          .select('delivery_method, day_name, is_available')
+          .eq('delivery_method', selectedMethod);
 
         if (error) throw error;
 
-        // Create a map of availability
+        // Create a map of availability for the selected method
         const availabilityMap = new Map(
           data.map(d => [d.day_name, d.is_available])
         );
@@ -103,7 +104,7 @@ const Delivery = () => {
     };
 
     fetchDeliveryAvailability();
-  }, [toast]);
+  }, [toast, selectedMethod]);
 
   const handleContinue = () => {
     if (!selectedDay) return;

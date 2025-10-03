@@ -304,6 +304,36 @@ export type Database = {
         }
         Relationships: []
       }
+      delivery_method_settings: {
+        Row: {
+          day_name: string
+          delivery_method: string
+          display_name: string
+          id: string
+          is_available: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          day_name: string
+          delivery_method: string
+          display_name: string
+          id?: string
+          is_available?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          day_name?: string
+          delivery_method?: string
+          display_name?: string
+          id?: string
+          is_available?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       driver_assignments: {
         Row: {
           created_at: string | null
