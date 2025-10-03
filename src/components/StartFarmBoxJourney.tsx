@@ -73,8 +73,7 @@ export function StartFarmBoxJourney() {
               Ready to Get Started?
             </h2>
             <p className="text-gray-600 max-w-md mx-auto">
-              Choose your box size and customize your weekly selection. 
-              You can always modify your preferences later.
+              Choose your box size and customize your weekly selection.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button asChild size="lg" className="bg-green-600 hover:bg-green-700">
@@ -95,7 +94,7 @@ export function StartFarmBoxJourney() {
 
       {/* Additional Info */}
       <div className="text-center text-sm text-gray-500 space-y-2">
-        <p>No commitment required • Skip or pause anytime • Cancel whenever you want</p>
+        <p>No commitment required • Cancel whenever you want</p>
         <p>Starting from $24.99/week • $9.00 delivery fee</p>
       </div>
     </div>
