@@ -60,11 +60,11 @@ const BoxComparison = () => {
   const getSampleItems = (boxSize) => {
     switch (boxSize) {
       case 'veggie_bag':
-        return ['Mixed greens', 'Rainbow carrots', 'Cherry tomatoes', 'Fresh herbs', 'Bell peppers', 'Seasonal vegetables'];
+        return ['6 items handpicked weekly by Billy and Ana, value of $30 or more'];
       case 'full_farm_bag':
-        return ['Mixed vegetables', 'Fresh eggs', 'Artisan bread', 'Local honey', 'Seasonal protein', 'Farm cheese', 'Leafy greens', 'Root vegetables'];
+        return ['1 protein chosen by the customer', '1 carb chosen by the customer', '5 items handpicked weekly by Billy and Ana', 'Value of $50 or more'];
       case 'protein-pack':
-        return ['Fresh salmon', 'Grass-fed beef', 'Free-range chicken', 'Wild shrimp', 'Sustainable catch'];
+        return ['5 proteins selected by the customer, value of $100 or more'];
       default:
         return [];
     }
