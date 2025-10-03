@@ -224,7 +224,79 @@ serve(async (req) => {
           .single();
         
         if (bagCreateError) {
-          logStep("ERROR: Failed to create weekly bag", { error: bagCreateError });
+          // Handle duplicate bag scenario - fetch existing bag instead
+          if (bagCreateError.code === '23505') {
+            logStep("Duplicate bag detected, fetching existing bag", { weekStart: weekStart.toISOString().split('T')[0] });
+            
+            const { data: existingBag, error: fetchBagError } = await supabase
+              .from('weekly_bags')
+              .select('id')
+              .eq('user_id', fullSession.metadata?.user_id)
+              .eq('week_start_date', weekStart.toISOString().split('T')[0])
+              .single();
+            
+            if (fetchBagError) {
+              logStep("ERROR: Failed to fetch existing bag", { error: fetchBagError });
+            } else {
+              weeklyBagId = existingBag.id;
+              logStep("Found existing bag", { bagId: weeklyBagId });
+              
+              // Update existing bag with user selections
+              const bagUpdateData: any = {
+                box_size: orderRecord.box_size,
+                box_price: boxData?.base_price || 0
+              };
+              
+              if (orderRecord.box_size === 'protein-pack' && orderRecord.user_protein_selections) {
+                bagUpdateData.user_protein_selections = orderRecord.user_protein_selections;
+              }
+              if (orderRecord.box_size === 'full_farm_bag') {
+                if (orderRecord.user_full_farm_bag_protein) {
+                  bagUpdateData.user_full_farm_bag_protein = orderRecord.user_full_farm_bag_protein;
+                }
+                if (orderRecord.user_full_farm_bag_carb) {
+                  bagUpdateData.user_full_farm_bag_carb = orderRecord.user_full_farm_bag_carb;
+                }
+              }
+              
+              const { error: updateBagError } = await supabase
+                .from('weekly_bags')
+                .update(bagUpdateData)
+                .eq('id', weeklyBagId);
+              
+              if (updateBagError) {
+                logStep("ERROR: Failed to update existing bag", { error: updateBagError });
+              } else {
+                logStep("Updated existing bag with selections", { bagId: weeklyBagId });
+              }
+              
+              // Repopulate bag items with user selections
+              const { error: repopError } = await supabase
+                .rpc('populate_weekly_bag_from_template', {
+                  bag_id: weeklyBagId,
+                  box_size_name: orderRecord.box_size,
+                  week_start: weekStart.toISOString().split('T')[0]
+                });
+              
+              if (repopError) {
+                logStep("ERROR: Failed to repopulate existing bag", { error: repopError });
+              } else {
+                logStep("Repopulated existing bag successfully", { bagId: weeklyBagId });
+              }
+              
+              // Link order to existing bag
+              const { error: orderUpdateError } = await supabase
+                .from('orders')
+                .update({ weekly_bag_id: weeklyBagId })
+                .eq('id', existingOrder.id);
+              
+              if (orderUpdateError) {
+                logStep("ERROR: Failed to update order with existing bag_id", { error: orderUpdateError });
+              }
+            }
+          } else {
+            logStep("ERROR: Failed to create weekly bag", { error: bagCreateError });
+          }
         } else {
           weeklyBagId = newBag.id;
           logStep("Created weekly bag", { bagId: weeklyBagId });

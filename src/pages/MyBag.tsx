@@ -202,9 +202,21 @@ function MyBag() {
         setTemplateStatus({ hasTemplates, isConfirmed });
       }
 
-      // Enhanced repopulation logic: check both bag data and order history
+      // Enhanced repopulation: always check if bag selections match items
       if (bagData.box_size === 'full_farm_bag' || bagData.box_size === 'protein-pack') {
-        const currentItems = bagItems;
+        // First, get fresh bag items to avoid stale state
+        const { data: freshItems } = await supabase
+          .from("weekly_bag_items")
+          .select(`
+            id,
+            product_id,
+            item_type
+          `)
+          .eq("weekly_bag_id", bagData.id);
+        
+        const currentUserSelectedItems = freshItems?.filter(
+          item => item.item_type === 'user_selected_protein' || item.item_type === 'user_selected_carb'
+        ) || [];
         
         // Check if we have selections in the bag
         let hasUserSelections = 
@@ -212,7 +224,7 @@ function MyBag() {
           bagData.user_full_farm_bag_protein || 
           bagData.user_full_farm_bag_carb;
         
-        // If no selections in bag, try to get from order
+        // If no selections in bag, try to get from paid order
         if (!hasUserSelections) {
           console.log('No selections in bag, checking order history');
           const { data: orderWithSelections } = await supabase
@@ -252,13 +264,9 @@ function MyBag() {
           }
         }
         
-        const hasUserSelectedItemsInBag = currentItems.some(
-          item => item.item_type === 'user_selected_protein' || item.item_type === 'user_selected_carb'
-        );
-        
         // If selections exist but items don't, repopulate
-        if (hasUserSelections && !hasUserSelectedItemsInBag) {
-          console.log('Repopulating bag with user selections');
+        if (hasUserSelections && currentUserSelectedItems.length === 0) {
+          console.log('Repopulating bag with user selections - selections exist but no items found');
           const { error: populateError } = await supabase.rpc('populate_weekly_bag_from_template', {
             bag_id: bagData.id,
             box_size_name: bagData.box_size,
@@ -268,6 +276,7 @@ function MyBag() {
           if (populateError) {
             console.error('Failed to repopulate bag:', populateError);
           } else {
+            console.log('Bag repopulated successfully, refetching items');
             // Refetch items after repopulation
             await fetchBagItems(bagData.id);
           }
@@ -652,8 +661,8 @@ function MyBag() {
               </div>
             )}
 
-            {/* Box Items Section - Not shown for protein-pack when they have selections */}
-            {!(currentWeekBag.box_size === 'protein-pack' && getUserSelectedItems().length > 0) && (
+            {/* Box Items Section - Not shown for protein-pack at all */}
+            {currentWeekBag.box_size !== 'protein-pack' && (
               <div>
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl font-semibold">
