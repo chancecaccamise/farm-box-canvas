@@ -44,6 +44,7 @@ serve(async (req) => {
     const priceVeggieBagOneTime = Deno.env.get("STRIPE_PRICE_ID_VEGGIE_BAG_ONETIME");
     const priceFullFarmBagOneTime = Deno.env.get("STRIPE_PRICE_ID_FULL_FARM_BAG_ONETIME");
     const priceProteinPackOneTime = Deno.env.get("STRIPE_PRICE_ID_PROTEIN_PACK_ONETIME");
+    const priceDeliveryFeeWeekly = Deno.env.get("STRIPE_PRICE_ID_DELIVERY_FEE_WEEKLY");
 
     // Keep legacy support for old naming
     const priceSmall = Deno.env.get("STRIPE_PRICE_ID_SMALL_WEEKLY");
@@ -332,16 +333,27 @@ serve(async (req) => {
       }
     }
 
-    // Add delivery fee (always use price_data for delivery fee, even in subscription mode)
+    // Add delivery fee
     if (deliveryFee > 0) {
-      lineItems.push({
-        price_data: {
-          currency: "usd",
-          product_data: { name: "Delivery Fee" },
-          unit_amount: Math.round(deliveryFee * 100),
-        },
-        quantity: 1,
-      });
+      if (isSubscription && priceDeliveryFeeWeekly) {
+        // For subscriptions, use recurring Price ID
+        lineItems.push({
+          price: priceDeliveryFeeWeekly,
+          quantity: 1,
+        });
+        logStep("Added recurring delivery fee", { priceId: priceDeliveryFeeWeekly });
+      } else {
+        // For one-time payments, use price_data
+        lineItems.push({
+          price_data: {
+            currency: "usd",
+            product_data: { name: "Delivery Fee" },
+            unit_amount: Math.round(deliveryFee * 100),
+          },
+          quantity: 1,
+        });
+        logStep("Added one-time delivery fee", { amount: deliveryFee });
+      }
     }
 
     logStep("Created line items", { itemCount: lineItems.length });
