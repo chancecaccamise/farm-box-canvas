@@ -1446,6 +1446,22 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_admin_user_list: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          created_at: string
+          email: string
+          email_newsletter: boolean
+          first_name: string
+          last_name: string
+          phone: string
+          sms_notifications: boolean
+          stripe_subscription_id: string
+          subscription_status: string
+          subscription_type: string
+          user_id: string
+        }[]
+      }
       get_next_cutoff_time: {
         Args: { input_date?: string }
         Returns: string

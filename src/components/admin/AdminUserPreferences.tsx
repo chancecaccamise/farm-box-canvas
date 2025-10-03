@@ -21,7 +21,7 @@ interface UserPreference {
   email: string | null;
   subscription_status: string | null;
   subscription_type: string | null;
-  has_subscription: boolean;
+  stripe_subscription_id: string | null;
 }
 
 export function AdminUserPreferences() {
@@ -43,56 +43,26 @@ export function AdminUserPreferences() {
   const fetchUserPreferences = async () => {
     try {
       setLoading(true);
-      
-      // Fetch profiles with subscriptions
-      const { data: profiles, error: profilesError } = await supabase
-        .from('profiles')
-        .select(`
-          user_id,
-          first_name,
-          last_name,
-          phone,
-          sms_notifications,
-          email_newsletter,
-          created_at
-        `)
-        .order('created_at', { ascending: false });
 
-      if (profilesError) throw profilesError;
+      // Use the secure RPC function to fetch all user data
+      const { data, error } = await supabase.rpc('get_admin_user_list');
 
-      // Fetch emails from auth.users (admin only)
-      let authUsers: any[] = [];
-      try {
-        const { data, error: authError } = await supabase.auth.admin.listUsers();
-        if (authError) {
-          console.error('Error fetching auth users:', authError);
-        } else {
-          authUsers = data.users || [];
-        }
-      } catch (error) {
-        console.error('Error fetching auth users:', error);
-      }
+      if (error) throw error;
 
-      // Fetch subscriptions
-      const { data: subscriptions, error: subsError } = await supabase
-        .from('user_subscriptions')
-        .select('user_id, status, subscription_type, stripe_subscription_id');
-
-      if (subsError) throw subsError;
-
-      // Combine data
-      const combinedData: UserPreference[] = (profiles || []).map(profile => {
-        const authUser = authUsers.find(u => u.id === profile.user_id);
-        const subscription = subscriptions?.find(s => s.user_id === profile.user_id);
-
-        return {
-          ...profile,
-          email: authUser?.email || null,
-          subscription_status: subscription?.status || null,
-          subscription_type: subscription?.subscription_type || null,
-          has_subscription: !!subscription?.stripe_subscription_id
-        };
-      });
+      // Map the data to the expected format
+      const combinedData: UserPreference[] = (data || []).map(user => ({
+        user_id: user.user_id,
+        email: user.email || null,
+        first_name: user.first_name || null,
+        last_name: user.last_name || null,
+        phone: user.phone || null,
+        sms_notifications: user.sms_notifications,
+        email_newsletter: user.email_newsletter,
+        created_at: user.created_at,
+        subscription_status: user.subscription_status || null,
+        subscription_type: user.subscription_type || null,
+        stripe_subscription_id: user.stripe_subscription_id || null,
+      }));
 
       setUsers(combinedData);
     } catch (error) {
@@ -133,7 +103,7 @@ export function AdminUserPreferences() {
         filtered = filtered.filter(u => u.subscription_status === 'active');
         break;
       case 'has-subscription':
-        filtered = filtered.filter(u => u.has_subscription);
+        filtered = filtered.filter(u => !!u.stripe_subscription_id);
         break;
     }
 
@@ -148,7 +118,7 @@ export function AdminUserPreferences() {
       user.phone || '',
       user.sms_notifications ? 'Yes' : 'No',
       user.email_newsletter ? 'Yes' : 'No',
-      user.has_subscription ? 'Yes' : 'No',
+      user.stripe_subscription_id ? 'Yes' : 'No',
       user.subscription_status || 'None',
       user.subscription_type || 'None',
       format(new Date(user.created_at), 'yyyy-MM-dd')
@@ -301,7 +271,7 @@ export function AdminUserPreferences() {
                         )}
                       </TableCell>
                       <TableCell>
-                        {user.has_subscription ? (
+                        {user.stripe_subscription_id ? (
                           <Badge variant="secondary">{user.subscription_type || 'weekly'}</Badge>
                         ) : (
                           <Badge variant="outline">None</Badge>
