@@ -229,8 +229,8 @@ const Delivery = () => {
                    selectedMethod === "market-pickup" ? "Market Hours" : "Farm Hours"}
                 </h3>
                 <p className="text-sm text-muted-foreground">
-                  {selectedMethod === "delivery" ? "Between 8 AM - 12 PM" :
-                   selectedMethod === "market-pickup" ? "Saturday 9 AM - 2 PM" : "Daily 9 AM - 6 PM"}
+                  {selectedMethod === "delivery" ? "Between 8 AM - 1 PM" :
+                   selectedMethod === "market-pickup" ? "9 AM - 1 PM" : "8 AM - 1 PM"}
                 </p>
               </div>
               <div>
@@ -284,8 +284,8 @@ const Delivery = () => {
                   </Badge>
                 ) : (
                   <p className="text-sm text-muted-foreground">
-                    {selectedMethod === "delivery" ? "8 AM - 12 PM" :
-                     selectedMethod === "market-pickup" ? "9 AM - 2 PM" : "9 AM - 6 PM"}
+                    {selectedMethod === "delivery" ? "8 AM - 1 PM" :
+                     selectedMethod === "market-pickup" ? "9 AM - 1 PM" : "8 AM - 1 PM"}
                   </p>
                 )}
               </CardContent>
@@ -303,7 +303,7 @@ const Delivery = () => {
             </h3>
             {selectedMethod === "delivery" && (
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>• Deliveries are made between 8 AM and 12 PM on your selected day</li>
+                <li>• Deliveries are made between 8 AM and 1 PM on your selected day</li>
                 <li>• No signature required - we'll leave your box in a safe location</li>
                 <li>• You'll receive a text notification when your box is delivered</li>
                 <li>• Refrigerated items are packed with ice packs to stay fresh</li>
@@ -312,7 +312,7 @@ const Delivery = () => {
             )}
             {selectedMethod === "market-pickup" && (
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>• Market pickup is available Saturday 9 AM - 2 PM</li>
+                <li>• Market pickup is available Saturday 9 AM - 1 PM</li>
                 <li>• Look for the Billy's Botanicals booth at your selected market</li>
                 <li>• Bring your order confirmation or phone number</li>
                 <li>• Refrigerated items will be kept cold until pickup</li>
@@ -321,7 +321,7 @@ const Delivery = () => {
             )}
             {selectedMethod === "farm-pickup" && (
               <ul className="space-y-2 text-sm text-muted-foreground">
-                <li>• Farm pickup is available daily 9 AM - 6 PM</li>
+                <li>• Farm pickup is available 8 AM - 1 PM</li>
                 <li>• Visit the farm store at your selected location</li>
                 <li>• Bring your order confirmation or phone number</li>
                 <li>• Take a tour of the farm while you're there!</li>
