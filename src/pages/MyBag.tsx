@@ -202,34 +202,74 @@ function MyBag() {
         setTemplateStatus({ hasTemplates, isConfirmed });
       }
 
-      // Check if bag has user selections but items are missing - repopulate if needed
+      // Enhanced repopulation logic: check both bag data and order history
       if (bagData.box_size === 'full_farm_bag' || bagData.box_size === 'protein-pack') {
-        const hasUserSelections = 
+        const currentItems = bagItems;
+        
+        // Check if we have selections in the bag
+        let hasUserSelections = 
           (bagData.user_protein_selections && bagData.user_protein_selections.length > 0) || 
           bagData.user_full_farm_bag_protein || 
           bagData.user_full_farm_bag_carb;
         
-        if (hasUserSelections) {
-          const currentItems = bagItems;
-          const hasUserSelectedItemsInBag = currentItems.some(
-            item => item.item_type === 'user_selected_protein' || item.item_type === 'user_selected_carb'
-          );
+        // If no selections in bag, try to get from order
+        if (!hasUserSelections) {
+          console.log('No selections in bag, checking order history');
+          const { data: orderWithSelections } = await supabase
+            .from('orders')
+            .select('user_protein_selections, user_full_farm_bag_protein, user_full_farm_bag_carb, box_size')
+            .eq('user_id', user.id)
+            .eq('week_start_date', bagData.week_start_date)
+            .eq('payment_status', 'paid')
+            .maybeSingle();
           
-          // If selections exist but items don't, repopulate
-          if (!hasUserSelectedItemsInBag) {
-            console.log('Repopulating bag with user selections');
-            const { error: populateError } = await supabase.rpc('populate_weekly_bag_from_template', {
-              bag_id: bagData.id,
-              box_size_name: bagData.box_size,
-              week_start: bagData.week_start_date
-            });
+          if (orderWithSelections?.user_protein_selections || orderWithSelections?.user_full_farm_bag_protein) {
+            console.log('Found selections in order, updating bag');
+            const bagUpdateData: any = {};
             
-            if (populateError) {
-              console.error('Failed to repopulate bag:', populateError);
-            } else {
-              // Refetch items after repopulation
-              await fetchBagItems(bagData.id);
+            if (orderWithSelections.box_size === 'protein-pack' && orderWithSelections.user_protein_selections) {
+              bagUpdateData.user_protein_selections = orderWithSelections.user_protein_selections;
             }
+            if (orderWithSelections.box_size === 'full_farm_bag') {
+              if (orderWithSelections.user_full_farm_bag_protein) {
+                bagUpdateData.user_full_farm_bag_protein = orderWithSelections.user_full_farm_bag_protein;
+              }
+              if (orderWithSelections.user_full_farm_bag_carb) {
+                bagUpdateData.user_full_farm_bag_carb = orderWithSelections.user_full_farm_bag_carb;
+              }
+            }
+            
+            if (Object.keys(bagUpdateData).length > 0) {
+              await supabase
+                .from('weekly_bags')
+                .update(bagUpdateData)
+                .eq('id', bagData.id);
+              
+              // Update local data
+              Object.assign(bagData, bagUpdateData);
+              hasUserSelections = true;
+            }
+          }
+        }
+        
+        const hasUserSelectedItemsInBag = currentItems.some(
+          item => item.item_type === 'user_selected_protein' || item.item_type === 'user_selected_carb'
+        );
+        
+        // If selections exist but items don't, repopulate
+        if (hasUserSelections && !hasUserSelectedItemsInBag) {
+          console.log('Repopulating bag with user selections');
+          const { error: populateError } = await supabase.rpc('populate_weekly_bag_from_template', {
+            bag_id: bagData.id,
+            box_size_name: bagData.box_size,
+            week_start: bagData.week_start_date
+          });
+          
+          if (populateError) {
+            console.error('Failed to repopulate bag:', populateError);
+          } else {
+            // Refetch items after repopulation
+            await fetchBagItems(bagData.id);
           }
         }
       }
