@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 interface UserProfile {
   first_name?: string;
   last_name?: string;
+  phone?: string;
   sms_notifications: boolean;
   email_newsletter: boolean;
 }
@@ -42,7 +43,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('first_name, last_name, sms_notifications, email_newsletter')
+        .select('first_name, last_name, phone, sms_notifications, email_newsletter')
         .eq('user_id', userId)
         .single();
       

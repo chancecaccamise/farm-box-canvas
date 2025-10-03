@@ -16,6 +16,7 @@ export default function Auth() {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [smsNotifications, setSmsNotifications] = useState(false);
@@ -47,6 +48,15 @@ export default function Auth() {
           return;
         }
 
+        if (!phone.trim()) {
+          toast({
+            title: "Error",
+            description: "Phone number is required",
+            variant: "destructive",
+          });
+          return;
+        }
+
         if (password !== confirmPassword) {
           toast({
             title: "Error",
@@ -59,6 +69,7 @@ export default function Auth() {
         const { error } = await signUp(email, password, {
           first_name: firstName,
           last_name: lastName,
+          phone: phone,
           sms_notifications: smsNotifications,
           email_newsletter: emailNewsletter
         });
@@ -162,7 +173,7 @@ export default function Auth() {
               )}
               
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">Email *</Label>
                 <Input
                   id="email"
                   type="email"
@@ -172,6 +183,20 @@ export default function Auth() {
                   required
                 />
               </div>
+
+              {isSignUp && (
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone Number *</Label>
+                  <Input
+                    id="phone"
+                    type="tel"
+                    placeholder="(555) 123-4567"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    required
+                  />
+                </div>
+              )}
               
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>

@@ -16,6 +16,7 @@ import { AdminGallery } from '@/components/admin/AdminGallery';
 import { AdminDeliveryAreas } from '@/components/admin/AdminDeliveryAreas';
 import { TestCleanup } from '@/components/TestCleanup';
 import { AdminDeliveryDays } from '@/components/admin/AdminDeliveryDays';
+import { AdminUserPreferences } from '@/components/admin/AdminUserPreferences';
 
 const Admin = () => {
   const { user, loading } = useAuth();
@@ -75,7 +76,7 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="products" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-10">
+          <TabsList className="grid w-full grid-cols-11">
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               Products
@@ -111,6 +112,10 @@ const Admin = () => {
             <TabsTrigger value="delivery-days" className="flex items-center gap-2">
               <Calendar className="h-4 w-4" />
               Delivery Days
+            </TabsTrigger>
+            <TabsTrigger value="user-preferences" className="flex items-center gap-2">
+              <UserCheck className="h-4 w-4" />
+              Users
             </TabsTrigger>
             <TabsTrigger value="test-cleanup" className="flex items-center gap-2">
               🧹
@@ -188,6 +193,20 @@ const Admin = () => {
               </CardHeader>
               <CardContent>
                 <AdminDeliveryDays />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="user-preferences">
+            <Card>
+              <CardHeader>
+                <CardTitle>User Marketing Preferences</CardTitle>
+                <CardDescription>
+                  View user contact information, marketing preferences, and subscription status
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AdminUserPreferences />
               </CardContent>
             </Card>
           </TabsContent>
