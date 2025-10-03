@@ -464,9 +464,16 @@ serve(async (req) => {
 
     // Add box item if not subscription
     if (!hasActiveSubscription && boxPrice > 0) {
-      const boxName = actualWeeklyBag ? 
-        `${actualWeeklyBag.box_size || 'Medium'} Farm Box` :
-        `${checkoutState.boxSize?.charAt(0).toUpperCase() + checkoutState.boxSize?.slice(1) || 'Medium'} Farm Box`;
+      // Fetch the proper display name from box_sizes table
+      const boxSizeName = actualWeeklyBag?.box_size || checkoutState.boxSize || 'medium';
+      const { data: boxSizeData } = await supabaseServiceClient
+        .from('box_sizes')
+        .select('display_name')
+        .eq('name', boxSizeName)
+        .single();
+      
+      const boxName = boxSizeData?.display_name || 
+        `${boxSizeName.charAt(0).toUpperCase() + boxSizeName.slice(1)} Farm Box`;
       
       orderItems.push({
         order_id: order.id,

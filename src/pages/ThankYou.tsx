@@ -224,9 +224,11 @@ const ThankYou = () => {
                       <p className="text-sm text-muted-foreground">
                         {orderData.delivery_time_preference === 'delivery' ? (
                           <>
-                            {orderData.week_start_date ? 
-                              `Week of ${new Date(orderData.week_start_date).toLocaleDateString()}` : 
-                              'Next available delivery window'
+                            {orderData.delivery_day_preference || 
+                              (orderData.week_start_date ? 
+                                `Week of ${new Date(orderData.week_start_date).toLocaleDateString()}` : 
+                                'Next available delivery window'
+                              )
                             }<br />
                             Between 8 AM - 12 PM
                           </>
@@ -253,6 +255,15 @@ const ThankYou = () => {
                         <span>${(item.price * item.quantity).toFixed(2)}</span>
                       </div>
                     ))}
+                    
+                    {/* Add Delivery Fee line item if delivery method is selected */}
+                    {orderData.delivery_time_preference === 'delivery' && orderData.delivery_fee > 0 && (
+                      <div className="flex justify-between text-muted-foreground">
+                        <span>Delivery Fee</span>
+                        <span>${orderData.delivery_fee.toFixed(2)}</span>
+                      </div>
+                    )}
+                    
                     <div className="border-t pt-2 mt-2 font-semibold flex justify-between">
                       <span>Total</span>
                       <span>${orderData.total_amount.toFixed(2)}</span>
