@@ -13,7 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { SubscriptionManager } from "@/components/SubscriptionManager";
 import { EditableDeliveryForm } from "@/components/EditableDeliveryForm";
 import NotificationPreferences from "@/components/NotificationPreferences";
-import { SubscriptionRecovery } from "@/components/SubscriptionRecovery";
+
 
 
 interface DeliveryAddress {
@@ -239,8 +239,6 @@ const MyPlan = () => {
               boxSize={weeklyBag?.box_size || undefined}
             />
 
-            {/* Subscription Recovery Tool */}
-            {(!subscription || subscription.status !== 'active') && <SubscriptionRecovery />}
 
 
             {/* Delivery Information */}
