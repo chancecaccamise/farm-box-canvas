@@ -241,57 +241,88 @@ serve(async (req) => {
               weeklyBagId = existingBag.id;
               logStep("Found existing bag", { bagId: weeklyBagId });
               
-              // Update existing bag with user selections
-              const bagUpdateData: any = {
-                box_size: orderRecord.box_size,
-                box_price: boxData?.base_price || 0
-              };
-              
-              if (orderRecord.box_size === 'protein-pack' && orderRecord.user_protein_selections) {
-                bagUpdateData.user_protein_selections = orderRecord.user_protein_selections;
-              }
-              if (orderRecord.box_size === 'full_farm_bag') {
-                if (orderRecord.user_full_farm_bag_protein) {
-                  bagUpdateData.user_full_farm_bag_protein = orderRecord.user_full_farm_bag_protein;
-                }
-                if (orderRecord.user_full_farm_bag_carb) {
-                  bagUpdateData.user_full_farm_bag_carb = orderRecord.user_full_farm_bag_carb;
-                }
-              }
-              
-              const { error: updateBagError } = await supabase
-                .from('weekly_bags')
-                .update(bagUpdateData)
-                .eq('id', weeklyBagId);
-              
-              if (updateBagError) {
-                logStep("ERROR: Failed to update existing bag", { error: updateBagError });
-              } else {
-                logStep("Updated existing bag with selections", { bagId: weeklyBagId });
-              }
-              
-              // Repopulate bag items with user selections
-              const { error: repopError } = await supabase
-                .rpc('populate_weekly_bag_from_template', {
-                  bag_id: weeklyBagId,
-                  box_size_name: orderRecord.box_size,
-                  week_start: weekStart.toISOString().split('T')[0]
-                });
-              
-              if (repopError) {
-                logStep("ERROR: Failed to repopulate existing bag", { error: repopError });
-              } else {
-                logStep("Repopulated existing bag successfully", { bagId: weeklyBagId });
-              }
-              
-              // Link order to existing bag
-              const { error: orderUpdateError } = await supabase
+              // Check if there's a newer order for this week/box
+              const { data: newerOrders } = await supabase
                 .from('orders')
-                .update({ weekly_bag_id: weeklyBagId })
-                .eq('id', existingOrder.id);
+                .select('id, created_at')
+                .eq('user_id', fullSession.metadata?.user_id)
+                .eq('weekly_bag_id', weeklyBagId)
+                .gt('created_at', existingOrder.created_at)
+                .limit(1);
               
-              if (orderUpdateError) {
-                logStep("ERROR: Failed to update order with existing bag_id", { error: orderUpdateError });
+              if (newerOrders && newerOrders.length > 0) {
+                logStep("Skipping bag update - newer order exists", {
+                  currentOrder: existingOrder.id,
+                  newerOrder: newerOrders[0].id,
+                  currentOrderTime: existingOrder.created_at,
+                  newerOrderTime: newerOrders[0].created_at
+                });
+                
+                // Still link this order to the bag, but don't update selections
+                const { error: orderUpdateError } = await supabase
+                  .from('orders')
+                  .update({ weekly_bag_id: weeklyBagId })
+                  .eq('id', existingOrder.id);
+                
+                if (orderUpdateError) {
+                  logStep("ERROR: Failed to update order with existing bag_id", { error: orderUpdateError });
+                }
+              } else {
+                // This is the most recent order - proceed with bag update
+                logStep("Updating bag - this is the most recent order");
+                
+                // Update existing bag with user selections
+                const bagUpdateData: any = {
+                  box_size: orderRecord.box_size,
+                  box_price: boxData?.base_price || 0
+                };
+                
+                if (orderRecord.box_size === 'protein-pack' && orderRecord.user_protein_selections) {
+                  bagUpdateData.user_protein_selections = orderRecord.user_protein_selections;
+                }
+                if (orderRecord.box_size === 'full_farm_bag') {
+                  if (orderRecord.user_full_farm_bag_protein) {
+                    bagUpdateData.user_full_farm_bag_protein = orderRecord.user_full_farm_bag_protein;
+                  }
+                  if (orderRecord.user_full_farm_bag_carb) {
+                    bagUpdateData.user_full_farm_bag_carb = orderRecord.user_full_farm_bag_carb;
+                  }
+                }
+                
+                const { error: updateBagError } = await supabase
+                  .from('weekly_bags')
+                  .update(bagUpdateData)
+                  .eq('id', weeklyBagId);
+                
+                if (updateBagError) {
+                  logStep("ERROR: Failed to update existing bag", { error: updateBagError });
+                } else {
+                  logStep("Updated existing bag with selections", { bagId: weeklyBagId });
+                }
+                
+                // Repopulate bag items with user selections
+                const { error: repopError } = await supabase
+                  .rpc('populate_weekly_bag_from_template', {
+                    bag_id: weeklyBagId,
+                    box_size_name: orderRecord.box_size,
+                    week_start: weekStart.toISOString().split('T')[0]
+                  });
+                
+                if (repopError) {
+                  logStep("ERROR: Failed to repopulate existing bag", { error: repopError });
+                } else {
+                  logStep("Repopulated existing bag successfully", { bagId: weeklyBagId });
+                }
+                
+                // Link order to existing bag
+                const { error: orderUpdateError } = await supabase
+                  .from('orders')
+                  .update({ weekly_bag_id: weeklyBagId })
+                  .eq('id', existingOrder.id);
+                
+                if (orderUpdateError) {
+                  logStep("ERROR: Failed to update order with existing bag_id", { error: orderUpdateError });
+                }
               }
             }
           } else {
