@@ -40,15 +40,9 @@ const FAQs = () => {
       icon: <Leaf className="w-5 h-5 text-accent" />
     },
     {
-      id: "6",
-      question: "Can I pause or skip deliveries?",
-      answer: "Yes! You have complete control over your subscription. You can skip any week, pause your subscription, or cancel anytime through your account dashboard. Just make sure to make changes before the weekly cutoff for your next scheduled delivery.",
-      icon: <Clock className="w-5 h-5 text-accent" />
-    },
-    {
       id: "7",
       question: "How do I manage my subscription?",
-      answer: "You can easily manage everything through your account dashboard - change bag types, update delivery preferences, add or remove add-ons, view order history, and modify your subscription settings. You have full control over your Billy's Botanicals experience.",
+      answer: "You can manage your subscription through the My Plan page. From there, you can view your subscription details, update delivery preferences, and cancel your subscription if needed. For other account settings like delivery address and payment methods, visit your account dashboard.",
       icon: <Settings className="w-5 h-5 text-accent" />
     },
     {
