@@ -277,16 +277,30 @@ serve(async (req) => {
                   box_price: boxData?.base_price || 0
                 };
                 
-                if (orderRecord.box_size === 'protein-pack' && orderRecord.user_protein_selections) {
-                  bagUpdateData.user_protein_selections = orderRecord.user_protein_selections;
-                }
+                // Clear conflicting selection fields based on box type
                 if (orderRecord.box_size === 'full_farm_bag') {
+                  // For Full Farm Bag, set the protein/carb selections and clear old protein pack data
+                  bagUpdateData.user_protein_selections = null;
+                  bagUpdateData.user_carb_selections = null;
                   if (orderRecord.user_full_farm_bag_protein) {
                     bagUpdateData.user_full_farm_bag_protein = orderRecord.user_full_farm_bag_protein;
                   }
                   if (orderRecord.user_full_farm_bag_carb) {
                     bagUpdateData.user_full_farm_bag_carb = orderRecord.user_full_farm_bag_carb;
                   }
+                } else if (orderRecord.box_size === 'protein-pack') {
+                  // For Protein Pack, set the selections and clear old Full Farm Bag data
+                  bagUpdateData.user_full_farm_bag_protein = null;
+                  bagUpdateData.user_full_farm_bag_carb = null;
+                  if (orderRecord.user_protein_selections) {
+                    bagUpdateData.user_protein_selections = orderRecord.user_protein_selections;
+                  }
+                } else {
+                  // For other box types, clear all selection fields
+                  bagUpdateData.user_protein_selections = null;
+                  bagUpdateData.user_carb_selections = null;
+                  bagUpdateData.user_full_farm_bag_protein = null;
+                  bagUpdateData.user_full_farm_bag_carb = null;
                 }
                 
                 const { error: updateBagError } = await supabase
