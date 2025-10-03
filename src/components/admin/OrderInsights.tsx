@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { CalendarDays, DollarSign, Users, ShoppingCart, TrendingUp, TrendingDown } from 'lucide-react';
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
@@ -269,9 +270,9 @@ export const OrderInsights = () => {
             </div>
 
             {/* KPI Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <Card>
-                <CardContent className="p-6">
+                <CardContent className="p-6 min-h-[120px]">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Total Revenue</p>
@@ -283,7 +284,7 @@ export const OrderInsights = () => {
               </Card>
 
               <Card>
-                <CardContent className="p-6">
+                <CardContent className="p-6 min-h-[120px]">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Total Orders</p>
@@ -295,10 +296,21 @@ export const OrderInsights = () => {
               </Card>
 
               <Card>
-                <CardContent className="p-6">
+                <CardContent className="p-6 min-h-[120px]">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Monthly Recurring Revenue</p>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <p className="text-sm font-medium text-muted-foreground cursor-help">
+                              MRR
+                            </p>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Monthly Recurring Revenue</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                       <p className="text-2xl font-bold">{formatCurrency(data.monthlyRecurringRevenue)}</p>
                     </div>
                     <TrendingUp className="h-8 w-8 text-emerald-600" />
@@ -307,10 +319,21 @@ export const OrderInsights = () => {
               </Card>
 
               <Card>
-                <CardContent className="p-6">
+                <CardContent className="p-6 min-h-[120px]">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Active Subscriptions</p>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <p className="text-sm font-medium text-muted-foreground cursor-help">
+                              Active Subs
+                            </p>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Active Subscriptions</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                       <p className="text-2xl font-bold">{data.activeSubscriptions}</p>
                       {data.pausedSubscriptions > 0 && (
                         <p className="text-xs text-muted-foreground mt-1">
@@ -324,7 +347,7 @@ export const OrderInsights = () => {
               </Card>
 
               <Card>
-                <CardContent className="p-6">
+                <CardContent className="p-6 min-h-[120px]">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Cancellation Rate</p>
@@ -341,10 +364,21 @@ export const OrderInsights = () => {
               </Card>
 
               <Card>
-                <CardContent className="p-6">
+                <CardContent className="p-6 min-h-[120px]">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Avg Order Value</p>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <p className="text-sm font-medium text-muted-foreground cursor-help">
+                              AOV
+                            </p>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Average Order Value</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                       <p className="text-2xl font-bold">{formatCurrency(data.averageOrderValue)}</p>
                     </div>
                     <CalendarDays className="h-8 w-8 text-orange-600" />
