@@ -100,9 +100,9 @@ export function SubscriptionManager({ subscription, onSubscriptionUpdate, boxSiz
             You currently don't have an active subscription. Upgrade your one-time purchase to receive a weekly box automatically.
           </p>
           <div className="flex gap-2">
-            <Button onClick={handleUpgradeToSubscription} size="sm" disabled={loading}>
+            <Button onClick={() => navigate('/zip-code')} size="sm">
               <ShoppingCart className="h-4 w-4 mr-2" />
-              {loading ? 'Starting…' : 'Upgrade to subscription'}
+              Upgrade to subscription
             </Button>
             <Button onClick={handleRefreshStatus} size="sm" variant="outline" disabled={loading}>
               Refresh status
@@ -234,7 +234,7 @@ export function SubscriptionManager({ subscription, onSubscriptionUpdate, boxSiz
                 Your subscription has been cancelled. To start receiving boxes again, you'll need to create a new subscription.
               </p>
               <div className="flex gap-2">
-                <Button onClick={handleUpgradeToSubscription} size="sm" variant="default" disabled={loading}>
+                <Button onClick={() => navigate('/zip-code')} size="sm" variant="default">
                   <ShoppingCart className="h-4 w-4 mr-2" />
                   Start New Subscription
                 </Button>
