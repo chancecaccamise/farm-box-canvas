@@ -316,6 +316,18 @@ function MyBag() {
         .eq("weekly_bag_id", bagId);
 
       if (error) throw error;
+      
+      console.log('📦 [ADD-ON DEBUG] fetchBagItems result:', {
+        bagId,
+        totalItems: data?.length || 0,
+        items: data?.map(item => ({
+          name: item.products?.name,
+          item_type: item.item_type,
+          product_category: item.products?.category,
+          is_paid: item.is_paid
+        }))
+      });
+      
       setBagItems((data || []) as WeeklyBagItem[]);
     } catch (error) {
       console.error("Error fetching bag items:", error);
@@ -323,10 +335,23 @@ function MyBag() {
   };
 
   const updateItemQuantity = async (productId: string, newQuantity: number) => {
-    if (!currentWeekBag || isLocked || currentWeekBag.is_confirmed) return;
+    console.log('🛒 [ADD-ON DEBUG] updateItemQuantity called:', {
+      productId,
+      newQuantity,
+      bagId: currentWeekBag?.id,
+      boxSize: currentWeekBag?.box_size,
+      isLocked,
+      isConfirmed: currentWeekBag?.is_confirmed
+    });
+
+    if (!currentWeekBag || isLocked || currentWeekBag.is_confirmed) {
+      console.log('⚠️ [ADD-ON DEBUG] Update blocked - bag locked or confirmed');
+      return;
+    }
 
     try {
       if (newQuantity <= 0) {
+        console.log('🗑️ [ADD-ON DEBUG] Deleting add-on item');
         await supabase
           .from("weekly_bag_items")
           .delete()
@@ -340,7 +365,10 @@ function MyBag() {
           .eq("id", productId)
           .single();
 
-        if (!productData) return;
+        if (!productData) {
+          console.log('❌ [ADD-ON DEBUG] Product not found');
+          return;
+        }
 
         const { data: existingItem } = await supabase
           .from("weekly_bag_items")
@@ -349,14 +377,18 @@ function MyBag() {
           .eq("product_id", productId)
           .maybeSingle();
 
+        console.log('🔍 [ADD-ON DEBUG] Existing item check:', { existingItem });
+
         if (existingItem && existingItem.item_type === 'addon') {
+          console.log('✏️ [ADD-ON DEBUG] Updating existing add-on');
           await supabase
             .from("weekly_bag_items")
             .update({ quantity: newQuantity })
             .eq("weekly_bag_id", currentWeekBag.id)
             .eq("product_id", productId);
         } else if (!existingItem) {
-          await supabase
+          console.log('➕ [ADD-ON DEBUG] Inserting new add-on with item_type: addon');
+          const { data: insertedData, error: insertError } = await supabase
             .from("weekly_bag_items")
             .insert({
               weekly_bag_id: currentWeekBag.id,
@@ -364,14 +396,18 @@ function MyBag() {
               quantity: newQuantity,
               price_at_time: productData.price,
               item_type: "addon"
-            });
+            })
+            .select();
+          
+          console.log('✅ [ADD-ON DEBUG] Insert result:', { insertedData, insertError });
         }
       }
 
       await fetchBagItems(currentWeekBag.id);
       await updateBagTotals();
+      console.log('✅ [ADD-ON DEBUG] Item quantity updated successfully');
     } catch (error) {
-      console.error("Error updating item quantity:", error);
+      console.error("❌ [ADD-ON DEBUG] Error updating item quantity:", error);
     }
   };
 
@@ -537,7 +573,25 @@ function MyBag() {
   };
 
   const getConfirmedAddons = () => {
-    return bagItems.filter(item => item.item_type === 'addon');
+    const addons = bagItems.filter(item => item.item_type === 'addon');
+    console.log('🔍 [ADD-ON DEBUG] getConfirmedAddons called:', {
+      totalBagItems: bagItems.length,
+      addonsFound: addons.length,
+      bagItemsBreakdown: {
+        box_items: bagItems.filter(i => i.item_type === 'box_item').length,
+        addons: addons.length,
+        user_selected_protein: bagItems.filter(i => i.item_type === 'user_selected_protein').length,
+        user_selected_carb: bagItems.filter(i => i.item_type === 'user_selected_carb').length,
+      },
+      allBagItems: bagItems.map(item => ({
+        id: item.id,
+        name: item.products.name,
+        item_type: item.item_type,
+        category: item.products.category,
+        is_paid: item.is_paid
+      }))
+    });
+    return addons;
   };
 
   const getAddonQuantities = () => {
@@ -715,21 +769,29 @@ function MyBag() {
             )}
 
               {/* Current Add-ons */}
-              {getConfirmedAddons().length > 0 && (
-                <div>
-                  <h2 className="text-xl font-semibold mb-4">Your Add-ons</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {getConfirmedAddons().map((item) => (
-                      <BagItemCard
-                        key={item.id}
-                        item={item}
-                        onUpdateQuantity={updateItemQuantity}
-                        isLocked={isLocked || currentWeekBag.is_confirmed}
-                      />
-                    ))}
+              {(() => {
+                const confirmedAddons = getConfirmedAddons();
+                console.log('🎨 [ADD-ON DEBUG] Rendering add-ons section:', {
+                  boxSize: currentWeekBag?.box_size,
+                  confirmedAddonsCount: confirmedAddons.length,
+                  willRenderSection: confirmedAddons.length > 0
+                });
+                return confirmedAddons.length > 0 ? (
+                  <div>
+                    <h2 className="text-xl font-semibold mb-4">Your Add-ons</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {confirmedAddons.map((item) => (
+                        <BagItemCard
+                          key={item.id}
+                          item={item}
+                          onUpdateQuantity={updateItemQuantity}
+                          isLocked={isLocked || currentWeekBag.is_confirmed}
+                        />
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                ) : null;
+              })()}
 
               {/* Add-ons Grid */}
               <div>
