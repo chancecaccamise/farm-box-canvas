@@ -105,8 +105,6 @@ const ZipCode = () => {
                   <CheckCircle className="h-4 w-4 text-primary" />
                   <AlertDescription className="text-primary">
                     <strong>Great! We deliver to {zipCodeData.city}, {zipCodeData.state}</strong>
-                    <br />
-                    Delivery available Tuesday through Saturday
                   </AlertDescription>
                 </Alert>
               )}
@@ -116,6 +114,13 @@ const ZipCode = () => {
                   <XCircle className="h-4 w-4 text-orange-600" />
                   <AlertDescription className="text-orange-800">
                     <strong>We don't deliver to {zipCode} yet, but we're expanding!</strong>
+                    <br />
+                    <br />
+                    Interested in pickup instead? Text us at{" "}
+                    <a href="tel:9127273098" className="font-semibold underline">
+                      (912) 727-3098
+                    </a>{" "}
+                    to place a pickup order.
                   </AlertDescription>
                 </Alert>
               )}
@@ -140,8 +145,7 @@ const ZipCode = () => {
             <div className="bg-secondary/50 rounded-lg p-4">
               <h4 className="font-medium mb-2">Delivery Areas</h4>
               <p className="text-sm text-muted-foreground">
-                We currently deliver to most areas within 50 miles of our partner farms. 
-                Delivery is available Tuesday through Saturday.
+                We currently deliver to most areas within 50 miles of our partner farms.
               </p>
             </div>
           </CardContent>
