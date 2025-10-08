@@ -432,8 +432,20 @@ serve(async (req) => {
       addons_total: addonsTotal,
       delivery_fee: deliveryFee,
       has_active_subscription: hasActiveSubscription,
-      week_start_date: actualWeeklyBag?.week_start_date || null,
-      week_end_date: actualWeeklyBag?.week_end_date || null,
+      week_start_date: actualWeeklyBag?.week_start_date || (() => {
+        const now = new Date();
+        const monday = new Date(now);
+        monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+        return monday.toISOString().split('T')[0];
+      })(),
+      week_end_date: actualWeeklyBag?.week_end_date || (() => {
+        const now = new Date();
+        const monday = new Date(now);
+        monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+        const sunday = new Date(monday);
+        sunday.setDate(monday.getDate() + 6);
+        return sunday.toISOString().split('T')[0];
+      })(),
       order_type: isSubscription ? 'subscription' : 'one_time',
       status: 'pending',
       // New enhanced fields

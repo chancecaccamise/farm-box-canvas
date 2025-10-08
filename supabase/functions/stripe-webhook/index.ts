@@ -414,18 +414,37 @@ serve(async (req) => {
           }
         }
         
-        // Repopulate bag items with user selections
+        // Repopulate bag items with user selections (resolve a valid week_start)
+        // Determine a safe week_start to use
+        let weekStartUsed = orderRecord.week_start_date as string | null;
+        if (!weekStartUsed) {
+          const { data: wb } = await supabase
+            .from('weekly_bags')
+            .select('week_start_date')
+            .eq('id', weeklyBagId)
+            .maybeSingle();
+          weekStartUsed = wb?.week_start_date || null;
+        }
+        if (!weekStartUsed) {
+          const now = new Date();
+          const monday = new Date(now);
+          // Set to Monday of the current week (Mon=1)
+          monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+          weekStartUsed = monday.toISOString().split('T')[0];
+        }
+        logStep("Repopulating bag - resolved week_start", { weeklyBagId, weekStartUsed, boxSize: orderRecord.box_size });
+
         const { error: populateError } = await supabase
           .rpc('populate_weekly_bag_from_template', {
             bag_id: weeklyBagId,
             box_size_name: orderRecord.box_size,
-            week_start: orderRecord.week_start_date
+            week_start: weekStartUsed
           });
         
         if (populateError) {
-          logStep("WARNING: Failed to repopulate bag", { error: populateError, weeklyBagId });
+          logStep("WARNING: Failed to repopulate bag", { error: populateError, weeklyBagId, weekStartUsed });
         } else {
-          logStep("Bag repopulated successfully with user selections", { weeklyBagId });
+          logStep("Bag repopulated successfully with user selections", { weeklyBagId, weekStartUsed });
         }
 
         // Mark add-on items as paid for subscribers

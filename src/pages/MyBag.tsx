@@ -282,9 +282,9 @@ function MyBag() {
           }
         }
         
-        // If selections exist but items don't, repopulate
-        if (hasUserSelections && currentUserSelectedItems.length === 0) {
-          console.log('Repopulating bag with user selections - selections exist but no items found');
+        // If Full Farm Bag is missing box items, repopulate from template
+        if (bagData.box_size === 'full_farm_bag' && hasUserSelections && !((freshItems || []).some(i => i.item_type === 'box_item'))) {
+          console.log('Repopulating bag - missing box items despite selections');
           const { error: populateError } = await supabase.rpc('populate_weekly_bag_from_template', {
             bag_id: bagData.id,
             box_size_name: bagData.box_size,
