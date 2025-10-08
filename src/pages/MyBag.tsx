@@ -795,7 +795,6 @@ function MyBag() {
 
               {/* Add-ons Grid - Display Only */}
               <div>
-                <h2 className="text-xl font-semibold mb-4">Browse Add-Ons</h2>
                 <AddOnsGrid
                   bagItems={getAddonQuantities()}
                   onUpdateQuantity={updateItemQuantity}

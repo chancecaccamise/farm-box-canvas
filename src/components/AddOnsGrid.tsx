@@ -101,7 +101,7 @@ export function AddOnsGrid({ bagItems, onUpdateQuantity, isLocked = false, confi
           <h2 className="text-2xl font-semibold text-foreground">Browse Add-Ons</h2>
         </div>
         <p className="text-muted-foreground">
-          Supplement your weekly box with these additional fresh products.
+          Interested in purchasing additional items? Text us at (912) 727-3098 to add more products to your order!
         </p>
         
         <div className="space-y-4">
