@@ -674,9 +674,9 @@ function MyBag() {
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-3 gap-8">
+          <div className="max-w-7xl mx-auto">
             {/* Main content - Bag Items */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="space-y-6">
             {/* User Selected Items - Protein Pack (5 proteins) */}
             {currentWeekBag.box_size === 'protein-pack' && getUserSelectedItems().length > 0 && (
               <div className="mb-6">
@@ -793,31 +793,15 @@ function MyBag() {
                 ) : null;
               })()}
 
-              {/* Add-ons Grid */}
+              {/* Add-ons Grid - Display Only */}
               <div>
-                <h2 className="text-xl font-semibold mb-4">Or Shop Add-Ons</h2>
+                <h2 className="text-xl font-semibold mb-4">Browse Add-Ons</h2>
                 <AddOnsGrid
                   bagItems={getAddonQuantities()}
                   onUpdateQuantity={updateItemQuantity}
-                  isLocked={isLocked || currentWeekBag.is_confirmed}
+                  isLocked={true}
                   confirmedAddons={getConfirmedAddonIds()}
-                />
-              </div>
-            </div>
-
-            {/* Sidebar - Summary */}
-            <div className="lg:col-span-1">
-              <div className="sticky top-8">
-                <WeeklyBagSummary
-                  weeklyBag={currentWeekBag}
-                  itemCount={bagItems.length}
-                  onCheckout={handleCheckout}
-                  onUnconfirm={() => setShowUnconfirmDialog(true)}
-                  isLocked={isLocked}
-                  hasActiveSubscription={hasActiveSubscription}
-                  loading={loading}
-                  unpaidAddonsTotal={bagItems.filter(item => item.item_type === 'addon' && !item.is_paid).reduce((sum, item) => sum + (item.price_at_time * item.quantity), 0)}
-                  hasPaidForThisWeek={hasPaidForThisWeek}
+                  displayOnly={true}
                 />
               </div>
             </div>

@@ -22,12 +22,13 @@ interface AddOnsGridProps {
   onUpdateQuantity: (productId: string, quantity: number) => void;
   isLocked?: boolean;
   confirmedAddons?: string[]; // Product IDs that are already confirmed/paid
+  displayOnly?: boolean; // If true, shows products without quantity controls
 }
 
 const PRODUCTS_PER_PAGE = 8;
 const CATEGORIES = ["All"]; // Only show all since we're filtering to addons category
 
-export function AddOnsGrid({ bagItems, onUpdateQuantity, isLocked = false, confirmedAddons = [] }: AddOnsGridProps) {
+export function AddOnsGrid({ bagItems, onUpdateQuantity, isLocked = false, confirmedAddons = [], displayOnly = false }: AddOnsGridProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -139,6 +140,7 @@ export function AddOnsGrid({ bagItems, onUpdateQuantity, isLocked = false, confi
             onUpdateQuantity={onUpdateQuantity}
             isLocked={isLocked}
             isConfirmed={confirmedAddons.includes(product.id)}
+            displayOnly={displayOnly}
           />
         ))}
       </div>

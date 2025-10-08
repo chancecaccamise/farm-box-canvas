@@ -20,9 +20,10 @@ interface ProductCardProps {
   onUpdateQuantity: (productId: string, quantity: number) => void;
   isLocked: boolean;
   isConfirmed?: boolean;
+  displayOnly?: boolean;
 }
 
-export function ProductCard({ product, quantity, onUpdateQuantity, isLocked, isConfirmed = false }: ProductCardProps) {
+export function ProductCard({ product, quantity, onUpdateQuantity, isLocked, isConfirmed = false, displayOnly = false }: ProductCardProps) {
   const getCategoryColor = (category: string) => {
     const colors = {
       produce: "bg-primary/10 text-primary border-primary/20",
@@ -125,58 +126,62 @@ export function ProductCard({ product, quantity, onUpdateQuantity, isLocked, isC
             <span className="font-semibold text-lg text-primary">
               ${product.price.toFixed(2)}
             </span>
-            <span className="text-xs text-muted-foreground">
-              {product.inventory_count} in stock
-            </span>
-          </div>
-
-          {/* Quantity Controls */}
-          <div className="flex items-center justify-center">
-            {isConfirmed ? (
-              <Button
-                size="sm"
-                disabled
-                variant="outline"
-                className="w-full border-green-200 bg-green-50 text-green-700"
-              >
-                ✓ Added to Bag
-              </Button>
-            ) : quantity > 0 ? (
-              <div className="flex items-center gap-3 w-full">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => onUpdateQuantity(product.id, quantity - 1)}
-                  disabled={isLocked}
-                  className="h-9 w-9 p-0 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20"
-                >
-                  <Minus className="h-4 w-4" />
-                </Button>
-                <span className="text-sm font-medium min-w-[2rem] text-center">
-                  {quantity}
-                </span>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => onUpdateQuantity(product.id, quantity + 1)}
-                  disabled={isLocked || quantity >= product.inventory_count}
-                  className="h-9 w-9 p-0 hover:bg-primary/10 hover:text-primary hover:border-primary/20"
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </div>
-            ) : (
-              <Button
-                size="sm"
-                onClick={() => onUpdateQuantity(product.id, 1)}
-                disabled={isLocked || product.inventory_count === 0}
-                className="w-full"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Add to Bag
-              </Button>
+            {!displayOnly && (
+              <span className="text-xs text-muted-foreground">
+                {product.inventory_count} in stock
+              </span>
             )}
           </div>
+
+          {/* Quantity Controls - Hidden in display only mode */}
+          {!displayOnly && (
+            <div className="flex items-center justify-center">
+              {isConfirmed ? (
+                <Button
+                  size="sm"
+                  disabled
+                  variant="outline"
+                  className="w-full border-green-200 bg-green-50 text-green-700"
+                >
+                  ✓ Added to Bag
+                </Button>
+              ) : quantity > 0 ? (
+                <div className="flex items-center gap-3 w-full">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => onUpdateQuantity(product.id, quantity - 1)}
+                    disabled={isLocked}
+                    className="h-9 w-9 p-0 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20"
+                  >
+                    <Minus className="h-4 w-4" />
+                  </Button>
+                  <span className="text-sm font-medium min-w-[2rem] text-center">
+                    {quantity}
+                  </span>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => onUpdateQuantity(product.id, quantity + 1)}
+                    disabled={isLocked || quantity >= product.inventory_count}
+                    className="h-9 w-9 p-0 hover:bg-primary/10 hover:text-primary hover:border-primary/20"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              ) : (
+                <Button
+                  size="sm"
+                  onClick={() => onUpdateQuantity(product.id, 1)}
+                  disabled={isLocked || product.inventory_count === 0}
+                  className="w-full"
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add to Bag
+                </Button>
+              )}
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>
