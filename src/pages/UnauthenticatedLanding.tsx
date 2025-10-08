@@ -1,17 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Leaf, Truck, Users, Star, Quote } from "lucide-react";
+import { CheckCircle, Leaf, Truck, Users, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import heroImage from "@/assets/billysBotanicalsHeroNew.png";
-import rainbowCarrots from "@/assets/rainbow-carrots.jpg";
-import leafyGreens from "@/assets/leafy-greens.jpg";
-import tomatoes from "@/assets/tomatoes.jpg";
-import bellPeppers from "@/assets/bell-peppers.jpg";
 import whychoosebillys from "@/assets/whyChooseBillys.jpg";
-import greenhouse from "@/assets/greenhouse.jpg";
 import BoxComparison from "@/components/BoxComparison";
+import FreshAddOns from "@/components/FreshAddOns";
 
 const UnauthenticatedLanding = () => {
   return (
@@ -43,9 +38,9 @@ const UnauthenticatedLanding = () => {
       {/* How It Works Section */}
       <section className="py-20 px-4">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-4">Simplify Your Access to Community Produce </h2>
+          <h2 className="text-4xl font-bold text-center mb-4">Simplify Your Access to Community Produce</h2>
           <p className="text-xl text-muted-foreground text-center mb-16 max-w-2xl mx-auto">
-            Three simple steps to get farm-fresh ingredients delivered to your door
+            Three simple steps to get fresh, curated ingredients delivered weekly
           </p>
           
           <div className="grid md:grid-cols-3 gap-8">
@@ -54,12 +49,27 @@ const UnauthenticatedLanding = () => {
                 <div className="w-16 h-16 bg-gradient-fresh rounded-full flex items-center justify-center mx-auto mb-4">
                   <Leaf className="w-8 h-8 text-white" />
                 </div>
-                <CardTitle className="text-2xl">1. Pick Your Produce</CardTitle>
+                <CardTitle className="text-2xl">1. Choose Your Box Size</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  Choose your box size and select from seasonal produce, local proteins, 
-                  and artisan pantry items. Every item is sourced from our hydroponic farm.
+                  Select from Veggie Billy's Bag, Full Billy's Bag, or Protein Billy's Bag 
+                  based on your household size and dietary preferences.
+                </CardDescription>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center">
+              <CardHeader>
+                <div className="w-16 h-16 bg-gradient-fresh rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Users className="w-8 h-8 text-white" />
+                </div>
+                <CardTitle className="text-2xl">2. We Curate Your Selection</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-base">
+                  Billy and his team handpick the freshest produce, local fish, 
+                  and artisan goods based on seasonal harvests.
                 </CardDescription>
               </CardContent>
             </Card>
@@ -69,122 +79,14 @@ const UnauthenticatedLanding = () => {
                 <div className="w-16 h-16 bg-gradient-fresh rounded-full flex items-center justify-center mx-auto mb-4">
                   <Truck className="w-8 h-8 text-white" />
                 </div>
-                <CardTitle className="text-2xl">2. Schedule Delivery</CardTitle>
+                <CardTitle className="text-2xl">3. Delivered Fresh</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base">
-                  Select your preferred delivery day and frequency. We deliver fresh 
-                  from our greenhouse to your doorstep every week.
+                  Your curated box arrives fresh at your doorstep every week.
                 </CardDescription>
               </CardContent>
             </Card>
-
-            <Card className="text-center">
-              <CardHeader>
-                <div className="w-16 h-16 bg-gradient-fresh rounded-full flex items-center justify-center mx-auto mb-4">
-                  <CheckCircle className="w-8 h-8 text-white" />
-                </div>
-                <CardTitle className="text-2xl">3. Enjoy Fresh Food</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="text-base">
-                  Unpack your weekly box and discover new seasonal favorites. 
-                  Cook with confidence knowing every ingredient is farm-fresh.
-                </CardDescription>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Products Section */}
-      <section className="py-20 px-4 bg-secondary/50">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-4">Billy's Personal Picks</h2>
-          <p className="text-xl text-muted-foreground text-center mb-16">
-            Hand-selected from our hydroponic greenhouse this week
-          </p>
-          
-          <div className="grid md:grid-cols-4 gap-6">
-            {[
-              { name: "Rainbow Carrots", description: "Sweet, colorful heirloom varieties", image: rainbowCarrots, badge: "Billy's Favorite" },
-              { name: "Leafy Greens Mix", description: "Fresh spinach, arugula, and kale", image: leafyGreens, badge: "From Billy's Greenhouse" },
-              { name: "Heritage Tomatoes", description: "Vine-ripened hydroponic varieties", image: tomatoes, badge: "Greenhouse Grown" },
-              { name: "Bell Pepper Trio", description: "Red, yellow, and orange peppers", image: bellPeppers, badge: "Seasonal Special" }
-            ].map((product, index) => (
-              <Card key={index} className="overflow-hidden hover:scale-105 transition-all duration-300">
-                <div className="relative aspect-square">
-                  <img 
-                    src={product.image} 
-                    alt={product.name}
-                    className="w-full h-full object-cover"
-                  />
-                  <div className="absolute top-2 left-2">
-                    <span className="bg-accent text-white text-xs px-2 py-1 rounded-full font-medium">
-                      {product.badge}
-                    </span>
-                  </div>
-                </div>
-                <CardContent className="p-4">
-                  <h3 className="font-semibold text-lg mb-2">{product.name}</h3>
-                  <p className="text-muted-foreground text-sm">{product.description}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Why Choose Billy's */}
-      <section className="py-20 px-4">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-16">What sets Billy&apos;s Botanicals apart?</h2>
-          
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <div className="space-y-8">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-gradient-fresh rounded-full flex items-center justify-center flex-shrink-0">
-                    <Leaf className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold mb-2">100% Sustainable</h3>
-                    <p className="text-muted-foreground">Closed-loop aquaponics system is a soil-free growth method sans pesticides or synthetic fertilizers.
-                    </p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-gradient-fresh rounded-full flex items-center justify-center flex-shrink-0">
-                    <Users className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold mb-2">Family-Owned Since 2020</h3>
-                    <p className="text-muted-foreground">From sow to sale, owners Billy and Ana put their hearts and hands into the entire operation.</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-gradient-fresh rounded-full flex items-center justify-center flex-shrink-0">
-                    <Truck className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-semibold mb-2">Community-loved</h3>
-                    <p className="text-muted-foreground">Dedicated to supporting fellow local growers, foragers, and makers in Savannah </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <div className="relative">
-              <div className="aspect-square rounded-2xl overflow-hidden">
-                <img 
-                  src={whychoosebillys} 
-                  alt="Billy's hydroponic greenhouse" 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            </div>
           </div>
         </div>
       </section>
@@ -192,12 +94,68 @@ const UnauthenticatedLanding = () => {
       {/* Subscription Plans */}
       <BoxComparison />
 
-      {/* Customer Testimonials */}
-      <section className="py-20 px-4 bg-secondary/50">
+      {/* Fresh Add-Ons Section */}
+      <FreshAddOns />
+
+      {/* Why Choose Billy's */}
+      <section className="py-20 px-4 bg-secondary/30">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-4">What Customers Say About Ana's Arrangements</h2>
+          <h2 className="text-4xl font-bold text-center mb-16">What sets Billy&apos;s Botanicals apart?</h2>
+          
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <div className="space-y-8">
+                <div className="flex items-start gap-4">
+                  <CheckCircle className="w-6 h-6 text-accent flex-shrink-0 mt-1" />
+                  <div>
+                    <h3 className="text-xl font-semibold mb-2">100% Local Sourcing</h3>
+                    <p className="text-muted-foreground">From Billy's hydroponic farm and trusted local partners including fishermen and artisan bakers.</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-4">
+                  <CheckCircle className="w-6 h-6 text-accent flex-shrink-0 mt-1" />
+                  <div>
+                    <h3 className="text-xl font-semibold mb-2">Sustainable Hydroponic Farming</h3>
+                    <p className="text-muted-foreground">Our greenhouse uses 95% less water and zero pesticides while producing the freshest vegetables year-round.</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-4">
+                  <CheckCircle className="w-6 h-6 text-accent flex-shrink-0 mt-1" />
+                  <div>
+                    <h3 className="text-xl font-semibold mb-2">Direct Partnerships</h3>
+                    <p className="text-muted-foreground">We work directly with small vendors and local fishermen to bring you the freshest seasonal offerings.</p>
+                  </div>
+                </div>
+                
+                <div className="flex items-start gap-4">
+                  <CheckCircle className="w-6 h-6 text-accent flex-shrink-0 mt-1" />
+                  <div>
+                    <h3 className="text-xl font-semibold mb-2">Transparent Sourcing</h3>
+                    <p className="text-muted-foreground">Family-owned since 2018, we know every farmer, fisherman, and baker we work with personally.</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="relative">
+              <img 
+                src={whychoosebillys} 
+                alt="Billy's hydroponic greenhouse operation" 
+                className="w-full h-80 lg:h-96 object-cover object-center rounded-2xl shadow-lg"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Customer Testimonials */}
+      <section className="py-20 px-4">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl font-bold text-center mb-4">What Our Community Is Saying</h2>
           <p className="text-xl text-muted-foreground text-center mb-16">
-            Real stories from customers who love Ana's floral arrangements
+            Real stories from local chefs, customers, and families who choose Billy's Botanicals
           </p>
           
           <Carousel
@@ -205,67 +163,87 @@ const UnauthenticatedLanding = () => {
               align: "start",
               loop: true,
             }}
-            className="w-full max-w-6xl mx-auto"
+            className="w-full max-w-5xl mx-auto"
           >
             <CarouselContent className="-ml-2 md:-ml-4">
               {[
                 {
-                  text: "I have had such wonderful experiences working with Ana at Billy's Botanicals! She is amazing to work with—her communication is always clear and timely, and she truly listens to what couples want for their wedding day. Ana is incredibly talented and creates the most beautiful floral arrangements that can completely transform our venues or add just enough to enhance their natural beauty.",
-                  author: "Melanie Marchand - Senior Wedding & Event Specialist, Red Gate Farms",
-                  event: "Wedding",
-                  rating: 5
+                  name: "Chef Derek Lark",
+                  location: "Marker 107",
+                  quote: "Billy's Botanicals is a gem! Their seafood is incredibly fresh and the herbs add such a vibrant kick to our dishes. The quality is unmatched, and the service is always warm and dependable. I highly recommend this local treasure!",
+                  rating: 5,
+                  type: "chef"
                 },
                 {
-                  text: "As a recent bride who loves flowers, I highly recommend Ana's services. Ana completely followed through with the vision I provided for my bouquet. Everything looked cohesive yet unique to where it was placed. Ana not only provided stunning floral arrangements, but also demonstrated professionalism and kindness.",
-                  author: "Erin B.",
-                  event: "Wedding", 
-                  rating: 5
+                  name: "Chef Collin Clemons", 
+                  location: "1540 Room & Desoto Hotel",
+                  quote: "Billy's Botanicals provides the highest quality products in the low-country, hands down. The relationships they have built with fishermen and restaurateurs, not to mention the amazing quality of vegetables and herbs grown on their farm are second to none. We at the DeSoto Hotel and 1540 Room restaurant are beyond proud to provide the highest quality food thanks to Billy.",
+                  rating: 5,
+                  type: "chef"
                 },
                 {
-                  text: "We would like to extend our heartfelt thanks to Ana and her team for their wonderful service. All of the florals were fresh, vibrant in color, and thoughtfully arranged to complement our theme. Ana maintained excellent communication with us throughout the planning process, and she even coordinated with our vendors to ensure everything matched perfectly.",
-                  author: "Adeina",
-                  event: "Wedding",
-                  rating: 5
+                  name: "Jane Fishel",
+                  location: "Savannah, GA",
+                  quote: "Billy's Botanicals is your one stop shop for produce, seafood, and stunning floral arrangements. Whether you go to the farmers market or get one of their beautifully curated farm bags, it is always fresh and always local!",
+                  rating: 5,
+                  type: "customer"
                 },
                 {
-                  text: "Words can't express how grateful we are to have had our dear friend Ana do the flowers for our wedding. My bouquet was a true work of art which brought tears to my eyes as soon as I saw it. The florals at our ceremony were absolutely breathtaking, and the centerpieces at the reception perfectly tied the entire room together.",
-                  author: "Libby B.",
-                  event: "Wedding",
-                  rating: 5
+                  name: "Rena P",
+                  location: "Savannah, GA",
+                  quote: "What a privilege to get a weekly delivery from Billy's Botanicals. Want in on the source of the freshest ingredients used by some of your favorite restaurants in Savannah? Where to find local fish? Fresh eggs? Just picked veggies? A bouquet of flowers that lasts a week? And the nicest folks you could ever meet? Billy's Botanicals is calling your name!",
+                  rating: 5,
+                  type: "customer"
                 },
                 {
-                  text: "Flowers by Ana does a weekly flower arrangement for us at Lavender Hill SpaSalon and the flowers catch every customer's eye. They are beautiful every single week. Each arrangement is unique, interesting and one-of-a-kind; we get so many compliments!",
-                  author: "Karen G. at SalonSpa",
-                  event: "Other",
-                  rating: 5
+                  name: "Karen G",
+                  location: "Billy's Bag Customer",
+                  quote: "My family also uses Billy's Botanicals Billy's Bag. It is so enjoyable to have the opportunity to have fresh and sustainably sourced produce and seafood as well as the privilege to support a local business.",
+                  rating: 5,
+                  type: "customer"
+                },
+                {
+                  name: "Jay H",
+                  location: "Savannah, GA",
+                  quote: "WE LOVE BILLY'S! From the fresh, local seafood to the produce, eggs, spices and sauces, you can't go wrong! We love Billy's Bags which include proteins, eggs, produce and more letting us eat healthy, fresh and local meals that vary every week depending on what's in season.",
+                  rating: 5,
+                  type: "customer"
+                },
+                {
+                  name: "Jacob Hammer",
+                  location: "Husk Savannah",
+                  quote: "Billy's botanicals is something special. From sourcing the freshest seafood to truly home-grown herbs and vegetables, they are the epitome of high quality. Partnerships like theirs are what allow Husk to thrive and be successful. On top of it all, Billy and Ana are two of the kindest people on the planet.",
+                  rating: 5,
+                  type: "customer"
+                },
+                {
+                  name: "Rachel Matte",
+                  location: "Savannah, GA",
+                  quote: "I first started ordering the farm bags from Billy's Botanicals during the covid lockdown, when veggies were nowhere to be found. I quickly relied on these weekly deliveries to get the best fresh vegetables. They became my 'Chopped Baskets,' getting to try new things you'd never find in a store like edible flowers, fava beans and spicy radishes, one of my personal favorites. Salads are my go to prep for the week, and these bags give the best variety and ingredients to make new fun flavors in them. Definitely a staple to my grocery list each week.",
+                  rating: 5,
+                  type: "customer"
                 }
-                
               ].map((testimonial, index) => (
                 <CarouselItem key={index} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
-                  <Card className="h-full">
+                  <Card className="text-center h-full">
                     <CardContent className="p-6 flex flex-col h-full">
                       <div className="flex justify-center mb-4">
                         {[...Array(testimonial.rating)].map((_, i) => (
-                          <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          <Star key={i} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
                         ))}
                       </div>
-                      <Quote className="w-8 h-8 text-accent mb-4 mx-auto" />
-                      <p className="text-muted-foreground italic mb-4 flex-grow text-sm">
-                        "{testimonial.text}"
-                      </p>
+                      <p className="text-muted-foreground mb-4 italic flex-grow text-sm leading-relaxed">"{testimonial.quote}"</p>
                       <div className="mt-auto">
-                        <p className="font-semibold text-sm">{testimonial.author}</p>
-                        <Badge variant="secondary" className="mt-1">
-                          {testimonial.event}
-                        </Badge>
+                        <p className="font-semibold">{testimonial.name}</p>
+                        <p className="text-sm text-muted-foreground">{testimonial.location}</p>
                       </div>
                     </CardContent>
                   </Card>
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <CarouselPrevious className="left-0 -translate-x-12" />
-            <CarouselNext className="right-0 translate-x-12" />
+            <CarouselPrevious className="hidden sm:flex -left-12" />
+            <CarouselNext className="hidden sm:flex -right-12" />
           </Carousel>
         </div>
       </section>
@@ -275,7 +253,7 @@ const UnauthenticatedLanding = () => {
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl font-bold mb-6">Ready to Start Your Weekly Deliveries?</h2>
           <p className="text-xl mb-8 opacity-90">
-            Join hundreds of Savannah families enjoying fresh, local ingredients delivered weekly. Skip weeks anytime or cancel without hassle.
+            Join Billy's Botanical family and experience the freshest curated boxes delivered weekly.
           </p>
           <div className="flex gap-4 justify-center">
             <Button asChild variant="organic" size="xl">
