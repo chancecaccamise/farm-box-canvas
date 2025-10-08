@@ -207,6 +207,16 @@ export const EnhancedOrderManagement = () => {
     return selections.length > 0 ? selections.join(' | ') : 'No selections';
   };
 
+  const getAddOnsDisplay = (order: EnhancedOrder): string => {
+    const addons = order.order_items.filter(item => item.item_type === 'addon');
+    
+    if (addons.length === 0) return 'No add-ons';
+    
+    return addons.map(item => 
+      `${item.quantity}x ${item.product_name || item.products?.name || 'Unknown'} ($${item.price.toFixed(2)})`
+    ).join(', ');
+  };
+
   const exportOrderData = async () => {
     try {
       const ordersToExport = getFilteredOrders();
@@ -234,7 +244,9 @@ export const EnhancedOrderManagement = () => {
         'Addons Total',
         'Delivery Fee',
         'Total Amount',
-        'Items Summary'
+        'Box Contents',
+        'Add-Ons Purchased',
+        'Add-Ons Details'
       ];
 
       const csvContent = [
@@ -261,8 +273,14 @@ export const EnhancedOrderManagement = () => {
           order.addons_total || 0,
           order.delivery_fee || 0,
           order.total_amount,
-          `"${order.order_items.map(item => 
+          `"${order.order_items.filter(item => item.item_type !== 'addon').map(item => 
             `${item.quantity}x ${item.product_name || item.products?.name || 'Unknown'}`
+          ).join('; ')}"`,
+          `"${order.order_items.filter(item => item.item_type === 'addon').map(item => 
+            `${item.quantity}x ${item.product_name || item.products?.name || 'Unknown'}`
+          ).join('; ')}"`,
+          `"${order.order_items.filter(item => item.item_type === 'addon').map(item => 
+            `${item.quantity}x ${item.product_name || item.products?.name || 'Unknown'} ($${item.price.toFixed(2)})`
           ).join('; ')}"`,
         ].join(','))
       ].join('\n');
@@ -429,6 +447,7 @@ export const EnhancedOrderManagement = () => {
                 <TableHead>Customer</TableHead>
                 <TableHead>Box Type</TableHead>
                 <TableHead>Customer Selections</TableHead>
+                <TableHead>Add-Ons Purchased</TableHead>
                 <TableHead>Delivery Preference</TableHead>
                 <TableHead>Address</TableHead>
                 <TableHead>Notes</TableHead>
@@ -463,6 +482,11 @@ export const EnhancedOrderManagement = () => {
                   <TableCell>
                     <div className="text-sm max-w-xs">
                       <p className="text-muted-foreground">{getCustomerSelections(order)}</p>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div className="text-sm max-w-xs">
+                      <p className="text-muted-foreground">{getAddOnsDisplay(order)}</p>
                     </div>
                   </TableCell>
                   <TableCell>
