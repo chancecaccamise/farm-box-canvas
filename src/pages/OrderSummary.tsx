@@ -359,16 +359,22 @@ const OrderSummary = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Delivery Day:</span>
+                  <span className="text-muted-foreground">
+                    {checkoutState.deliveryMethod === 'delivery' ? 'Delivery Day:' : 'Pickup Day:'}
+                  </span>
                   <span className="font-medium">{checkoutState.deliveryDay || 'Not selected'}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Delivery Time:</span>
-                  <span className="font-medium">8 AM - 12 PM</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">ZIP Code:</span>
-                  <span className="font-medium">{checkoutState.zipCode || 'Not provided'}</span>
+                  <span className="text-muted-foreground">
+                    {checkoutState.deliveryMethod === 'delivery' ? 'Delivery Time:' : 'Pickup Hours:'}
+                  </span>
+                  <span className="font-medium">
+                    {checkoutState.deliveryMethod === 'delivery' 
+                      ? 'Between 8 AM - 1 PM' 
+                      : checkoutState.deliveryMethod === 'market-pickup'
+                        ? '9 AM - 1 PM'
+                        : '8 AM - 1 PM'}
+                  </span>
                 </div>
               </CardContent>
             </Card>
