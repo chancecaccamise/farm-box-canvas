@@ -273,9 +273,9 @@ const UnauthenticatedLanding = () => {
       {/* CTA Section */}
       <section className="py-20 px-4 bg-gradient-primary text-white">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl font-bold mb-6">Be nurtured by Billy&apos;s Botanicals</h2>
+          <h2 className="text-4xl font-bold mb-6">Ready to Start Your Weekly Deliveries?</h2>
           <p className="text-xl mb-8 opacity-90">
-            Experience the freshest produce grown with love since 2018.
+            Join hundreds of Savannah families enjoying fresh, local ingredients delivered weekly. Skip weeks anytime or cancel without hassle.
           </p>
           <div className="flex gap-4 justify-center">
             <Button asChild variant="organic" size="xl">
