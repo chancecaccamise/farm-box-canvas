@@ -378,10 +378,26 @@ serve(async (req) => {
           }
         }
         
-        // Confirm bag for subscribers
-        if (hasActiveSubscription) {
+        // Check if there's a confirmed template for this week/box-size
+        const { data: confirmedTemplate } = await supabase
+          .from('box_templates')
+          .select('id')
+          .eq('week_start_date', orderRecord.week_start_date)
+          .eq('box_size', orderRecord.box_size)
+          .eq('is_confirmed', true)
+          .limit(1)
+          .maybeSingle();
+
+        // Confirm bag if:
+        // 1. User has active subscription OR
+        // 2. A confirmed template exists for this week/box-size
+        if (hasActiveSubscription || confirmedTemplate) {
           bagUpdateData.is_confirmed = true;
           bagUpdateData.confirmed_at = new Date().toISOString();
+          logStep("Bag auto-confirmed", { 
+            reason: hasActiveSubscription ? 'active_subscription' : 'confirmed_template_exists',
+            weeklyBagId 
+          });
         }
         
         // Update the bag with selections and confirmation status

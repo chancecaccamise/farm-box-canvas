@@ -200,6 +200,24 @@ function MyBag() {
         const hasTemplates = templateData && templateData.length > 0;
         const isConfirmed = hasTemplates && templateData.every(t => t.is_confirmed);
         setTemplateStatus({ hasTemplates, isConfirmed });
+
+        // If bag is not confirmed but a confirmed template exists, auto-confirm it
+        if (bagData && !bagData.is_confirmed && isConfirmed) {
+          console.log("Auto-confirming bag based on confirmed template");
+          const { error: confirmError } = await supabase
+            .from('weekly_bags')
+            .update({
+              is_confirmed: true,
+              confirmed_at: new Date().toISOString()
+            })
+            .eq('id', bagData.id);
+          
+          if (!confirmError) {
+            bagData.is_confirmed = true;
+            bagData.confirmed_at = new Date().toISOString();
+            setCurrentWeekBag(bagData);
+          }
+        }
       }
 
       // Enhanced repopulation: always check if bag selections match items
