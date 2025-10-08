@@ -14,7 +14,6 @@ import { AdminRecentNews } from '@/components/admin/AdminRecentNews';
 import { AdminFormSubmissions } from '@/components/admin/AdminFormSubmissions';
 import { AdminGallery } from '@/components/admin/AdminGallery';
 import { AdminDeliveryAreas } from '@/components/admin/AdminDeliveryAreas';
-import { TestCleanup } from '@/components/TestCleanup';
 import { AdminDeliveryDays } from '@/components/admin/AdminDeliveryDays';
 import { AdminUserPreferences } from '@/components/admin/AdminUserPreferences';
 
@@ -76,7 +75,7 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="products" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-11">
+          <TabsList className="grid w-full grid-cols-10">
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               Products
@@ -116,10 +115,6 @@ const Admin = () => {
             <TabsTrigger value="user-preferences" className="flex items-center gap-2">
               <UserCheck className="h-4 w-4" />
               Users
-            </TabsTrigger>
-            <TabsTrigger value="test-cleanup" className="flex items-center gap-2">
-              🧹
-              Test Cleanup
             </TabsTrigger>
           </TabsList>
 
@@ -207,20 +202,6 @@ const Admin = () => {
               </CardHeader>
               <CardContent>
                 <AdminUserPreferences />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="test-cleanup">
-            <Card>
-              <CardHeader>
-                <CardTitle>Test Data Cleanup</CardTitle>
-                <CardDescription>
-                  Clean up pending test orders and reset the system for testing.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <TestCleanup />
               </CardContent>
             </Card>
           </TabsContent>
