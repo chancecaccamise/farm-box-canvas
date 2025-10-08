@@ -230,14 +230,14 @@ const ThankYou = () => {
                                 'Next available delivery window'
                               )
                             }<br />
-                            Between 8 AM - 12 PM
+                            Between 8 AM - 1 PM
                           </>
                         ) : (
                           <>
                             {orderData.delivery_day_preference || 'Check your email for pickup day'}<br />
                             {orderData.delivery_time_preference === 'market-pickup' ? 
-                              'Market hours: 8 AM - 2 PM' : 
-                              'Farm hours: 9 AM - 5 PM'
+                              '9 AM - 1 PM' : 
+                              '8 AM - 1 PM'
                             }
                           </>
                         )}
