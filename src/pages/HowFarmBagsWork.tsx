@@ -106,16 +106,16 @@ const HowFarmBagsWork = () => {
                 <div className="w-16 h-16 bg-gradient-fresh rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-white text-2xl">🥬</span>
                 </div>
-                <CardTitle className="text-2xl">Box Size</CardTitle>
+                <CardTitle className="text-2xl">Billy's Bag Options</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base mb-4">
-                  Choose from Small (2-3 people), Medium (4-5 people), or Large (6+ people) boxes
+                  Choose from three bag types to fit your needs and budget
                 </CardDescription>
                 <div className="space-y-2">
-                  <Badge variant="outline">Small - $35/week</Badge>
-                  <Badge variant="outline">Medium - $50/week</Badge>
-                  <Badge variant="outline">Large - $70/week</Badge>
+                  <Badge variant="outline">Veggie Bag - $30 ($25/week)</Badge>
+                  <Badge variant="outline">Full Bag - $55 ($50/week)</Badge>
+                  <Badge variant="outline">Protein Bag - $100 ($95/week)</Badge>
                 </div>
               </CardContent>
             </Card>
@@ -199,7 +199,7 @@ const HowFarmBagsWork = () => {
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold mb-2">Contactless Delivery</h3>
-                    <p className="text-muted-foreground">Safe, contactless delivery with insulated, reusable bags</p>
+                    <p className="text-muted-foreground">Safe, contactless delivery - bags are transported in insulated carriers</p>
                   </div>
                 </div>
               </div>
