@@ -95,9 +95,9 @@ const HowFarmBagsWork = () => {
       {/* Customization Options */}
       <section className="py-20 px-4 bg-secondary/50">
         <div className="max-w-6xl mx-auto">
-          <h2 className="text-4xl font-bold text-center mb-4">Choose Your Box Size</h2>
+          <h2 className="text-4xl font-bold text-center mb-4">Choose Your Billy's Bag</h2>
           <p className="text-xl text-muted-foreground text-center mb-16">
-            Billy curates each bag with the freshest seasonal produce. Simply choose your size and add any extras!
+            Billy curates each bag with the freshest seasonal produce. Choose your bag type and save with a subscription!
           </p>
           
           <div className="grid md:grid-cols-3 gap-8">
@@ -106,16 +106,15 @@ const HowFarmBagsWork = () => {
                 <div className="w-16 h-16 bg-gradient-fresh rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-white text-2xl">🥬</span>
                 </div>
-                <CardTitle className="text-2xl">Box Size</CardTitle>
+                <CardTitle className="text-2xl">Veggie Billy's Bag</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base mb-4">
-                  Choose from Small (2-3 people), Medium (4-5 people), or Large (6+ people) boxes
+                  Fresh vegetables and herbs from Billy's aquaponic greenhouse
                 </CardDescription>
                 <div className="space-y-2">
-                  <Badge variant="outline">Small - $35/week</Badge>
-                  <Badge variant="outline">Medium - $50/week</Badge>
-                  <Badge variant="outline">Large - $70/week</Badge>
+                  <Badge variant="outline">One-time: $30</Badge>
+                  <Badge variant="outline">Subscribe & Save: $25/week</Badge>
                 </div>
               </CardContent>
             </Card>
@@ -125,16 +124,15 @@ const HowFarmBagsWork = () => {
                 <div className="w-16 h-16 bg-gradient-fresh rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-white text-2xl">🍅</span>
                 </div>
-                <CardTitle className="text-2xl">Billy's Curation</CardTitle>
+                <CardTitle className="text-2xl">Full Billy's Bag</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base mb-4">
-                  Billy personally selects the best seasonal produce from his greenhouse for each bag
+                  Complete meal solution with vegetables, herbs, premium protein, and fresh carb
                 </CardDescription>
                 <div className="space-y-2">
-                  <Badge variant="outline">Fresh Vegetables</Badge>
-                  <Badge variant="outline">Seasonal Herbs</Badge>
-                  <Badge variant="outline">Premium Quality</Badge>
+                  <Badge variant="outline">One-time: $55</Badge>
+                  <Badge variant="outline">Subscribe & Save: $50/week</Badge>
                 </div>
               </CardContent>
             </Card>
@@ -142,18 +140,17 @@ const HowFarmBagsWork = () => {
             <Card className="text-center">
               <CardHeader>
                 <div className="w-16 h-16 bg-gradient-fresh rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-white text-2xl">🌿</span>
+                  <span className="text-white text-2xl">🐟</span>
                 </div>
-                <CardTitle className="text-2xl">Add-On Options</CardTitle>
+                <CardTitle className="text-2xl">Protein Billy's Bag</CardTitle>
               </CardHeader>
               <CardContent>
                 <CardDescription className="text-base mb-4">
-                  Enhance your box with fresh fish, proteins, and other local specialties
+                  Premium proteins and fresh-caught seafood from the Georgia coast
                 </CardDescription>
                 <div className="space-y-2">
-                  <Badge variant="outline">Fresh Fish</Badge>
-                  <Badge variant="outline">Local Proteins</Badge>
-                  <Badge variant="outline">Extra Produce</Badge>
+                  <Badge variant="outline">One-time: $100</Badge>
+                  <Badge variant="outline">Subscribe & Save: $95/week</Badge>
                 </div>
               </CardContent>
             </Card>
@@ -199,7 +196,7 @@ const HowFarmBagsWork = () => {
                   </div>
                   <div>
                     <h3 className="text-xl font-semibold mb-2">Contactless Delivery</h3>
-                    <p className="text-muted-foreground">Safe, contactless delivery with insulated, reusable bags</p>
+                    <p className="text-muted-foreground">Safe, contactless delivery - bags are transported in insulated carriers</p>
                   </div>
                 </div>
               </div>
