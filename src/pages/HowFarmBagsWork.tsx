@@ -100,21 +100,34 @@ const HowFarmBagsWork = () => {
             Billy curates each bag with the freshest seasonal produce. Choose your bag type and save with a subscription!
           </p>
           
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="text-center">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <Card className="text-center lg:col-span-3">
               <CardHeader>
                 <div className="w-16 h-16 bg-gradient-fresh rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-white text-2xl">🥬</span>
+                  <Package className="w-8 h-8 text-white" />
                 </div>
-                <CardTitle className="text-2xl">Veggie Billy's Bag</CardTitle>
+                <CardTitle className="text-2xl">Box Size Selection</CardTitle>
               </CardHeader>
               <CardContent>
-                <CardDescription className="text-base mb-4">
-                  Fresh vegetables and herbs from Billy's aquaponic greenhouse
+                <CardDescription className="text-base mb-6">
+                  Choose from three carefully curated bag sizes to fit your family's needs
                 </CardDescription>
-                <div className="space-y-2">
-                  <Badge variant="outline">One-time: $30</Badge>
-                  <Badge variant="outline">Subscribe & Save: $25/week</Badge>
+                <div className="grid md:grid-cols-3 gap-4 max-w-3xl mx-auto">
+                  <div className="space-y-2">
+                    <p className="font-semibold">🥬 Veggie Billy's Bag</p>
+                    <Badge variant="outline">One-time: $30</Badge>
+                    <Badge variant="outline">Subscribe: $25/week</Badge>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="font-semibold">🍅 Full Billy's Bag</p>
+                    <Badge variant="outline">One-time: $55</Badge>
+                    <Badge variant="outline">Subscribe: $50/week</Badge>
+                  </div>
+                  <div className="space-y-2">
+                    <p className="font-semibold">🐟 Protein Billy's Bag</p>
+                    <Badge variant="outline">One-time: $100</Badge>
+                    <Badge variant="outline">Subscribe: $95/week</Badge>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -122,36 +135,56 @@ const HowFarmBagsWork = () => {
             <Card className="text-center">
               <CardHeader>
                 <div className="w-16 h-16 bg-gradient-fresh rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-white text-2xl">🍅</span>
+                  <span className="text-white text-2xl">✨</span>
                 </div>
-                <CardTitle className="text-2xl">Full Billy's Bag</CardTitle>
+                <CardTitle className="text-2xl">Billy's Curation</CardTitle>
               </CardHeader>
               <CardContent>
-                <CardDescription className="text-base mb-4">
-                  Complete meal solution with vegetables, herbs, premium protein, and fresh carb
+                <CardDescription className="text-base">
+                  Billy personally selects the freshest seasonal produce from his aquaponic greenhouse, ensuring peak flavor and nutrition in every bag
                 </CardDescription>
-                <div className="space-y-2">
-                  <Badge variant="outline">One-time: $55</Badge>
-                  <Badge variant="outline">Subscribe & Save: $50/week</Badge>
-                </div>
               </CardContent>
             </Card>
 
             <Card className="text-center">
               <CardHeader>
                 <div className="w-16 h-16 bg-gradient-fresh rounded-full flex items-center justify-center mx-auto mb-4">
-                  <span className="text-white text-2xl">🐟</span>
+                  <span className="text-white text-2xl">➕</span>
                 </div>
-                <CardTitle className="text-2xl">Protein Billy's Bag</CardTitle>
+                <CardTitle className="text-2xl">Add-On Options</CardTitle>
               </CardHeader>
               <CardContent>
-                <CardDescription className="text-base mb-4">
-                  Premium proteins and fresh-caught seafood from the Georgia coast
+                <CardDescription className="text-base">
+                  Enhance your bag with fresh-caught seafood, premium proteins, artisan breads, and seasonal specialties from Billy's partner farms
                 </CardDescription>
-                <div className="space-y-2">
-                  <Badge variant="outline">One-time: $100</Badge>
-                  <Badge variant="outline">Subscribe & Save: $95/week</Badge>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center">
+              <CardHeader>
+                <div className="w-16 h-16 bg-gradient-fresh rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Calendar className="w-8 h-8 text-white" />
                 </div>
+                <CardTitle className="text-2xl">Scheduling Flexibility</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-base">
+                  Skip, pause, or modify your subscription anytime through your account. Billy understands family life and makes it easy to manage your deliveries
+                </CardDescription>
+              </CardContent>
+            </Card>
+
+            <Card className="text-center">
+              <CardHeader>
+                <div className="w-16 h-16 bg-gradient-fresh rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-white text-2xl">💬</span>
+                </div>
+                <CardTitle className="text-2xl">Customer Support</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-base">
+                  Billy's personal guarantee - if you're not completely satisfied with anything in your bag, reach out and Billy will make it right
+                </CardDescription>
               </CardContent>
             </Card>
           </div>
