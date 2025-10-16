@@ -22,12 +22,12 @@ const HowFarmBagsWork = () => {
         <div className="relative z-10 max-w-6xl mx-auto text-center">
         <h1 className="text-5xl font-bold mb-6 text-white">How Billy's Bags Work</h1>
           <p className="text-xl mb-8 max-w-3xl mx-auto text-white/90">
-            From Billy's hydroponic greenhouse to your doorstep, discover how we bring the freshest produce 
+            From Billy's aquaponic greenhouse to your doorstep, discover how we bring the freshest produce 
             directly to your kitchen every week with love and care.
           </p>
           <div className="flex justify-center">
             <Badge variant="outline" className="text-lg px-6 py-2 bg-white/10 text-white border-white">
-              🌱 Fresh • Hydroponic • Family-Owned Since 2018
+              🌱 Fresh • Aquaponic • Family-Owned Since 2018
             </Badge>
           </div>
         </div>
@@ -45,8 +45,8 @@ const HowFarmBagsWork = () => {
             {[
               {
                 step: "01",
-                title: "Hydroponic Growing",
-                description: "Billy personally tends to our sustainable hydroponic greenhouse year-round",
+                title: "Aquaponic Growing",
+                description: "Billy personally tends to our sustainable aquaponic greenhouse year-round",
                 icon: <Package className="w-8 h-8" />,
                 color: "bg-gradient-fresh"
               },
@@ -238,7 +238,7 @@ const HowFarmBagsWork = () => {
                 <CheckCircle className="w-8 h-8 text-white" />
               </div>
               <h3 className="text-xl font-semibold mb-3">Pesticide-Free Growing</h3>
-              <p className="opacity-90">100% pesticide-free hydroponic growing in Billy's greenhouse</p>
+              <p className="opacity-90">100% pesticide-free aquaponic growing in Billy's greenhouse</p>
             </div>
             
             <div className="text-center">

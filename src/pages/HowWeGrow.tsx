@@ -16,7 +16,7 @@ const HowWeGrow = () => {
         <div className="absolute inset-0 bg-black/20"></div>
         <img 
           src={howWeGrowBanner} 
-          alt="Hydroponic growing system" 
+          alt="Aquaponic growing system" 
           className="w-full h-full object-cover"
         />
         <div className="absolute inset-0 flex items-center justify-center">
@@ -32,7 +32,7 @@ const HowWeGrow = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-16">
-        {/* Section 1: Hydroponic System */}
+        {/* Section 1: Aquaponic System */}
         <section className="mb-20">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold mb-4">Ancient, Adaptable Methods</h2>
@@ -46,7 +46,7 @@ const HowWeGrow = () => {
               </p>
               
               <div className="bg-accent/10 p-6 rounded-lg">
-                <h4 className="font-semibold text-lg mb-3">Benefits of Hydroponics:</h4>
+                <h4 className="font-semibold text-lg mb-3">Benefits of Aquaponics:</h4>
                 <ul className="space-y-2">
                   <li className="flex items-center space-x-3">
                     <Droplets className="w-5 h-5 text-accent" />
@@ -71,7 +71,7 @@ const HowWeGrow = () => {
             <div className="grid grid-cols-2 gap-4">
               <img 
                 src={hydroFarm}
-                alt="Hydroponic lettuce growing" 
+                alt="Aquaponic lettuce growing" 
                 className="rounded-lg shadow-soft w-full h-48 object-cover"
               />
               <img 

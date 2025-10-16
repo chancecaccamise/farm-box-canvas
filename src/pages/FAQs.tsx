@@ -12,7 +12,7 @@ const FAQs = () => {
     {
       id: "1",
       question: "What types of Billy's Bags do you offer?",
-      answer: "We offer three types of Billy's Bags: Veggie Billy's Bag ($30 or $25 for subscribers) with fresh vegetables and herbs, Full Billy's Bag ($55 or $50 for subscribers) with vegetables, herbs, protein, and carb, and Protein Billy's Bag ($100 or $95 for subscribers) with premium proteins and seafood. All bags feature Billy's fresh, hydroponically-grown produce.",
+      answer: "We offer three types of Billy's Bags: Veggie Billy's Bag ($30 or $25 for subscribers) with fresh vegetables and herbs, Full Billy's Bag ($55 or $50 for subscribers) with vegetables, herbs, protein, and carb, and Protein Billy's Bag ($100 or $95 for subscribers) with premium proteins and seafood. All bags feature Billy's fresh, aquaponically-grown produce.",
       icon: <Leaf className="w-5 h-5 text-accent" />
     },
     {
@@ -69,7 +69,7 @@ const FAQs = () => {
     {
       id: "5",
       question: "What is aquaponic farming?",
-      answer: "Aquaponic farming is a method of growing plants without soil, using nutrient-rich water solutions. This allows for year-round growing, uses 90% less water than traditional farming, and produces incredibly fresh, clean produce. Several of our partner farms use hydroponic systems for leafy greens and herbs.",
+      answer: "Aquaponic farming is a method of growing plants without soil, using nutrient-rich water solutions. This allows for year-round growing, uses 90% less water than traditional farming, and produces incredibly fresh, clean produce. Several of our partner farms use aquaponic systems for leafy greens and herbs.",
       icon: <Fish className="w-5 h-5 text-accent" />
     },
     {

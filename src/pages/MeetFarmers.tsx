@@ -127,7 +127,7 @@ const MeetFarmers = () => {
             <div className="flex justify-center">
               <img 
                 src={mtf1} 
-                alt="Team working in hydroponic greenhouse" 
+                alt="Team working in aquaponic greenhouse" 
                 className="rounded-lg shadow-soft w-full max-w-lg h-96 object-cover"
               />
             </div>

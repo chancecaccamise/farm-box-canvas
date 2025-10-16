@@ -30,7 +30,7 @@ const Landing = () => {
           Subscribe to Your <span className="text-accent">Sustenance.</span>
           </h1>
           <p className="text-xl mb-8 max-w-2xl mx-auto leading-relaxed">
-          Billy&apos;s Botanicals seasonal Billy's Bags are delivered fresh to your door or available for pickup at the Forsyth Farmer&apos;s Market.
+          Billy&apos;s Botanicals seasonal Billy's Bags are delivered fresh to your door or available for pickup at the farm or Forsyth Farmers Market.
           </p>
           <Button onClick={scrollToBoxes} variant="hero" size="xl">
             View Subscription Options
@@ -115,14 +115,14 @@ const Landing = () => {
                   <CheckCircle className="w-6 h-6 text-accent flex-shrink-0 mt-1" />
                   <div>
                     <h3 className="text-xl font-semibold mb-2">100% Local Sourcing</h3>
-                    <p className="text-muted-foreground">From Billy's hydroponic farm and trusted local partners including fishermen and artisan bakers.</p>
+                    <p className="text-muted-foreground">From Billy's aquaponic farm and trusted local partners including fishermen and artisan bakers.</p>
                   </div>
                 </div>
                 
                 <div className="flex items-start gap-4">
                   <CheckCircle className="w-6 h-6 text-accent flex-shrink-0 mt-1" />
                   <div>
-                    <h3 className="text-xl font-semibold mb-2">Sustainable Hydroponic Farming</h3>
+                    <h3 className="text-xl font-semibold mb-2">Sustainable Aquaponic Farming</h3>
                     <p className="text-muted-foreground">Our greenhouse uses 95% less water and zero pesticides while producing the freshest vegetables year-round.</p>
                   </div>
                 </div>
@@ -150,7 +150,7 @@ const Landing = () => {
             <div className="relative">
               <img 
                 src={whychoosebillys} 
-                alt="Billy's hydroponic greenhouse operation" 
+                alt="Billy's aquaponic greenhouse operation" 
                 className="w-full h-80 lg:h-96 object-cover object-center rounded-2xl shadow-lg"
               />
             </div>
