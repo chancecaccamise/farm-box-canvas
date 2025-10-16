@@ -24,7 +24,7 @@ const FAQs = () => {
     {
       id: "3",
       question: "What delivery options are available?",
-      answer: "We offer flexible fulfillment options including home delivery on Thursdays, Saturdays, and Sundays, as well as convenient pickup locations at local markets and directly from our farm. Choose the option that works best for your schedule during checkout.",
+      answer: "We offer flexible fulfillment options including home delivery on Saturdays, as well as convenient pickup locations at local markets and directly from our farm. Choose the option that works best for your schedule during checkout.",
       icon: <Truck className="w-5 h-5 text-accent" />
     },
     {
@@ -75,7 +75,7 @@ const FAQs = () => {
     {
       id: "6",
       question: "Where is the fish caught?",
-      answer: "All our fish, shrimp, and oceanic proteins are caught off the Georgia coast by our fishing team.",
+      answer: "We source most of our fish from the Georgia coast and the Carolinas. Our salmon and scallops come from the North Atlantic - the closest region where we can source these high-demand products from the highest quality operations we can find.",
       icon: <Droplets className="w-5 h-5 text-accent" />
     }
   ];
