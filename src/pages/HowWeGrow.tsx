@@ -50,7 +50,7 @@ const HowWeGrow = () => {
                 <ul className="space-y-2">
                   <li className="flex items-center space-x-3">
                     <Droplets className="w-5 h-5 text-accent" />
-                    <span>Local fish varieties are nurtured in large tanks where they produce ammonia-rich waste</span>
+                    <span>A variety of freshwater fish thrive in aquaponics</span>
                   </li>
                   <li className="flex items-center space-x-3">
                     <Leaf className="w-5 h-5 text-accent" />
