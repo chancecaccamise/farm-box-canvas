@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { CheckCircle, Leaf, Truck, Users, Star } from "lucide-react";
 import { Link } from "react-router-dom";
-import heroImage from "@/assets/billysBotanicalsHeroNew.png";
+
 import whychoosebillys from "@/assets/whyChooseBillys.jpg";
 import BoxComparison from "@/components/BoxComparison";
 import FreshAddOns from "@/components/FreshAddOns";
@@ -14,7 +14,7 @@ const UnauthenticatedLanding = () => {
       {/* Hero Section */}
       <section 
         className="relative h-screen flex items-center justify-center bg-cover bg-center md:bg-center bg-[position:center_20%]"
-        style={{ backgroundImage: `url(${heroImage})` }}
+        style={{ backgroundImage: 'url(/billysHeroImage.JPG)' }}
       >
         <div className="absolute inset-0 bg-black opacity-30"></div>
         <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">

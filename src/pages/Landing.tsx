@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { CheckCircle, Leaf, Truck, Users, Star } from "lucide-react";
-import heroImage from "@/assets/billysBotanicalsHeroNew.png";
+
 import BoxComparison from "@/components/BoxComparison";
 import FreshAddOns from "@/components/FreshAddOns";
 import whychoosebillys from "@/assets/whyChooseBillys.jpg";
@@ -22,7 +22,7 @@ const Landing = () => {
       {/* Hero Section */}
       <section 
         className="relative h-screen flex items-center justify-center bg-cover bg-center sm:bg-[position:center_25%] md:bg-[position:center_20%] lg:bg-center xl:bg-[position:center_10%]"
-        style={{ backgroundImage: `url(${heroImage})` }}
+        style={{ backgroundImage: 'url(/billysHeroImage.JPG)' }}
       >
         <div className="absolute inset-0 bg-black opacity-30"></div>
         <div className="relative z-10 text-center text-white max-w-4xl mx-auto px-4">
