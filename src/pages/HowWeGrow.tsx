@@ -42,7 +42,7 @@ const HowWeGrow = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
               <p className="text-lg leading-relaxed">
-              Aquaponics unifies the tenets of aquaculture and hydroponics, simultaneously raising fish and produce efficiently, organically, and sustainably. This technique uses 1/3 less amounts of water and land while outputting 3 times as much food per acre as traditional farming.
+              Aquaponics unifies the tenets of aquaculture and hydroponics, simultaneously raising fish and produce efficiently, organically, and sustainably. This technique uses 1/3rd the amount of water and land while outputting 3 times as much food per acre as traditional farming.
               </p>
               
               <div className="bg-accent/10 p-6 rounded-lg">
