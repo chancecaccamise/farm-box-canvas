@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, Heart, Baby, Cake, Leaf, Flower } from "lucide-react";
+import { ArrowLeft, Heart, Briefcase, Cake, Leaf, Flower } from "lucide-react";
 
 interface GalleryImage {
   id: string;
@@ -23,7 +23,7 @@ const Gallery = () => {
     { value: "all", label: "All Arrangements", icon: <Flower className="w-4 h-4" /> },
     { value: "wedding", label: "Weddings", icon: <Heart className="w-4 h-4" /> },
     { value: "celebration", label: "Celebrations", icon: <Cake className="w-4 h-4" /> },
-    { value: "baby-shower", label: "Baby Showers", icon: <Baby className="w-4 h-4" /> },
+    { value: "commercial", label: "Commercial Clients", icon: <Briefcase className="w-4 h-4" /> },
     { value: "seasonal", label: "Seasonal", icon: <Leaf className="w-4 h-4" /> }
   ];
 

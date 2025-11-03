@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { 
   Flower, 
   Heart, 
-  Baby, 
+  Briefcase, 
   Cake, 
   Leaf, 
   Star,
@@ -193,7 +193,7 @@ const AnasFlowers = () => {
 
   const eventTypes = [
     { value: "wedding", label: "Wedding", icon: <Heart className="w-4 h-4" /> },
-    { value: "baby-shower", label: "Baby Shower", icon: <Baby className="w-4 h-4" /> },
+    { value: "commercial", label: "Commercial Client", icon: <Briefcase className="w-4 h-4" /> },
     { value: "birthday", label: "Birthday", icon: <Cake className="w-4 h-4" /> },
     { value: "anniversary", label: "Anniversary", icon: <Heart className="w-4 h-4" /> },
     { value: "seasonal", label: "Seasonal Event", icon: <Leaf className="w-4 h-4" /> },
@@ -209,10 +209,10 @@ const AnasFlowers = () => {
       image: weddingBouquet
     },
     {
-      title: "Baby Showers", 
-      icon: <Baby className="w-6 h-6 text-blue-500" />,
-      description: "Soft, delicate arrangements to celebrate new life",
-      features: ["Pastel color palettes", "Gentle flower choices", "Table arrangements", "Welcome displays"],
+      title: "Commercial Clients", 
+      icon: <Briefcase className="w-6 h-6 text-blue-500" />,
+      description: "Professional floral arrangements for businesses and venues",
+      features: ["Office arrangements", "Restaurant displays", "Spa & salon flowers", "Weekly subscriptions"],
       image: babyShowerFlowers
     },
     {
