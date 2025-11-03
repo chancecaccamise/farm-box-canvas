@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { 
   Flower, 
   Heart, 
@@ -20,7 +21,8 @@ import {
   Upload,
   Calendar,
   Palette,
-  Camera
+  Camera,
+  ChevronDown
 } from "lucide-react";
 import weddingBouquet from "@/assets/weddingBouquet.png";
 import babyShowerFlowers from "@/assets/Large on table.jpg";
@@ -395,29 +397,56 @@ const AnasFlowers = () => {
             className="w-full"
           >
             <CarouselContent className="-ml-2 md:-ml-4">
-              {testimonials.map((testimonial, index) => (
-                <CarouselItem key={index} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
-                  <Card className="h-full">
-                    <CardContent className="p-6 flex flex-col h-full">
-                      <div className="flex items-center space-x-1 mb-4">
-                        {[...Array(testimonial.rating)].map((_, i) => (
-                          <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                        ))}
-                      </div>
-                      <Quote className="w-8 h-8 text-accent mb-4" />
-                      <p className="text-muted-foreground italic mb-4 flex-grow text-sm">
-                        "{testimonial.text}"
-                      </p>
-                      <div className="mt-auto">
-                        <p className="font-semibold">{testimonial.author}</p>
-                        <Badge variant="secondary" className="mt-1">
-                          {testimonial.event}
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </CarouselItem>
-              ))}
+              {testimonials.map((testimonial, index) => {
+                const MAX_CHARS = 200;
+                const needsTruncation = testimonial.text.length > MAX_CHARS;
+                const truncatedText = needsTruncation 
+                  ? testimonial.text.substring(0, MAX_CHARS).trim() + "..."
+                  : testimonial.text;
+
+                return (
+                  <CarouselItem key={index} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3">
+                    <Card className="h-full min-h-[400px]">
+                      <CardContent className="p-6 flex flex-col h-full">
+                        <div className="flex items-center space-x-1 mb-4">
+                          {[...Array(testimonial.rating)].map((_, i) => (
+                            <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                          ))}
+                        </div>
+                        <Quote className="w-8 h-8 text-accent mb-4" />
+                        
+                        {needsTruncation ? (
+                          <Accordion type="single" collapsible className="flex-grow mb-4">
+                            <AccordionItem value={`testimonial-${index}`} className="border-none">
+                              <div className="text-muted-foreground italic text-sm">
+                                <span>"{truncatedText}"</span>
+                                <AccordionTrigger className="inline-flex items-center text-accent hover:text-accent/80 underline ml-1 py-0 hover:no-underline">
+                                  <span className="text-xs">Read more</span>
+                                  <ChevronDown className="h-3 w-3 ml-1 shrink-0 transition-transform duration-200" />
+                                </AccordionTrigger>
+                              </div>
+                              <AccordionContent className="text-muted-foreground italic text-sm pt-2">
+                                "{testimonial.text}"
+                              </AccordionContent>
+                            </AccordionItem>
+                          </Accordion>
+                        ) : (
+                          <p className="text-muted-foreground italic mb-4 flex-grow text-sm">
+                            "{testimonial.text}"
+                          </p>
+                        )}
+                        
+                        <div className="mt-auto">
+                          <p className="font-semibold">{testimonial.author}</p>
+                          <Badge variant="secondary" className="mt-1">
+                            {testimonial.event}
+                          </Badge>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </CarouselItem>
+                );
+              })}
             </CarouselContent>
             <CarouselPrevious className="left-0 -translate-x-12" />
             <CarouselNext className="right-0 translate-x-12" />
