@@ -86,9 +86,9 @@ const Navbar = () => {
               FAQs
             </Link>
 
-            <Link to="/support-local" className="text-foreground hover:text-primary transition-smooth font-medium">
-              Support Local
-            </Link>
+              <Link to="/support-local" className="text-foreground hover:text-primary transition-smooth font-medium">
+                Local Partners
+              </Link>
 
             <Link to="/fresh-catch" className="text-foreground hover:text-primary transition-smooth font-medium">
               Fresh Catch
@@ -164,11 +164,11 @@ const Navbar = () => {
                       </Link>
                     </Button>
 
-                    <Button variant="ghost" className="w-full justify-start" asChild>
-                      <Link to="/support-local" onClick={() => setMobileMenuOpen(false)}>
-                        Support Local
-                      </Link>
-                    </Button>
+            <Button variant="ghost" className="w-full justify-start" asChild>
+              <Link to="/support-local" onClick={() => setMobileMenuOpen(false)}>
+                Local Partners
+              </Link>
+            </Button>
 
                     <Button variant="ghost" className="w-full justify-start" asChild>
                       <Link to="/fresh-catch" onClick={() => setMobileMenuOpen(false)}>

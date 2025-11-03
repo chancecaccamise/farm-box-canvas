@@ -112,7 +112,7 @@ const SupportLocal = () => {
             <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center mx-auto mb-6">
               <Heart className="w-8 h-8 text-white" />
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold mb-6">Support Local Partners</h1>
+            <h1 className="text-5xl md:text-6xl font-bold mb-6">Local Partners</h1>
             <p className="text-xl md:text-2xl max-w-3xl mx-auto leading-relaxed">
               Meet the incredible local businesses we're proud to partner with. Every purchase 
               supports these hardworking families and strengthens our community.
