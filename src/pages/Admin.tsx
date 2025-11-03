@@ -5,7 +5,7 @@ import { Navigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Package, ShoppingBag, Users, Fish, Flower, MapPin, UserCheck, Camera, Calendar } from 'lucide-react';
+import { Package, ShoppingBag, Users, Fish, Flower, MapPin, UserCheck, Camera, Calendar, Store } from 'lucide-react';
 import { AdminProducts } from '@/components/admin/AdminProducts';
 import { AdminBoxTemplates } from '@/components/admin/AdminBoxTemplates';
 import { EnhancedOrderManagement } from '@/components/admin/EnhancedOrderManagement';
@@ -16,6 +16,7 @@ import { AdminGallery } from '@/components/admin/AdminGallery';
 import { AdminDeliveryAreas } from '@/components/admin/AdminDeliveryAreas';
 import { AdminDeliveryDays } from '@/components/admin/AdminDeliveryDays';
 import { AdminUserPreferences } from '@/components/admin/AdminUserPreferences';
+import { AdminPartners } from '@/components/admin/AdminPartners';
 
 const Admin = () => {
   const { user, loading } = useAuth();
@@ -75,7 +76,7 @@ const Admin = () => {
         </div>
 
         <Tabs defaultValue="products" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-10">
+          <TabsList className="grid w-full grid-cols-11">
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="h-4 w-4" />
               Products
@@ -115,6 +116,10 @@ const Admin = () => {
             <TabsTrigger value="user-preferences" className="flex items-center gap-2">
               <UserCheck className="h-4 w-4" />
               Users
+            </TabsTrigger>
+            <TabsTrigger value="local-partners" className="flex items-center gap-2">
+              <Store className="h-4 w-4" />
+              Local Partners
             </TabsTrigger>
           </TabsList>
 
@@ -202,6 +207,20 @@ const Admin = () => {
               </CardHeader>
               <CardContent>
                 <AdminUserPreferences />
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="local-partners">
+            <Card>
+              <CardHeader>
+                <CardTitle>Local Partners Management</CardTitle>
+                <CardDescription>
+                  Manage restaurant, bakery, and sustainable food partners displayed on the Local Partners page
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <AdminPartners />
               </CardContent>
             </Card>
           </TabsContent>

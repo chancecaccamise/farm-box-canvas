@@ -1438,16 +1438,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      assign_admin_role: {
-        Args: { user_email: string }
-        Returns: undefined
-      }
-      generate_order_confirmation_number: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      assign_admin_role: { Args: { user_email: string }; Returns: undefined }
+      generate_order_confirmation_number: { Args: never; Returns: string }
       get_admin_user_list: {
-        Args: Record<PropertyKey, never>
+        Args: never
         Returns: {
           created_at: string
           email: string
@@ -1462,10 +1456,7 @@ export type Database = {
           user_id: string
         }[]
       }
-      get_next_cutoff_time: {
-        Args: { input_date?: string }
-        Returns: string
-      }
+      get_next_cutoff_time: { Args: { input_date?: string }; Returns: string }
       get_or_create_current_week_bag: {
         Args: { user_uuid: string }
         Returns: string
@@ -1490,18 +1481,12 @@ export type Database = {
         }
         Returns: boolean
       }
-      is_current_user_admin: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
+      is_current_user_admin: { Args: never; Returns: boolean }
       populate_weekly_bag_from_template: {
         Args: { bag_id: string; box_size_name: string; week_start: string }
         Returns: undefined
       }
-      unconfirm_weekly_bag: {
-        Args: { bag_id: string }
-        Returns: undefined
-      }
+      unconfirm_weekly_bag: { Args: { bag_id: string }; Returns: undefined }
       update_all_user_bags_for_template_change: {
         Args: {
           template_box_size: string
@@ -1510,10 +1495,7 @@ export type Database = {
         }
         Returns: number
       }
-      update_weekly_bag_totals: {
-        Args: { bag_id: string }
-        Returns: undefined
-      }
+      update_weekly_bag_totals: { Args: { bag_id: string }; Returns: undefined }
     }
     Enums: {
       app_role: "admin" | "user"
