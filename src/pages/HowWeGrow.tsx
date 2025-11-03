@@ -42,7 +42,7 @@ const HowWeGrow = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
               <p className="text-lg leading-relaxed">
-              Aquaponics unifies the tenets of aquaculture and hydroponics, simultaneously raising fish and produce efficiently, organically, and sustainably. This technique uses 1/3rd the amount of water and land while outputting 3 times as much food per acre as traditional farming.
+              Aquaponics unifies the tenets of aquaculture and hydroponics, simultaneously raising fish and produce efficiently, organically, and sustainably. This technique uses 1/3rd the amount of water and land while producing 3 times as much food per acre as traditional farming.
               </p>
               
               <div className="bg-accent/10 p-6 rounded-lg">
@@ -54,15 +54,19 @@ const HowWeGrow = () => {
                   </li>
                   <li className="flex items-center space-x-3">
                     <Leaf className="w-5 h-5 text-accent" />
-                    <span>Bacteria in the adjacent grow beds oxidizes the ammonia into nitrites and eventually nitrates</span>
+                    <span>Bacteria in the adjacent grow beds oxidize the ammonia into nitrites and eventually nitrates</span>
                   </li>
                   <li className="flex items-center space-x-3">
                     <Lightbulb className="w-5 h-5 text-accent" />
-                    <span>Plants absorb the nitrates as nutrients which acts as a natural fertilizer</span>
+                    <span>Plants absorb the nitrates as nutrients, which act as a natural fertilizer</span>
+                  </li>
+                  <li className="flex items-center space-x-3">
+                    <Lightbulb className="w-5 h-5 text-accent" />
+                    <span>The system operates effortlessly and efficiently with minimal intervention</span>
                   </li>
                   <li className="flex items-center space-x-3">
                     <Recycle className="w-5 h-5 text-accent" />
-                    <span>The roots from the plants act as a complex water filtration system for the fish</span>
+                    <span>Plant roots act as a complex water filtration system for the fish</span>
                   </li>
                 </ul>
               </div>
