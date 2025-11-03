@@ -13,7 +13,7 @@ const UnauthenticatedLanding = () => {
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <section 
-        className="relative h-screen flex items-center justify-center bg-[length:120%_auto] bg-[position:center_30%] sm:bg-[position:center_25%] md:bg-[position:center_20%] lg:bg-[position:center_15%]"
+        className="relative h-screen flex items-center justify-center bg-[length:120%_auto] bg-no-repeat bg-[position:center_30%] sm:bg-[position:center_25%] md:bg-[position:center_20%] lg:bg-[position:center_15%]"
         style={{ backgroundImage: 'url(/billysHeroImage.JPG)' }}
       >
         <div className="absolute inset-0 bg-black opacity-30"></div>
