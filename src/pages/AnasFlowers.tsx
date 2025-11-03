@@ -418,13 +418,15 @@ const AnasFlowers = () => {
                         {needsTruncation ? (
                           <Accordion type="single" collapsible className="flex-grow mb-4">
                             <AccordionItem value={`testimonial-${index}`} className="border-none">
-                              <div className="text-muted-foreground italic text-sm">
-                                <span>"{truncatedText}"</span>
-                                <AccordionTrigger className="inline-flex items-center text-accent hover:text-accent/80 underline ml-1 py-0 hover:no-underline">
-                                  <span className="text-xs">Read more</span>
-                                  <ChevronDown className="h-3 w-3 ml-1 shrink-0 transition-transform duration-200" />
-                                </AccordionTrigger>
-                              </div>
+                              <p className="text-muted-foreground italic text-sm mb-2">
+                                "{truncatedText}"
+                              </p>
+                              
+                              <AccordionTrigger className="flex items-center justify-start text-accent hover:text-accent/80 py-1 px-0 hover:no-underline">
+                                <span className="text-xs underline">Read more</span>
+                                <ChevronDown className="h-3 w-3 ml-1 shrink-0 transition-transform duration-200" />
+                              </AccordionTrigger>
+                              
                               <AccordionContent className="text-muted-foreground italic text-sm pt-2">
                                 "{testimonial.text}"
                               </AccordionContent>
