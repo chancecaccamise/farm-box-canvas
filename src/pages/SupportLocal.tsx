@@ -89,9 +89,9 @@ const SupportLocal = () => {
       color: 'bg-amber-100 text-amber-800'
     },
     fisherman: {
-      title: 'Fishing Partners',
+      title: 'Sustainable Food Partners',
       icon: Fish,
-      description: 'Sustainable seafood providers',
+      description: 'Local farmers and fishermen committed to sustainable practices',
       route: '/partners/fisherman',
       color: 'bg-blue-100 text-blue-800'
     }

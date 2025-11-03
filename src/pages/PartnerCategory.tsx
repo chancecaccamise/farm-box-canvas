@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Star } from "lucide-react";
+import { MapPin, Star, ArrowLeft } from "lucide-react";
 
 interface Partner {
   id: string;
@@ -31,7 +31,7 @@ const getCategoryTitle = (category: string): string => {
     case 'bakery':
       return 'Our Bakery Partners';
     case 'fisherman':
-      return 'Our Fishing and Farm Partners';
+      return 'Our Sustainable Food Partners';
     default:
       return 'Our Partners';
   }
@@ -44,7 +44,7 @@ const getCategoryDescription = (category: string): string => {
     case 'bakery':
       return 'Meet the artisan bakers who craft delicious breads and pastries using the finest local ingredients.';
     case 'fisherman':
-      return 'Learn about the fishing families who provide us with the freshest, sustainably caught seafood.';
+      return 'Meet the local farmers and fishermen who provide us with fresh, sustainably sourced produce, meat, and seafood.';
     default:
       return 'Explore our network of local partners committed to quality and sustainability.';
   }
@@ -106,13 +106,25 @@ const PartnerCategory = ({ category }: PartnerCategoryProps) => {
     <div className="min-h-screen bg-background">
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-primary/10 to-secondary/10 py-16">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
-            {getCategoryTitle(category)}
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            {getCategoryDescription(category)}
-          </p>
+        <div className="container mx-auto px-4">
+          <div className="mb-6">
+            <Button 
+              variant="ghost" 
+              onClick={() => navigate('/support-local')}
+              className="group"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+              Back to Support Local
+            </Button>
+          </div>
+          <div className="text-center">
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">
+              {getCategoryTitle(category)}
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              {getCategoryDescription(category)}
+            </p>
+          </div>
         </div>
       </div>
 
