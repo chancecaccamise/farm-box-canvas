@@ -46,6 +46,12 @@ const FAQs = () => {
       icon: <Settings className="w-5 h-5 text-accent" />
     },
     {
+      id: "7b",
+      question: "Can I pause or skip weeks on my subscription?",
+      answer: "While we don't currently offer an in-app pause feature, we have flexible options for managing your subscription schedule. If you need to skip a week, you'll be refunded for that week's bag. Alternatively, you can cancel your subscription and restart it whenever you're ready to resume deliveries. We understand life gets busy, so we've designed our system to be as flexible as possible!",
+      icon: <Clock className="w-5 h-5 text-accent" />
+    },
+    {
       id: "8",
       question: "What if I'm not satisfied with my order?",
       answer: "Billy stands behind every item! If you receive something you don't enjoy or have any quality concerns, contact us and we'll make it right. Our commitment to quality means we guarantee the freshness and taste of everything in your Billy's Bag.",
