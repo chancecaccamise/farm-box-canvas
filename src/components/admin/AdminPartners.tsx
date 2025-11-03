@@ -469,34 +469,8 @@ export const AdminPartners = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold">Local Partners</h2>
-          <p className="text-muted-foreground">Manage your local restaurant, bakery, and food partners</p>
-        </div>
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button onClick={() => setFormData(emptyForm)}>
-              <Plus className="h-4 w-4 mr-2" />
-              Add New Partner
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-2xl">
-            <DialogHeader>
-              <DialogTitle>Add New Partner</DialogTitle>
-            </DialogHeader>
-            <PartnerFormFields />
-            <div className="flex justify-end gap-2 mt-4">
-              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
-              <Button onClick={handleAddPartner}>Add Partner</Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      {/* Filters */}
-      <div className="flex gap-4">
+      {/* Filters and Actions */}
+      <div className="flex gap-4 items-end">
         <div className="flex-1 relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
           <Input
@@ -517,6 +491,24 @@ export const AdminPartners = () => {
             ))}
           </SelectContent>
         </Select>
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <DialogTrigger asChild>
+            <Button onClick={() => setFormData(emptyForm)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Add New Partner
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Add New Partner</DialogTitle>
+            </DialogHeader>
+            <PartnerFormFields />
+            <div className="flex justify-end gap-2 mt-4">
+              <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
+              <Button onClick={handleAddPartner}>Add Partner</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Partners Grid */}
