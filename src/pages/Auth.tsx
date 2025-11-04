@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/components/AuthProvider';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -13,16 +14,21 @@ import { Link } from 'react-router-dom';
 export default function Auth() {
   const [searchParams] = useSearchParams();
   const [isSignUp, setIsSignUp] = useState(searchParams.get('signup') === 'true');
+  const [isPasswordReset, setIsPasswordReset] = useState(false);
+  const [isPasswordUpdate, setIsPasswordUpdate] = useState(searchParams.get('reset') === 'true');
+  const [resetEmailSent, setResetEmailSent] = useState(false);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
   const [smsNotifications, setSmsNotifications] = useState(false);
   const [emailNewsletter, setEmailNewsletter] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { user, signIn, signUp } = useAuth();
+  const { user, signIn, signUp, resetPassword } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -107,6 +113,88 @@ export default function Auth() {
     }
   };
 
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      const { error } = await resetPassword(email);
+      
+      if (error) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        setResetEmailSent(true);
+        toast({
+          title: "Success",
+          description: "Check your email for a password reset link",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePasswordUpdate = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+
+    try {
+      if (newPassword !== confirmNewPassword) {
+        toast({
+          title: "Error",
+          description: "Passwords don't match",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (newPassword.length < 6) {
+        toast({
+          title: "Error",
+          description: "Password must be at least 6 characters",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Success",
+          description: "Password updated successfully! You can now sign in.",
+        });
+        navigate('/auth');
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (user) {
     return null; // Will redirect
   }
@@ -135,14 +223,118 @@ export default function Auth() {
 
         <Card>
           <CardHeader>
-            <CardTitle>{isSignUp ? 'Create Account' : 'Sign In'}</CardTitle>
+            <CardTitle>
+              {isPasswordUpdate 
+                ? 'Update Password' 
+                : isPasswordReset 
+                ? 'Reset Password' 
+                : isSignUp 
+                ? 'Create Account' 
+                : 'Sign In'}
+            </CardTitle>
             <CardDescription>
-              {isSignUp ? 'Join thousands of families enjoying fresh farm produce' : 'Welcome back! Please sign in to your account'}
+              {isPasswordUpdate
+                ? 'Enter your new password below'
+                : isPasswordReset
+                ? resetEmailSent 
+                  ? 'Check your email for a reset link' 
+                  : 'Enter your email to receive a password reset link'
+                : isSignUp 
+                ? 'Join thousands of families enjoying fresh farm produce' 
+                : 'Welcome back! Please sign in to your account'}
             </CardDescription>
           </CardHeader>
           
           <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+            {isPasswordUpdate ? (
+              <form onSubmit={handlePasswordUpdate} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">New Password</Label>
+                  <Input
+                    id="newPassword"
+                    type="password"
+                    placeholder="Enter new password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    required
+                    minLength={6}
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="confirmNewPassword">Confirm New Password</Label>
+                  <Input
+                    id="confirmNewPassword"
+                    type="password"
+                    placeholder="Confirm new password"
+                    value={confirmNewPassword}
+                    onChange={(e) => setConfirmNewPassword(e.target.value)}
+                    required
+                    minLength={6}
+                  />
+                </div>
+
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? 'Updating...' : 'Update Password'}
+                </Button>
+              </form>
+            ) : isPasswordReset ? (
+              <>
+                {resetEmailSent ? (
+                  <div className="space-y-4">
+                    <div className="bg-muted p-4 rounded-lg text-center">
+                      <p className="text-sm">
+                        We've sent a password reset link to <strong>{email}</strong>
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Please check your email and click the link to reset your password.
+                      </p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => {
+                        setIsPasswordReset(false);
+                        setResetEmailSent(false);
+                        setEmail('');
+                      }}
+                    >
+                      Back to Sign In
+                    </Button>
+                  </div>
+                ) : (
+                  <form onSubmit={handlePasswordReset} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="resetEmail">Email</Label>
+                      <Input
+                        id="resetEmail"
+                        type="email"
+                        placeholder="your@email.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+
+                    <Button type="submit" className="w-full" disabled={loading}>
+                      {loading ? 'Sending...' : 'Send Reset Link'}
+                    </Button>
+
+                    <div className="text-center">
+                      <button
+                        type="button"
+                        onClick={() => setIsPasswordReset(false)}
+                        className="text-sm text-primary hover:underline"
+                      >
+                        Back to sign in
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </>
+            ) : (
+              <>
+              <form onSubmit={handleSubmit} className="space-y-4">
               {isSignUp && (
                 <>
                   <div className="grid grid-cols-2 gap-4">
@@ -263,8 +455,20 @@ export default function Auth() {
               </Button>
             </form>
             
+            {!isSignUp && (
+              <div className="mt-4 text-center">
+                <button
+                  type="button"
+                  onClick={() => setIsPasswordReset(true)}
+                  className="text-sm text-primary hover:underline"
+                >
+                  Forgot password?
+                </button>
+              </div>
+            )}
+
             <div className="mt-6 text-center">
-              <p className="text-sm text-muted-foreground">
+              <p className="text-muted-foreground">
                 {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
                 <button
                   type="button"
@@ -275,6 +479,8 @@ export default function Auth() {
                 </button>
               </p>
             </div>
+            </>
+            )}
           </CardContent>
         </Card>
       </div>
