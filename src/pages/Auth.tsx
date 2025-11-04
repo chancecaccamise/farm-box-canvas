@@ -28,9 +28,39 @@ export default function Auth() {
   const [smsNotifications, setSmsNotifications] = useState(false);
   const [emailNewsletter, setEmailNewsletter] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [validatingToken, setValidatingToken] = useState(false);
   const { user, signIn, signUp, resetPassword } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Handle password reset token from email
+  useEffect(() => {
+    const hashParams = new URLSearchParams(window.location.hash.substring(1));
+    const type = hashParams.get('type');
+    const tokenHash = hashParams.get('token_hash');
+    
+    if (type === 'recovery' && tokenHash) {
+      setValidatingToken(true);
+      setIsPasswordUpdate(true);
+      
+      // Give Supabase time to establish the session automatically
+      setTimeout(async () => {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          setValidatingToken(false);
+        } else {
+          toast({
+            title: "Error",
+            description: "Password reset link is invalid or has expired",
+            variant: "destructive",
+          });
+          setIsPasswordUpdate(false);
+          setValidatingToken(false);
+          navigate('/auth');
+        }
+      }, 1000);
+    }
+  }, [toast, navigate]);
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -247,7 +277,12 @@ export default function Auth() {
           
           <CardContent>
             {isPasswordUpdate ? (
-              <form onSubmit={handlePasswordUpdate} className="space-y-4">
+              validatingToken ? (
+                <div className="text-center py-8">
+                  <p className="text-muted-foreground">Validating reset link...</p>
+                </div>
+              ) : (
+                <form onSubmit={handlePasswordUpdate} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="newPassword">New Password</Label>
                   <Input
@@ -278,6 +313,7 @@ export default function Auth() {
                   {loading ? 'Updating...' : 'Update Password'}
                 </Button>
               </form>
+              )
             ) : isPasswordReset ? (
               <>
                 {resetEmailSent ? (
