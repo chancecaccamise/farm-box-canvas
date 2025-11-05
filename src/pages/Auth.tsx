@@ -15,7 +15,7 @@ export default function Auth() {
   const [searchParams] = useSearchParams();
   const [isSignUp, setIsSignUp] = useState(searchParams.get('signup') === 'true');
   const [isPasswordReset, setIsPasswordReset] = useState(false);
-  const [isPasswordUpdate, setIsPasswordUpdate] = useState(searchParams.get('reset') === 'true');
+  const [isPasswordUpdate, setIsPasswordUpdate] = useState(false);
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -35,30 +35,73 @@ export default function Auth() {
 
   // Handle password reset token from email
   useEffect(() => {
+    const qp = new URLSearchParams(window.location.search);
+    const code = qp.get('code');
+    const errorDescription = qp.get('error_description');
+
+    // Handle error from URL
+    if (errorDescription) {
+      toast({
+        title: "Error",
+        description: errorDescription,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Check for recovery flow in hash
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const type = hashParams.get('type');
-    const tokenHash = hashParams.get('token_hash');
-    
-    if (type === 'recovery' && tokenHash) {
-      setValidatingToken(true);
-      setIsPasswordUpdate(true);
-      
-      // Give Supabase time to establish the session automatically
-      setTimeout(async () => {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session) {
-          setValidatingToken(false);
-        } else {
+    const accessToken = hashParams.get('access_token');
+
+    // Handle code exchange if present
+    const handleCodeExchange = async () => {
+      if (code) {
+        try {
+          const { error } = await supabase.auth.exchangeCodeForSession(code);
+          if (error) throw error;
+        } catch (err: any) {
           toast({
             title: "Error",
-            description: "Password reset link is invalid or has expired",
+            description: err?.message || "Invalid or expired reset link",
             variant: "destructive",
           });
           setIsPasswordUpdate(false);
           setValidatingToken(false);
-          navigate('/auth');
         }
-      }, 1000);
+      }
+    };
+
+    // If recovery flow is detected OR we have a code, start validation
+    if (type === 'recovery' || code || accessToken) {
+      setValidatingToken(true);
+      setIsPasswordUpdate(true);
+
+      // Exchange code first if present, then poll for session
+      handleCodeExchange().finally(() => {
+        let attempts = 0;
+        const maxAttempts = 40; // 40 * 250ms = 10 seconds
+        
+        const interval = setInterval(async () => {
+          attempts++;
+          const { data: { session } } = await supabase.auth.getSession();
+          
+          if (session) {
+            clearInterval(interval);
+            setValidatingToken(false);
+          } else if (attempts >= maxAttempts) {
+            clearInterval(interval);
+            toast({
+              title: "Error",
+              description: "Password reset link is invalid or has expired",
+              variant: "destructive",
+            });
+            setIsPasswordUpdate(false);
+            setValidatingToken(false);
+            navigate('/auth');
+          }
+        }, 250);
+      });
     }
   }, [toast, navigate]);
 
