@@ -202,8 +202,8 @@ export default function Auth() {
       } else {
         setResetEmailSent(true);
         toast({
-          title: "Success",
-          description: "Check your email for a password reset link",
+          title: "Reset Link Sent",
+          description: "If an account exists with this email, you'll receive a password reset link shortly.",
         });
       }
     } catch (error) {
@@ -363,10 +363,10 @@ export default function Auth() {
                   <div className="space-y-4">
                     <div className="bg-muted p-4 rounded-lg text-center">
                       <p className="text-sm">
-                        We've sent a password reset link to <strong>{email}</strong>
+                        If an account exists with <strong>{email}</strong>, you will receive a password reset link shortly.
                       </p>
                       <p className="text-sm text-muted-foreground mt-2">
-                        Please check your email and click the link to reset your password.
+                        Please check your email inbox (and spam folder) for the reset link. If you don't receive an email within a few minutes, the email address may not be registered.
                       </p>
                     </div>
                     <Button
