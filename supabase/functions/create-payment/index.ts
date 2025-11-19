@@ -376,7 +376,7 @@ serve(async (req) => {
     });
 
     // Get the correct origin URL for redirects
-    const origin = req.headers.get("origin") || req.headers.get("referer")?.split('/').slice(0, 3).join('/') || "https://f78f5142-250a-4339-adfa-6897bce152ea.lovableproject.com";
+    const origin = req.headers.get("origin") || req.headers.get("referer")?.split('/').slice(0, 3).join('/') || "https://billysbotanicals.com";
     logStep("Using origin for redirects", { origin });
 
     const sessionMode = isSubscription ? "subscription" : "payment";
