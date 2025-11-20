@@ -13,6 +13,7 @@ import {
   Award
 } from "lucide-react";
 import { supabase } from '@/integrations/supabase/client';
+import supportLocalFishImg from "@/assets/supportLocalFish.jpg";
 
 interface Partner {
   id: string;
@@ -103,7 +104,7 @@ const SupportLocal = () => {
       <div className="relative h-[60vh] bg-gradient-fresh overflow-hidden">
         <div className="absolute inset-0 bg-black/50"></div>
         <img 
-          src="/supportLocalFish.jpg"
+          src={supportLocalFishImg}
           alt="Local partners and community" 
           className="w-full h-full object-cover"
         />
