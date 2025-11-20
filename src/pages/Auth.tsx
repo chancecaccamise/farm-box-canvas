@@ -105,12 +105,12 @@ export default function Auth() {
     }
   }, [toast, navigate]);
 
-  // Redirect if already authenticated
+  // Redirect if already authenticated (but not during password update)
   useEffect(() => {
-    if (user) {
+    if (user && !isPasswordUpdate) {
       navigate('/');
     }
-  }, [user, navigate]);
+  }, [user, navigate, isPasswordUpdate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
