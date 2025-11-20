@@ -255,7 +255,7 @@ export default function Auth() {
           title: "Success",
           description: "Password updated successfully! You can now sign in.",
         });
-        navigate('/auth');
+        navigate('/my-plan?password_reset=true');
       }
     } catch (error) {
       toast({

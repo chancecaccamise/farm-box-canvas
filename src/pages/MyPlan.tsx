@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,16 @@ import { useNavigate } from "react-router-dom";
 import { SubscriptionManager } from "@/components/SubscriptionManager";
 import { EditableDeliveryForm } from "@/components/EditableDeliveryForm";
 import NotificationPreferences from "@/components/NotificationPreferences";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 
 
 
@@ -71,12 +81,24 @@ const MyPlan = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [showPasswordResetModal, setShowPasswordResetModal] = useState(false);
+  const [isPasswordResetFlow, setIsPasswordResetFlow] = useState(false);
+  const passwordSectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (user) {
       loadUserData();
     }
   }, [user]);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('password_reset') === 'true') {
+      setShowPasswordResetModal(true);
+      setIsPasswordResetFlow(true);
+      window.history.replaceState({}, '', '/my-plan');
+    }
+  }, []);
 
   const loadUserData = async () => {
     try {
@@ -220,22 +242,24 @@ const MyPlan = () => {
     setIsChangingPassword(true);
 
     try {
-      // First, re-authenticate with current password
-      const { error: signInError } = await supabase.auth.signInWithPassword({
-        email: user?.email || '',
-        password: currentPassword,
-      });
-
-      if (signInError) {
-        toast({
-          title: "Error",
-          description: "Current password is incorrect",
-          variant: "destructive",
+      // Skip re-authentication if coming from password reset flow
+      if (!isPasswordResetFlow) {
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: user?.email || '',
+          password: currentPassword,
         });
-        return;
+
+        if (signInError) {
+          toast({
+            title: "Error",
+            description: "Current password is incorrect",
+            variant: "destructive",
+          });
+          return;
+        }
       }
 
-      // If re-authentication successful, update password
+      // Update password
       const { error: updateError } = await supabase.auth.updateUser({
         password: newPassword,
       });
@@ -247,10 +271,11 @@ const MyPlan = () => {
         description: "Your password has been changed successfully",
       });
 
-      // Clear form
+      // Clear form and reset flow
       setCurrentPassword("");
       setNewPassword("");
       setConfirmNewPassword("");
+      setIsPasswordResetFlow(false);
     } catch (error: any) {
       toast({
         title: "Error",
@@ -263,9 +288,33 @@ const MyPlan = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <div className="max-w-7xl mx-auto px-4 py-8">
+  return (
+    <div className="min-h-screen bg-background">
+      <AlertDialog open={showPasswordResetModal} onOpenChange={setShowPasswordResetModal}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Password Reset Successful!</AlertDialogTitle>
+            <AlertDialogDescription>
+              Your password has been successfully reset. You're now logged into your account.
+              You can optionally update your password again from the settings below if needed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction
+              onClick={() => {
+                setShowPasswordResetModal(false);
+                setTimeout(() => {
+                  passwordSectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 100);
+              }}
+            >
+              Got it
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="animate-pulse space-y-8">
             <div className="h-8 bg-muted rounded w-1/4"></div>
             <div className="grid lg:grid-cols-3 gap-8">
@@ -322,24 +371,33 @@ const MyPlan = () => {
             <NotificationPreferences />
 
             {/* Change Password */}
-            <Card>
+            <Card ref={passwordSectionRef}>
               <CardHeader>
-                <CardTitle>Change Password</CardTitle>
-                <CardDescription>Update your account password</CardDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>Change Password</CardTitle>
+                    <CardDescription>Update your account password</CardDescription>
+                  </div>
+                  {isPasswordResetFlow && (
+                    <Badge variant="secondary">Password Reset Mode</Badge>
+                  )}
+                </div>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handlePasswordChange} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="current-password">Current Password</Label>
-                    <Input
-                      id="current-password"
-                      type="password"
-                      value={currentPassword}
-                      onChange={(e) => setCurrentPassword(e.target.value)}
-                      required
-                      disabled={isChangingPassword}
-                    />
-                  </div>
+                  {!isPasswordResetFlow && (
+                    <div className="space-y-2">
+                      <Label htmlFor="current-password">Current Password</Label>
+                      <Input
+                        id="current-password"
+                        type="password"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
+                        required
+                        disabled={isChangingPassword}
+                      />
+                    </div>
+                  )}
                   <div className="space-y-2">
                     <Label htmlFor="new-password">New Password</Label>
                     <Input
