@@ -268,7 +268,7 @@ export default function Auth() {
     }
   };
 
-  if (user) {
+  if (user && !isPasswordUpdate) {
     return null; // Will redirect
   }
 
