@@ -25,6 +25,7 @@ import FreshCatch from "./pages/FreshCatch";
 import RecentNews from "./pages/RecentNews";
 import BecomeAPartner from "./pages/BecomeAPartner";
 import AnasFlowers from "./pages/AnasFlowers";
+import ContactUs from "./pages/ContactUs";
 import Gallery from "./pages/Gallery";
 import ZipCode from "./pages/ZipCode";
 import Account from "./pages/Account";
@@ -89,6 +90,7 @@ const AppRoutes = () => {
         <Route path="/fresh-catch" element={<FreshCatch />} />
         <Route path="/recent-news" element={<RecentNews />} />
         <Route path="/become-a-partner" element={<BecomeAPartner />} />
+        <Route path="/contact-us" element={<ContactUs />} />
         <Route path="/partners/restaurants" element={<PartnerCategory category="restaurants" />} />
         <Route path="/partners/bakery" element={<PartnerCategory category="bakery" />} />
         <Route path="/partners/fisherman" element={<PartnerCategory category="fisherman" />} />
