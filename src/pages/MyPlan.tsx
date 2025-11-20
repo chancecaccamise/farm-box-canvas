@@ -290,6 +290,29 @@ const MyPlan = () => {
   if (loading) {
   return (
     <div className="min-h-screen bg-background">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+          <div className="animate-pulse space-y-8">
+            <div className="h-8 bg-muted rounded w-1/4"></div>
+            <div className="grid lg:grid-cols-3 gap-8">
+              <div className="lg:col-span-2 space-y-6">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="h-64 bg-muted rounded"></div>
+                ))}
+              </div>
+              <div className="space-y-6">
+                {[1, 2].map((i) => (
+                  <div key={i} className="h-32 bg-muted rounded"></div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-background">
       <AlertDialog open={showPasswordResetModal} onOpenChange={setShowPasswordResetModal}>
         <AlertDialogContent>
           <AlertDialogHeader>
@@ -314,29 +337,6 @@ const MyPlan = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      <div className="max-w-7xl mx-auto px-4 py-8">
-          <div className="animate-pulse space-y-8">
-            <div className="h-8 bg-muted rounded w-1/4"></div>
-            <div className="grid lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2 space-y-6">
-                {[1, 2, 3].map((i) => (
-                  <div key={i} className="h-64 bg-muted rounded"></div>
-                ))}
-              </div>
-              <div className="space-y-6">
-                {[1, 2].map((i) => (
-                  <div key={i} className="h-32 bg-muted rounded"></div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="min-h-screen bg-background">
       <div className="max-w-7xl mx-auto px-4 py-8">
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Left Side - Main Content */}
