@@ -67,6 +67,10 @@ const MyPlan = () => {
   const [loading, setLoading] = useState(true);
   const [promoCode, setPromoCode] = useState("");
   const [orderHistory, setOrderHistory] = useState<any[]>([]);
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -191,6 +195,73 @@ const MyPlan = () => {
     setDeliveryAddress(updatedAddress);
   };
 
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Validation
+    if (newPassword !== confirmNewPassword) {
+      toast({
+        title: "Error",
+        description: "New passwords do not match",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (newPassword.length < 6) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 6 characters long",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsChangingPassword(true);
+
+    try {
+      // First, re-authenticate with current password
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user?.email || '',
+        password: currentPassword,
+      });
+
+      if (signInError) {
+        toast({
+          title: "Error",
+          description: "Current password is incorrect",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // If re-authentication successful, update password
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (updateError) throw updateError;
+
+      toast({
+        title: "Success",
+        description: "Your password has been changed successfully",
+      });
+
+      // Clear form
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmNewPassword("");
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error?.message || "Failed to change password",
+        variant: "destructive",
+      });
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -249,6 +320,56 @@ const MyPlan = () => {
 
             {/* Notification Preferences */}
             <NotificationPreferences />
+
+            {/* Change Password */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Change Password</CardTitle>
+                <CardDescription>Update your account password</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handlePasswordChange} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="current-password">Current Password</Label>
+                    <Input
+                      id="current-password"
+                      type="password"
+                      value={currentPassword}
+                      onChange={(e) => setCurrentPassword(e.target.value)}
+                      required
+                      disabled={isChangingPassword}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="new-password">New Password</Label>
+                    <Input
+                      id="new-password"
+                      type="password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      required
+                      minLength={6}
+                      disabled={isChangingPassword}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirm-new-password">Confirm New Password</Label>
+                    <Input
+                      id="confirm-new-password"
+                      type="password"
+                      value={confirmNewPassword}
+                      onChange={(e) => setConfirmNewPassword(e.target.value)}
+                      required
+                      minLength={6}
+                      disabled={isChangingPassword}
+                    />
+                  </div>
+                  <Button type="submit" disabled={isChangingPassword} className="w-full">
+                    {isChangingPassword ? "Changing Password..." : "Change Password"}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
 
           </div>
 
