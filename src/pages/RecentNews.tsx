@@ -49,7 +49,7 @@ const RecentNews = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[...Array(6)].map((_, i) => (
               <Card key={i} className="overflow-hidden">
-                <Skeleton className="h-48 w-full" />
+                <Skeleton className="aspect-square w-full" />
                 <CardContent className="p-6">
                   <Skeleton className="h-6 w-full mb-2" />
                   <Skeleton className="h-4 w-3/4 mb-4" />
@@ -91,7 +91,7 @@ const RecentNews = () => {
             {announcements.map((announcement) => (
               <Card key={announcement.id} className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
                 {announcement.image_url && (
-                  <div className="aspect-video overflow-hidden">
+                  <div className="aspect-square overflow-hidden">
                     <img
                       src={announcement.image_url}
                       alt={announcement.title}
