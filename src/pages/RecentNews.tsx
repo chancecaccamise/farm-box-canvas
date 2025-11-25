@@ -16,6 +16,7 @@ interface NewsAnnouncement {
 const RecentNews = () => {
   const [announcements, setAnnouncements] = useState<NewsAnnouncement[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedCards, setExpandedCards] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchAnnouncements();
@@ -111,9 +112,25 @@ const RecentNews = () => {
                   </div>
 
                   {announcement.description && (
-                    <p className="text-muted-foreground line-clamp-3">
-                      {announcement.description}
-                    </p>
+                    <div>
+                      <p className={`text-muted-foreground ${expandedCards.has(announcement.id) ? '' : 'line-clamp-3'}`}>
+                        {announcement.description}
+                      </p>
+                      <button
+                        onClick={() => {
+                          const newExpanded = new Set(expandedCards);
+                          if (expandedCards.has(announcement.id)) {
+                            newExpanded.delete(announcement.id);
+                          } else {
+                            newExpanded.add(announcement.id);
+                          }
+                          setExpandedCards(newExpanded);
+                        }}
+                        className="text-sm text-primary hover:text-primary/80 mt-2 transition-colors"
+                      >
+                        {expandedCards.has(announcement.id) ? 'Read less' : 'Read more'}
+                      </button>
+                    </div>
                   )}
                 </CardContent>
               </Card>

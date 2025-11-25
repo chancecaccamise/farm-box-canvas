@@ -116,11 +116,7 @@ const ZipCode = () => {
                     <strong>We don't deliver to {zipCode} yet, but we're expanding!</strong>
                     <br />
                     <br />
-                    Interested in pickup instead? Text us at{" "}
-                    <a href="tel:9127273098" className="font-semibold underline">
-                      (912) 727-3098
-                    </a>{" "}
-                    to place a pickup order.
+                    Use code <span className="font-semibold">55555</span> to place a pickup order.
                   </AlertDescription>
                 </Alert>
               )}
