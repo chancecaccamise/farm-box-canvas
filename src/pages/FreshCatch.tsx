@@ -222,7 +222,7 @@ const FreshCatch = () => {
               {announcements.map((announcement) => (
                 <Card key={announcement.id} className="overflow-hidden">
                   {announcement.image_url && (
-                    <div className="aspect-video bg-muted">
+                    <div className="aspect-square bg-muted">
                       <img
                         src={announcement.image_url}
                         alt={announcement.fish_name}
