@@ -24,6 +24,7 @@ interface FormData {
   description: string;
   image_url: string;
   author_name: string;
+  published_date: string;
 }
 
 export const AdminRecentNews = () => {
@@ -35,7 +36,8 @@ export const AdminRecentNews = () => {
     title: '',
     description: '',
     image_url: '',
-    author_name: ''
+    author_name: '',
+    published_date: format(new Date(), 'yyyy-MM-dd')
   });
   const { toast } = useToast();
 
@@ -84,7 +86,8 @@ export const AdminRecentNews = () => {
             title: formData.title,
             description: formData.description || null,
             image_url: formData.image_url || null,
-            author_name: formData.author_name || null
+            author_name: formData.author_name || null,
+            created_at: new Date(formData.published_date).toISOString()
           })
           .eq('id', editingAnnouncement.id);
 
@@ -101,7 +104,8 @@ export const AdminRecentNews = () => {
             title: formData.title,
             description: formData.description || null,
             image_url: formData.image_url || null,
-            author_name: formData.author_name || null
+            author_name: formData.author_name || null,
+            created_at: new Date(formData.published_date).toISOString()
           });
 
         if (error) throw error;
@@ -131,7 +135,8 @@ export const AdminRecentNews = () => {
       title: announcement.title,
       description: announcement.description || '',
       image_url: announcement.image_url || '',
-      author_name: announcement.author_name || ''
+      author_name: announcement.author_name || '',
+      published_date: format(new Date(announcement.created_at), 'yyyy-MM-dd')
     });
     setIsDialogOpen(true);
   };
@@ -170,7 +175,8 @@ export const AdminRecentNews = () => {
       title: '',
       description: '',
       image_url: '',
-      author_name: ''
+      author_name: '',
+      published_date: format(new Date(), 'yyyy-MM-dd')
     });
     setEditingAnnouncement(null);
   };
@@ -283,6 +289,18 @@ export const AdminRecentNews = () => {
                 onChange={(e) => setFormData({ ...formData, author_name: e.target.value })}
                 placeholder="Enter author name (e.g., Billy, Ana)"
               />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium mb-2 block">Publication Date</label>
+              <Input
+                type="date"
+                value={formData.published_date}
+                onChange={(e) => setFormData({ ...formData, published_date: e.target.value })}
+              />
+              <p className="text-xs text-muted-foreground mt-1">
+                Set a custom date for articles published in the past
+              </p>
             </div>
 
             <div>

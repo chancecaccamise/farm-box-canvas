@@ -147,14 +147,7 @@ const Admin = () => {
           </TabsContent>
 
           <TabsContent value="recent-news">
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent News Management</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <AdminRecentNews />
-              </CardContent>
-            </Card>
+            <AdminRecentNews />
           </TabsContent>
 
           <TabsContent value="form-submissions">
