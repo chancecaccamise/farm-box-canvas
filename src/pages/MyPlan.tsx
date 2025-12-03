@@ -217,6 +217,10 @@ const MyPlan = () => {
     setDeliveryAddress(updatedAddress);
   };
 
+  const handleAddressDelete = () => {
+    setDeliveryAddress(null);
+  };
+
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -365,6 +369,7 @@ const MyPlan = () => {
             <EditableDeliveryForm 
               address={deliveryAddress}
               onAddressUpdate={handleAddressUpdate}
+              onAddressDelete={handleAddressDelete}
             />
 
             {/* Notification Preferences */}

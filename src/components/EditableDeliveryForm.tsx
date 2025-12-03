@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Edit, Save, X, Plus } from "lucide-react";
+import { MapPin, Edit, Save, X, Plus, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/AuthProvider";
@@ -24,9 +24,10 @@ interface DeliveryAddress {
 interface EditableDeliveryFormProps {
   address: DeliveryAddress | null;
   onAddressUpdate: (address: DeliveryAddress) => void;
+  onAddressDelete?: () => void;
 }
 
-export function EditableDeliveryForm({ address, onAddressUpdate }: EditableDeliveryFormProps) {
+export function EditableDeliveryForm({ address, onAddressUpdate, onAddressDelete }: EditableDeliveryFormProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     street_address: "",
@@ -143,6 +144,32 @@ export function EditableDeliveryForm({ address, onAddressUpdate }: EditableDeliv
     setIsEditing(false);
   };
 
+  const handleDelete = async () => {
+    if (!user || !address) return;
+
+    try {
+      const { error } = await supabase
+        .from('delivery_addresses')
+        .delete()
+        .eq('id', address.id);
+
+      if (error) throw error;
+
+      onAddressDelete?.();
+      toast({
+        title: "Address Removed",
+        description: "Your delivery address has been removed. You can still use market or farm pickups.",
+      });
+    } catch (error) {
+      console.error('Error deleting address:', error);
+      toast({
+        title: "Error",
+        description: "Failed to remove address. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   // Collapsed state when no address exists and not editing - show optional message
   if (!isEditing && !address) {
     return (
@@ -179,10 +206,16 @@ export function EditableDeliveryForm({ address, onAddressUpdate }: EditableDeliv
               <MapPin className="w-5 h-5 text-primary" />
               <span>Delivery Information</span>
             </div>
-            <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
-              <Edit className="w-4 h-4 mr-2" />
-              Edit
-            </Button>
+            <div className="flex space-x-2">
+              <Button variant="outline" size="sm" onClick={handleDelete}>
+                <Trash2 className="w-4 h-4 mr-2" />
+                Remove
+              </Button>
+              <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                <Edit className="w-4 h-4 mr-2" />
+                Edit
+              </Button>
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
