@@ -1439,6 +1439,7 @@ export type Database = {
     }
     Functions: {
       assign_admin_role: { Args: { user_email: string }; Returns: undefined }
+      cleanup_stale_pending_orders: { Args: never; Returns: number }
       generate_order_confirmation_number: { Args: never; Returns: string }
       get_admin_user_list: {
         Args: never
