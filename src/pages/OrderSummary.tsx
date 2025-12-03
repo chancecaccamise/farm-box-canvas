@@ -9,6 +9,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { useCheckout } from "@/contexts/CheckoutContext";
+import { useOrderCutoff } from "@/hooks/useOrderCutoff";
+import { CutoffBanner } from "@/components/CutoffBanner";
 
 const OrderSummary = () => {
   const navigate = useNavigate();
@@ -21,6 +23,7 @@ const OrderSummary = () => {
   const [selectedProtein, setSelectedProtein] = useState<any>(null);
   const [selectedCarb, setSelectedCarb] = useState<any>(null);
   const { checkoutState } = useCheckout();
+  const { isPastCutoff, nextWeekStart } = useOrderCutoff();
 
   const getBoxDisplayName = (boxName: string) => {
     const nameMap: Record<string, string> = {
@@ -327,6 +330,13 @@ const OrderSummary = () => {
             }
           </p>
         </div>
+
+        {/* Cutoff Banner */}
+        <CutoffBanner 
+          isPastCutoff={isPastCutoff} 
+          nextWeekStart={nextWeekStart}
+          variant="info"
+        />
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Order Details */}

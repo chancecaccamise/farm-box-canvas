@@ -6,6 +6,8 @@ import { ArrowLeft, Package, Repeat, ShoppingBag, CheckCircle } from "lucide-rea
 import { Link, useNavigate } from "react-router-dom";
 import { useCheckout } from "@/contexts/CheckoutContext";
 import { supabase } from "@/integrations/supabase/client";
+import { useOrderCutoff } from "@/hooks/useOrderCutoff";
+import { CutoffBanner } from "@/components/CutoffBanner";
 
 type BoxType = "one-time" | "subscription";
 type BoxSize = "small" | "medium" | "large" | "protein-pack" | "full_farm_bag" | "veggie_bag";
@@ -17,6 +19,7 @@ const BoxSelection = () => {
   const [boxSizes, setBoxSizes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { isPastCutoff, nextWeekStart } = useOrderCutoff();
 
   const getBoxDisplayName = (boxName: string) => {
     const nameMap: Record<string, string> = {
@@ -99,6 +102,13 @@ const BoxSelection = () => {
           </div>
           <span className="ml-4 text-sm text-muted-foreground">Step 3 of 3</span>
         </div>
+
+        {/* Cutoff Banner */}
+        <CutoffBanner 
+          isPastCutoff={isPastCutoff} 
+          nextWeekStart={nextWeekStart}
+          variant="info"
+        />
 
         {/* Header */}
         <div className="text-center mb-12">
