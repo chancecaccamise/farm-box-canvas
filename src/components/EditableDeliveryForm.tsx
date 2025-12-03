@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { MapPin, Edit, Save, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { MapPin, Edit, Save, X, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/components/AuthProvider";
@@ -130,20 +131,45 @@ export function EditableDeliveryForm({ address, onAddressUpdate }: EditableDeliv
   };
 
   const handleCancel = () => {
-    if (address) {
-      setFormData({
-        street_address: address.street_address,
-        apartment: address.apartment || "",
-        city: address.city,
-        state: address.state,
-        zip_code: address.zip_code,
-        delivery_instructions: address.delivery_instructions || "",
-      });
-    }
+    setFormData({
+      street_address: address?.street_address || "",
+      apartment: address?.apartment || "",
+      city: address?.city || "",
+      state: address?.state || "",
+      zip_code: address?.zip_code || "",
+      delivery_instructions: address?.delivery_instructions || "",
+    });
     setErrors({});
     setIsEditing(false);
   };
 
+  // Collapsed state when no address exists and not editing - show optional message
+  if (!isEditing && !address) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <MapPin className="w-5 h-5 text-primary" />
+              <span>Delivery Information</span>
+              <Badge variant="outline" className="text-xs">Optional</Badge>
+            </div>
+            <Button variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Address
+            </Button>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p className="text-sm text-muted-foreground">
+            Only required for home delivery. Skip this if you prefer market or farm pickups.
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  // Display mode when address exists
   if (!isEditing && address) {
     return (
       <Card>
@@ -176,6 +202,7 @@ export function EditableDeliveryForm({ address, onAddressUpdate }: EditableDeliv
     );
   }
 
+  // Edit mode
   return (
     <Card>
       <CardHeader>
