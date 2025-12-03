@@ -143,36 +143,40 @@ const OrderSummary = () => {
       return;
     }
 
-    // Check if user has a delivery address with ZIP code
-    console.log('📍 Checking user delivery address...');
-    const { data: deliveryAddress, error: addressError } = await supabase
-      .from('delivery_addresses')
-      .select('*')
-      .eq('user_id', user.id)
-      .eq('is_primary', true)
-      .maybeSingle();
+    // Only check delivery address for home delivery orders, not pickups
+    if (checkoutState.deliveryMethod === 'delivery') {
+      console.log('📍 Checking user delivery address...');
+      const { data: deliveryAddress, error: addressError } = await supabase
+        .from('delivery_addresses')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('is_primary', true)
+        .maybeSingle();
 
-    if (addressError) {
-      console.error('❌ Error fetching delivery address:', addressError);
-      toast({
-        title: "Address Error",
-        description: "Failed to verify delivery address. Please try again.",
-        variant: "destructive"
-      });
-      return;
+      if (addressError) {
+        console.error('❌ Error fetching delivery address:', addressError);
+        toast({
+          title: "Address Error",
+          description: "Failed to verify delivery address. Please try again.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      if (!deliveryAddress || !deliveryAddress.zip_code) {
+        console.error('❌ No delivery address or ZIP code found');
+        toast({
+          title: "Delivery Address Required",
+          description: "Please add a delivery address with ZIP code in your account settings.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      console.log('✅ Delivery address found:', deliveryAddress.zip_code);
+    } else {
+      console.log('📍 Pickup order - skipping delivery address validation');
     }
-
-    if (!deliveryAddress || !deliveryAddress.zip_code) {
-      console.error('❌ No delivery address or ZIP code found');
-      toast({
-        title: "Delivery Address Required",
-        description: "Please add a delivery address with ZIP code in your account settings.",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    console.log('✅ Delivery address found:', deliveryAddress.zip_code);
 
     setIsCheckingOut(true);
     console.log('⏳ Setting checkout loading state');
