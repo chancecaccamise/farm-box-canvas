@@ -667,8 +667,9 @@ function MyBag() {
     );
   }
 
-  // Show Start Farm Box Journey if user has no current purchases
-  if (!hasActiveSubscription && !hasPaidForThisWeek && !hasPendingOrderThisWeek) {
+  // Show Start Farm Box Journey if user has no active subscription or paid order
+  // Pending orders from abandoned checkouts should NOT grant access to bag contents
+  if (!hasActiveSubscription && !hasPaidForThisWeek) {
     return (
       <div className="min-h-screen bg-background">
         <div className="container mx-auto px-4 py-8">
