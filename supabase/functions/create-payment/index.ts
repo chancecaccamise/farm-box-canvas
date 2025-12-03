@@ -386,17 +386,14 @@ serve(async (req) => {
       customerId: customerId || "new_customer"
     });
 
-    // Create Stripe checkout session
-    const session = await stripe.checkout.sessions.create({
+    // Create Stripe checkout session config
+    const sessionConfig: any = {
       customer: customerId,
       customer_email: customerId ? undefined : user.email,
       line_items: lineItems,
       mode: sessionMode,
       success_url: `${origin}/?stripe_redirect=thank-you&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${origin}/?stripe_redirect=my-bag&cancelled=true`,
-      shipping_address_collection: {
-        allowed_countries: ['US'],
-      },
       phone_number_collection: {
         enabled: true,
       },
@@ -406,8 +403,18 @@ serve(async (req) => {
         has_active_subscription: hasActiveSubscription.toString(),
         box_size: checkoutState?.boxSize || actualWeeklyBag?.box_size || 'medium',
         is_subscription: isSubscription.toString(),
+        delivery_method: checkoutState?.deliveryMethod || 'delivery',
       },
-    });
+    };
+
+    // Only collect shipping address for home delivery orders
+    if (checkoutState?.deliveryMethod === 'delivery') {
+      sessionConfig.shipping_address_collection = {
+        allowed_countries: ['US'],
+      };
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionConfig);
 
     logStep("Stripe session created", { sessionId: session.id, url: session.url });
 
