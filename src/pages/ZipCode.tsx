@@ -143,6 +143,9 @@ const ZipCode = () => {
               <p className="text-sm text-muted-foreground">
                 We currently deliver to most areas within 50 miles of our partner farms.
               </p>
+              <p className="text-sm text-muted-foreground mt-2">
+                <strong>Prefer pickup?</strong> Use code <span className="font-semibold text-primary">55555</span> to place a market or farm pickup order.
+              </p>
             </div>
           </CardContent>
         </Card>
