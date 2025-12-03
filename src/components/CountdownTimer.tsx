@@ -84,10 +84,10 @@ export function CountdownTimer({ cutoffTime, isConfirmed, hasActiveSubscription 
         <CardContent className="pt-6">
           <div className="flex items-center justify-center gap-3">
             <Lock className="h-5 w-5 text-red-600" />
-            <span className="text-red-800 font-medium">Cutoff Time Has Passed</span>
+            <span className="text-red-800 font-medium">Weekly Cutoff Has Passed</span>
           </div>
           <p className="text-sm text-red-600 text-center mt-2">
-            Your bag is now locked for the week. Cutoff was {formatCutoffTime()}.
+            The cutoff for this week was Friday at noon EST. Your bag is now locked.
           </p>
         </CardContent>
       </Card>
@@ -101,7 +101,7 @@ export function CountdownTimer({ cutoffTime, isConfirmed, hasActiveSubscription 
           <div className="flex items-center justify-center gap-2 mb-2">
             <Clock className="h-5 w-5 text-orange-600" />
             <span className="text-orange-800 font-medium">
-              {hasActiveSubscription ? 'Purchase additional add-ons' : 'Confirm your bag'} by {formatCutoffTime()}
+              {hasActiveSubscription ? 'Purchase additional add-ons' : 'Confirm your bag'} by Friday at noon EST
             </span>
           </div>
           

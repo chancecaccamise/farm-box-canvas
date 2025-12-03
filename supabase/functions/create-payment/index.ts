@@ -12,6 +12,41 @@ const logStep = (step: string, details?: any) => {
   console.log(`[CREATE-PAYMENT] ${step}${detailsStr}`);
 };
 
+// Helper function to calculate Friday noon EST cutoff
+const getFridayNoonCutoff = (): Date => {
+  const now = new Date();
+  const currentDay = now.getUTCDay(); // 0 = Sunday, 5 = Friday
+  
+  // Get current week's Friday
+  const daysUntilFriday = (5 - currentDay + 7) % 7;
+  const friday = new Date(now);
+  friday.setUTCDate(now.getUTCDate() + daysUntilFriday);
+  
+  // Set to noon EST (17:00 UTC during EST, 16:00 UTC during EDT)
+  // Using 17:00 UTC as a conservative estimate (noon EST)
+  friday.setUTCHours(17, 0, 0, 0);
+  
+  return friday;
+};
+
+// Helper function to get next week's Monday
+const getNextWeekMonday = (): string => {
+  const now = new Date();
+  const currentDay = now.getUTCDay();
+  const daysUntilMonday = (8 - currentDay) % 7 || 7;
+  const monday = new Date(now);
+  monday.setUTCDate(now.getUTCDate() + daysUntilMonday);
+  monday.setUTCHours(0, 0, 0, 0);
+  return monday.toISOString().split('T')[0];
+};
+
+// Helper function to check if past Friday noon cutoff
+const isPastFridayCutoff = (): boolean => {
+  const now = new Date();
+  const cutoff = getFridayNoonCutoff();
+  return now > cutoff;
+};
+
 // Helper function to expand quantity map to array of IDs
 const expandQuantitiesToArray = (quantities: Record<string, number> | string[]): string[] => {
   // Handle legacy array format
@@ -440,12 +475,23 @@ serve(async (req) => {
       delivery_fee: deliveryFee,
       has_active_subscription: hasActiveSubscription,
       week_start_date: actualWeeklyBag?.week_start_date || (() => {
+        // If past Friday noon cutoff, schedule for next week
+        if (isPastFridayCutoff()) {
+          return getNextWeekMonday();
+        }
         const now = new Date();
         const monday = new Date(now);
         monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
         return monday.toISOString().split('T')[0];
       })(),
       week_end_date: actualWeeklyBag?.week_end_date || (() => {
+        // If past Friday noon cutoff, schedule for next week
+        if (isPastFridayCutoff()) {
+          const nextMonday = new Date(getNextWeekMonday());
+          const sunday = new Date(nextMonday);
+          sunday.setDate(nextMonday.getDate() + 6);
+          return sunday.toISOString().split('T')[0];
+        }
         const now = new Date();
         const monday = new Date(now);
         monday.setDate(now.getDate() - ((now.getDay() + 6) % 7));
