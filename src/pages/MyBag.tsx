@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Package } from "lucide-react";
+import { Package, RefreshCw } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -9,7 +9,9 @@ import { ReadOnlyBagItem } from "@/components/ReadOnlyBagItem";
 import { AddOnsGrid } from "@/components/AddOnsGrid";
 import { StartFarmBoxJourney } from "@/components/StartFarmBoxJourney";
 import { UnconfirmBagDialog } from "@/components/UnconfirmBagDialog";
+import { UpdateSelectionsDialog } from "@/components/UpdateSelectionsDialog";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 interface WeeklyBag {
   id: string;
@@ -24,6 +26,9 @@ interface WeeklyBag {
   box_size: string;
   box_price: number;
   addons_total: number;
+  user_full_farm_bag_protein?: string | null;
+  user_full_farm_bag_carb?: string | null;
+  user_protein_selections?: string[] | null;
 }
 
 interface WeeklyBagItem {
@@ -56,6 +61,7 @@ function MyBag() {
   const [templateStatus, setTemplateStatus] = useState<{hasTemplates: boolean, isConfirmed: boolean}>({hasTemplates: false, isConfirmed: false});
   const [showUnconfirmDialog, setShowUnconfirmDialog] = useState(false);
   const [unconfirmLoading, setUnconfirmLoading] = useState(false);
+  const [showUpdateSelectionsDialog, setShowUpdateSelectionsDialog] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -686,11 +692,30 @@ function MyBag() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">My Bag</h1>
-            <p className="text-muted-foreground">
-              Review your weekly farm box contents and add any extras you'd like.
-            </p>
+          <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground mb-2">My Bag</h1>
+              <p className="text-muted-foreground">
+                Review your weekly farm box contents and add any extras you'd like.
+              </p>
+            </div>
+            
+            {/* Update Selections Button - Only for subscribers with customizable boxes */}
+            {hasActiveSubscription && 
+             !isLocked && 
+             !currentWeekBag?.is_confirmed && 
+             currentWeekBag && 
+             (currentWeekBag.box_size === 'full_farm_bag' || currentWeekBag.box_size === 'protein-pack') && (
+              <Button 
+                onClick={() => setShowUpdateSelectionsDialog(true)}
+                className="flex items-center gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                {currentWeekBag.box_size === 'full_farm_bag' 
+                  ? 'Change Protein & Carb' 
+                  : 'Change My 5 Proteins'}
+              </Button>
+            )}
           </div>
 
           <div className="max-w-7xl mx-auto">
@@ -835,6 +860,21 @@ function MyBag() {
           onConfirm={handleUnconfirmBag}
           loading={unconfirmLoading}
           boxSize={currentWeekBag.box_size}
+        />
+      )}
+
+      {/* Update Selections Dialog */}
+      {currentWeekBag && (currentWeekBag.box_size === 'full_farm_bag' || currentWeekBag.box_size === 'protein-pack') && (
+        <UpdateSelectionsDialog
+          isOpen={showUpdateSelectionsDialog}
+          onClose={() => setShowUpdateSelectionsDialog(false)}
+          boxSize={currentWeekBag.box_size}
+          weeklyBagId={currentWeekBag.id}
+          weekStartDate={currentWeekBag.week_start_date}
+          currentProtein={currentWeekBag.user_full_farm_bag_protein}
+          currentCarb={currentWeekBag.user_full_farm_bag_carb}
+          currentProteinSelections={currentWeekBag.user_protein_selections}
+          onSelectionsUpdated={() => initializeCurrentWeekBag()}
         />
       )}
     </div>
