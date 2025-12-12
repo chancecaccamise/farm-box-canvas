@@ -60,6 +60,7 @@ export const EnhancedOrderManagement = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [orderTypeFilter, setOrderTypeFilter] = useState('all');
   const [productNames, setProductNames] = useState<Record<string, string>>({});
   const { toast } = useToast();
 
@@ -225,6 +226,7 @@ export const EnhancedOrderManagement = () => {
       const headers = [
         'Order ID',
         'Order Date',
+        'Order Type',
         'Customer Name',
         'Customer Email', 
         'Customer Phone',
@@ -254,6 +256,7 @@ export const EnhancedOrderManagement = () => {
         ...ordersToExport.map(order => [
           order.id,
           new Date(order.order_date).toLocaleDateString(),
+          order.order_type === 'subscription' ? 'Subscription' : 'One-Time',
           `"${order.customer_name || getCustomerName(order)}"`,
           `"${order.customer_email || ''}"`,
           `"${order.customer_phone || ''}"`,
@@ -332,8 +335,9 @@ export const EnhancedOrderManagement = () => {
         (order.customer_email && order.customer_email.toLowerCase().includes(searchTerm.toLowerCase()));
       
       const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+      const matchesOrderType = orderTypeFilter === 'all' || order.order_type === orderTypeFilter;
       
-      return matchesSearch && matchesStatus;
+      return matchesSearch && matchesStatus && matchesOrderType;
     });
   };
 
@@ -403,7 +407,7 @@ export const EnhancedOrderManagement = () => {
       </div>
 
       {/* Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div>
           <Label htmlFor="search">Search Orders</Label>
           <div className="relative">
@@ -433,6 +437,20 @@ export const EnhancedOrderManagement = () => {
             </SelectContent>
           </Select>
         </div>
+
+        <div>
+          <Label htmlFor="orderType">Filter by Order Type</Label>
+          <Select value={orderTypeFilter} onValueChange={setOrderTypeFilter}>
+            <SelectTrigger>
+              <SelectValue placeholder="All types" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Types</SelectItem>
+              <SelectItem value="subscription">Subscription</SelectItem>
+              <SelectItem value="one_time">One-Time</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Enhanced Orders Table */}
@@ -445,6 +463,7 @@ export const EnhancedOrderManagement = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Customer</TableHead>
+                <TableHead>Order Type</TableHead>
                 <TableHead>Box Type</TableHead>
                 <TableHead>Customer Selections</TableHead>
                 <TableHead>Add-Ons Purchased</TableHead>
@@ -472,6 +491,14 @@ export const EnhancedOrderManagement = () => {
                         {new Date(order.order_date).toLocaleDateString()}
                       </p>
                     </div>
+                  </TableCell>
+                  <TableCell>
+                    <Badge 
+                      variant={order.order_type === 'subscription' ? 'default' : 'secondary'}
+                      className={order.order_type === 'subscription' ? 'bg-green-600 text-white' : 'bg-blue-600 text-white'}
+                    >
+                      {order.order_type === 'subscription' ? 'Subscription' : 'One-Time'}
+                    </Badge>
                   </TableCell>
                   <TableCell>
                     <div className="text-sm">
