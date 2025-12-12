@@ -7,9 +7,20 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Download, Search, Package, Users } from 'lucide-react';
+import { Download, Search, Package, Users, Trash2, X, Calendar } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { OrderInsights } from './OrderInsights';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface EnhancedOrder {
   id: string;
@@ -62,6 +73,12 @@ export const EnhancedOrderManagement = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [orderTypeFilter, setOrderTypeFilter] = useState('all');
   const [productNames, setProductNames] = useState<Record<string, string>>({});
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [selectedOrders, setSelectedOrders] = useState<Set<string>>(new Set());
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -337,8 +354,100 @@ export const EnhancedOrderManagement = () => {
       const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
       const matchesOrderType = orderTypeFilter === 'all' || order.order_type === orderTypeFilter;
       
-      return matchesSearch && matchesStatus && matchesOrderType;
+      // Date filtering
+      const orderDate = new Date(order.order_date);
+      const matchesStartDate = !startDate || orderDate >= new Date(startDate);
+      const matchesEndDate = !endDate || orderDate <= new Date(endDate + 'T23:59:59');
+      
+      return matchesSearch && matchesStatus && matchesOrderType && matchesStartDate && matchesEndDate;
     });
+  };
+
+  const clearFilters = () => {
+    setSearchTerm('');
+    setStatusFilter('all');
+    setOrderTypeFilter('all');
+    setStartDate('');
+    setEndDate('');
+  };
+
+  const handleSelectOrder = (orderId: string, checked: boolean) => {
+    const newSelected = new Set(selectedOrders);
+    if (checked) {
+      newSelected.add(orderId);
+    } else {
+      newSelected.delete(orderId);
+    }
+    setSelectedOrders(newSelected);
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      const allIds = new Set(getFilteredOrders().map(order => order.id));
+      setSelectedOrders(allIds);
+    } else {
+      setSelectedOrders(new Set());
+    }
+  };
+
+  const handleDeleteOrder = async (orderId: string) => {
+    try {
+      // Delete order_items first (cascade might not be set up)
+      await supabase.from('order_items').delete().eq('order_id', orderId);
+      
+      // Delete the order
+      const { error } = await supabase.from('orders').delete().eq('id', orderId);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Order Deleted",
+        description: "The order has been successfully deleted."
+      });
+      
+      setOrderToDelete(null);
+      setDeleteDialogOpen(false);
+      fetchOrders();
+    } catch (error) {
+      console.error('Error deleting order:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete order",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleBulkDelete = async () => {
+    try {
+      const orderIds = Array.from(selectedOrders);
+      
+      // Delete order_items first
+      for (const orderId of orderIds) {
+        await supabase.from('order_items').delete().eq('order_id', orderId);
+      }
+      
+      // Delete orders
+      const { error } = await supabase.from('orders').delete().in('id', orderIds);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Orders Deleted",
+        description: `${orderIds.length} orders have been successfully deleted.`
+      });
+      
+      setSelectedOrders(new Set());
+      setBulkDeleteDialogOpen(false);
+      fetchOrders();
+    } catch (error) {
+      console.error('Error deleting orders:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete orders",
+        variant: "destructive"
+      });
+    }
   };
 
   const getStatusBadgeVariant = (status: string) => {
@@ -407,7 +516,7 @@ export const EnhancedOrderManagement = () => {
       </div>
 
       {/* Filters */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
         <div>
           <Label htmlFor="search">Search Orders</Label>
           <div className="relative">
@@ -451,7 +560,64 @@ export const EnhancedOrderManagement = () => {
             </SelectContent>
           </Select>
         </div>
+
+        <div>
+          <Label htmlFor="startDate">From Date</Label>
+          <div className="relative">
+            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              id="startDate"
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </div>
+
+        <div>
+          <Label htmlFor="endDate">To Date</Label>
+          <div className="relative">
+            <Calendar className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              id="endDate"
+              type="date"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </div>
+
+        <div className="flex items-end">
+          <Button variant="outline" onClick={clearFilters} className="w-full">
+            <X className="h-4 w-4 mr-2" />
+            Clear Filters
+          </Button>
+        </div>
       </div>
+
+      {/* Bulk Actions */}
+      {selectedOrders.size > 0 && (
+        <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
+          <span className="text-sm font-medium">{selectedOrders.size} order(s) selected</span>
+          <Button 
+            variant="destructive" 
+            size="sm"
+            onClick={() => setBulkDeleteDialogOpen(true)}
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            Delete Selected
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => setSelectedOrders(new Set())}
+          >
+            Clear Selection
+          </Button>
+        </div>
+      )}
 
       {/* Enhanced Orders Table */}
       <Card>
@@ -462,6 +628,12 @@ export const EnhancedOrderManagement = () => {
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-12">
+                  <Checkbox
+                    checked={filteredOrders.length > 0 && selectedOrders.size === filteredOrders.length}
+                    onCheckedChange={handleSelectAll}
+                  />
+                </TableHead>
                 <TableHead>Customer</TableHead>
                 <TableHead>Order Type</TableHead>
                 <TableHead>Box Type</TableHead>
@@ -473,11 +645,18 @@ export const EnhancedOrderManagement = () => {
                 <TableHead>Amount</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Payment</TableHead>
+                <TableHead className="w-16">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {filteredOrders.map((order) => (
                 <TableRow key={order.id}>
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedOrders.has(order.id)}
+                      onCheckedChange={(checked) => handleSelectOrder(order.id, checked as boolean)}
+                    />
+                  </TableCell>
                   <TableCell>
                     <div>
                       <p className="font-medium">{getCustomerName(order)}</p>
@@ -563,6 +742,19 @@ export const EnhancedOrderManagement = () => {
                       {order.payment_status || 'unknown'}
                     </Badge>
                   </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => {
+                        setOrderToDelete(order.id);
+                        setDeleteDialogOpen(true);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
@@ -575,6 +767,48 @@ export const EnhancedOrderManagement = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Single Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Order</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this order? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={() => orderToDelete && handleDeleteOrder(orderToDelete)}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <AlertDialog open={bulkDeleteDialogOpen} onOpenChange={setBulkDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete {selectedOrders.size} Orders</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete {selectedOrders.size} selected orders? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={handleBulkDelete}
+            >
+              Delete All
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
