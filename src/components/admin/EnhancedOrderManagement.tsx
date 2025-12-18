@@ -47,6 +47,7 @@ interface EnhancedOrder {
   assigned_driver_id: string | null;
   delivery_sequence: number | null;
   payment_status: string | null;
+  weekly_bag_id: string | null;
   // New enhanced fields
   delivery_day_preference: string | null;
   delivery_time_preference: string | null;
@@ -84,7 +85,7 @@ export const EnhancedOrderManagement = () => {
   useEffect(() => {
     fetchOrders();
     
-    // Set up real-time subscription
+    // Set up real-time subscription for orders, order_items, and weekly_bags
     const orderSubscription = supabase
       .channel('orders-realtime')
       .on('postgres_changes', 
@@ -99,6 +100,13 @@ export const EnhancedOrderManagement = () => {
         (payload) => {
           console.log('Order items change:', payload);
           fetchOrders(); // Refresh data on any change
+        }
+      )
+      .on('postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'weekly_bags' },
+        (payload) => {
+          console.log('Weekly bag selections changed:', payload);
+          fetchOrders(); // Refresh to get latest selections
         }
       )
       .subscribe();
@@ -145,6 +153,33 @@ export const EnhancedOrderManagement = () => {
           item_type: (item as any).item_type || 'addon'
         }))
       }));
+      
+      // Fetch latest selections from weekly_bags for subscription orders
+      const weeklyBagIds = enhancedOrders
+        .filter(o => o.weekly_bag_id)
+        .map(o => o.weekly_bag_id as string);
+
+      if (weeklyBagIds.length > 0) {
+        const { data: weeklyBags } = await supabase
+          .from('weekly_bags')
+          .select('id, user_full_farm_bag_protein, user_full_farm_bag_carb, user_protein_selections')
+          .in('id', weeklyBagIds);
+
+        // Merge latest selections from weekly_bags into orders
+        if (weeklyBags && weeklyBags.length > 0) {
+          const weeklyBagMap = new Map(weeklyBags.map(wb => [wb.id, wb]));
+          
+          enhancedOrders.forEach(order => {
+            if (order.weekly_bag_id && weeklyBagMap.has(order.weekly_bag_id)) {
+              const wb = weeklyBagMap.get(order.weekly_bag_id)!;
+              // Use weekly_bags as source of truth for selections
+              order.user_full_farm_bag_protein = wb.user_full_farm_bag_protein;
+              order.user_full_farm_bag_carb = wb.user_full_farm_bag_carb;
+              order.user_protein_selections = wb.user_protein_selections;
+            }
+          });
+        }
+      }
       
       setOrders(enhancedOrders);
       

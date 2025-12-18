@@ -101,12 +101,15 @@ export function UpdateSelectionsDialog({
     setSaving(true);
     try {
       const updateData: Record<string, unknown> = {};
+      const orderUpdateData: Record<string, unknown> = {};
 
       if (boxSize === 'full_farm_bag') {
         const proteinId = Object.keys(selectedProtein)[0];
         const carbId = selectedCarbs[0];
         updateData.user_full_farm_bag_protein = proteinId;
         updateData.user_full_farm_bag_carb = carbId;
+        orderUpdateData.user_full_farm_bag_protein = proteinId;
+        orderUpdateData.user_full_farm_bag_carb = carbId;
       } else if (boxSize === 'protein-pack') {
         // Convert quantity record back to array (with duplicates for quantities > 1)
         const proteinArray: string[] = [];
@@ -116,6 +119,7 @@ export function UpdateSelectionsDialog({
           }
         });
         updateData.user_protein_selections = proteinArray;
+        orderUpdateData.user_protein_selections = proteinArray;
       }
 
       // Update weekly_bags with new selections
@@ -125,6 +129,17 @@ export function UpdateSelectionsDialog({
         .eq('id', weeklyBagId);
 
       if (updateError) throw updateError;
+
+      // Sync selections to the linked orders table for admin dashboard
+      const { error: orderError } = await supabase
+        .from('orders')
+        .update(orderUpdateData)
+        .eq('weekly_bag_id', weeklyBagId);
+
+      if (orderError) {
+        console.error('Error syncing to order:', orderError);
+        // Don't throw - weekly_bags is updated, order sync is secondary
+      }
 
       // Call RPC to repopulate bag from template with new selections
       const { error: rpcError } = await supabase.rpc('populate_weekly_bag_from_template', {
