@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { RefreshCw } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { RefreshCw, Clock } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ProteinSelector } from "@/components/ProteinSelector";
 import { CarbSelector } from "@/components/CarbSelector";
+import { format } from "date-fns";
 
 interface UpdateSelectionsDialogProps {
   isOpen: boolean;
@@ -20,6 +21,7 @@ interface UpdateSelectionsDialogProps {
   boxSize: string;
   weeklyBagId: string;
   weekStartDate: string;
+  cutoffTime?: string | null;
   currentProtein?: string | null;
   currentCarb?: string | null;
   currentProteinSelections?: string[] | null;
@@ -32,6 +34,7 @@ export function UpdateSelectionsDialog({
   boxSize,
   weeklyBagId,
   weekStartDate,
+  cutoffTime,
   currentProtein,
   currentCarb,
   currentProteinSelections,
@@ -95,10 +98,51 @@ export function UpdateSelectionsDialog({
     return false;
   };
 
+  // Check if cutoff has passed
+  const isPastCutoff = useMemo(() => {
+    if (!cutoffTime) return false;
+    return new Date() > new Date(cutoffTime);
+  }, [cutoffTime]);
+
+  // Format cutoff time for display
+  const formattedCutoffTime = useMemo(() => {
+    if (!cutoffTime) return null;
+    try {
+      return format(new Date(cutoffTime), "EEEE, MMMM d 'at' h:mm a");
+    } catch {
+      return null;
+    }
+  }, [cutoffTime]);
+
   const handleSave = async () => {
-    if (!isValid()) return;
+    if (!isValid() || isPastCutoff) return;
 
     setSaving(true);
+
+    try {
+      // Server-side cutoff validation
+      const { data: bagData } = await supabase
+        .from('weekly_bags')
+        .select('cutoff_time')
+        .eq('id', weeklyBagId)
+        .single();
+
+      if (bagData) {
+        const serverCutoffTime = new Date(bagData.cutoff_time);
+        const now = new Date();
+        if (now > serverCutoffTime) {
+          toast({
+            title: "Cutoff Time Passed",
+            description: "The deadline to change selections has passed. Your choices are locked.",
+            variant: "destructive",
+          });
+          onClose();
+          return;
+        }
+      }
+    } catch (error) {
+      console.error("Error validating cutoff:", error);
+    }
     try {
       const updateData: Record<string, unknown> = {};
       const orderUpdateData: Record<string, unknown> = {};
@@ -181,10 +225,24 @@ export function UpdateSelectionsDialog({
               ? 'Update Your Protein & Carb' 
               : 'Update Your 5 Proteins'}
           </DialogTitle>
-          <DialogDescription>
-            {boxSize === 'full_farm_bag'
-              ? 'Choose a new protein and carb for this week\'s bag.'
-              : 'Select 5 proteins for this week\'s protein pack.'}
+          <DialogDescription className="space-y-2">
+            <span>
+              {boxSize === 'full_farm_bag'
+                ? 'Choose a new protein and carb for this week\'s bag.'
+                : 'Select 5 proteins for this week\'s protein pack.'}
+            </span>
+            {formattedCutoffTime && !isPastCutoff && (
+              <span className="flex items-center gap-1.5 text-amber-600 font-medium">
+                <Clock className="w-4 h-4" />
+                Changes must be made before {formattedCutoffTime}
+              </span>
+            )}
+            {isPastCutoff && (
+              <span className="flex items-center gap-1.5 text-destructive font-medium">
+                <Clock className="w-4 h-4" />
+                The cutoff time has passed. Changes are no longer allowed.
+              </span>
+            )}
           </DialogDescription>
         </DialogHeader>
 
@@ -229,8 +287,8 @@ export function UpdateSelectionsDialog({
           <Button variant="outline" onClick={onClose} disabled={saving}>
             Cancel
           </Button>
-          <Button onClick={handleSave} disabled={!isValid() || saving}>
-            {saving ? "Saving..." : "Save Selections"}
+          <Button onClick={handleSave} disabled={!isValid() || saving || isPastCutoff}>
+            {isPastCutoff ? "Cutoff Passed" : saving ? "Saving..." : "Save Selections"}
           </Button>
         </DialogFooter>
       </DialogContent>
