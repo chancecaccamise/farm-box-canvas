@@ -3,6 +3,7 @@ import { Package, RefreshCw } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useOrderCutoff } from "@/hooks/useOrderCutoff";
 import { WeeklyBagSummary } from "@/components/WeeklyBagSummary";
 import { BagItemCard } from "@/components/BagItemCard";
 import { ReadOnlyBagItem } from "@/components/ReadOnlyBagItem";
@@ -50,6 +51,7 @@ interface WeeklyBagItem {
 function MyBag() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { isPastCutoff } = useOrderCutoff();
   
   const [currentWeekBag, setCurrentWeekBag] = useState<WeeklyBag | null>(null);
   const [bagItems, setBagItems] = useState<WeeklyBagItem[]>([]);
@@ -700,9 +702,9 @@ function MyBag() {
               </p>
             </div>
             
-            {/* Update Selections Button - Only for subscribers with customizable boxes */}
+            {/* Update Selections Button - Only for subscribers with customizable boxes, before cutoff */}
             {hasActiveSubscription && 
-             !isLocked && 
+             !isPastCutoff && 
              !currentWeekBag?.is_confirmed && 
              currentWeekBag && 
              (currentWeekBag.box_size === 'full_farm_bag' || currentWeekBag.box_size === 'protein-pack') && (
@@ -871,6 +873,7 @@ function MyBag() {
           boxSize={currentWeekBag.box_size}
           weeklyBagId={currentWeekBag.id}
           weekStartDate={currentWeekBag.week_start_date}
+          cutoffTime={currentWeekBag.cutoff_time}
           currentProtein={currentWeekBag.user_full_farm_bag_protein}
           currentCarb={currentWeekBag.user_full_farm_bag_carb}
           currentProteinSelections={currentWeekBag.user_protein_selections}
