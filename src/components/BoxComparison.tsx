@@ -209,7 +209,7 @@ const BoxComparison = () => {
         
         <div className="text-center mt-8">
           <p className="text-muted-foreground">
-            All orders include a $9.00 delivery fee
+            All delivery orders are subject to a $9 fee.
           </p>
         </div>
       </div>
