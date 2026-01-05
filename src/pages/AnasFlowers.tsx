@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -378,10 +379,10 @@ const AnasFlowers = () => {
           
           <div className="text-center">
             <Button variant="outline" size="lg" className="group" asChild>
-              <a href="/gallery">
+              <Link to="/gallery">
                 <Camera className="w-4 h-4 mr-2 transition-transform group-hover:scale-110" />
                 View Full Gallery
-              </a>
+              </Link>
             </Button>
           </div>
         </div>
