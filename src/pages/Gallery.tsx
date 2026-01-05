@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -59,10 +60,10 @@ const Gallery = () => {
         <div className="max-w-6xl mx-auto px-4 py-8">
           <div className="flex items-center space-x-4 mb-6">
             <Button variant="ghost" size="sm" asChild>
-              <a href="/anas-flowers">
+              <Link to="/anas-flowers">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Ana's Arrangements
-              </a>
+              </Link>
             </Button>
           </div>
           
@@ -134,10 +135,10 @@ const Gallery = () => {
             Let Ana design a custom arrangement that perfectly captures your vision and brings your special occasion to life.
           </p>
           <Button size="lg" asChild>
-            <a href="/anas-flowers#bouquet-form">
+            <Link to="/anas-flowers#bouquet-form">
               <Flower className="w-4 h-4 mr-2" />
               Request Custom Arrangement
-            </a>
+            </Link>
           </Button>
         </div>
       </div>
