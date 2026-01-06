@@ -45,9 +45,9 @@ export const AdminGallery = () => {
 
   const categories = [
     { value: "wedding", label: "Weddings" },
-    { value: "celebration", label: "Celebrations" },
-    { value: "commercial", label: "Commercial Clients" },
-    { value: "seasonal", label: "Seasonal" },
+    { value: "celebration", label: "Perfect Peonies" },
+    { value: "commercial", label: "Savoy Society" },
+    { value: "seasonal", label: "Host Desk at Husk" },
   ];
 
   const categoryColors: Record<string, string> = {
