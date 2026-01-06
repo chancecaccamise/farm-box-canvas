@@ -44,16 +44,16 @@ export const AdminGallery = () => {
   });
 
   const categories = [
-    { value: "wedding", label: "Wedding" },
-    { value: "celebration", label: "Celebration" },
-    { value: "baby-shower", label: "Baby Shower" },
+    { value: "wedding", label: "Weddings" },
+    { value: "celebration", label: "Celebrations" },
+    { value: "commercial", label: "Commercial Clients" },
     { value: "seasonal", label: "Seasonal" },
   ];
 
-  const categoryColors = {
+  const categoryColors: Record<string, string> = {
     wedding: "bg-rose-100 text-rose-800",
     celebration: "bg-yellow-100 text-yellow-800",
-    "baby-shower": "bg-blue-100 text-blue-800",
+    commercial: "bg-blue-100 text-blue-800",
     seasonal: "bg-green-100 text-green-800",
   };
 
