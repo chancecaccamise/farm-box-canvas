@@ -23,9 +23,9 @@ const Gallery = () => {
   const filters = [
     { value: "all", label: "All Arrangements", icon: <Flower className="w-4 h-4" /> },
     { value: "wedding", label: "Weddings", icon: <Heart className="w-4 h-4" /> },
-    { value: "celebration", label: "Celebrations", icon: <Cake className="w-4 h-4" /> },
-    { value: "commercial", label: "Commercial Clients", icon: <Briefcase className="w-4 h-4" /> },
-    { value: "seasonal", label: "Seasonal", icon: <Leaf className="w-4 h-4" /> }
+    { value: "celebration", label: "Perfect Peonies", icon: <Cake className="w-4 h-4" /> },
+    { value: "commercial", label: "Savoy Society", icon: <Briefcase className="w-4 h-4" /> },
+    { value: "seasonal", label: "Host Desk at Husk", icon: <Leaf className="w-4 h-4" /> }
   ];
 
   useEffect(() => {
