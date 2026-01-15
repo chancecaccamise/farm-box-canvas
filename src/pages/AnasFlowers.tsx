@@ -212,21 +212,21 @@ const AnasFlowers = () => {
       image: weddingBouquet
     },
     {
-      title: "Savoy Society", 
+      title: "Commercial Clients", 
       icon: <Briefcase className="w-6 h-6 text-blue-500" />,
       description: "Professional floral arrangements for businesses and venues",
       features: ["Office arrangements", "Restaurant displays", "Spa & salon flowers", "Weekly subscriptions"],
       image: babyShowerFlowers
     },
     {
-      title: "Perfect Peonies",
+      title: "Celebrations",
       icon: <Cake className="w-6 h-6 text-yellow-500" />,
       description: "Vibrant, joyful arrangements for celebrating another year",
       features: ["Bright color schemes", "Seasonal flowers", "Custom arrangements", "Party centerpieces"],
       image: birthdayFlowers
     },
     {
-      title: "Host Desk at Husk",
+      title: "Seasonal Bouquets",
       icon: <Leaf className="w-6 h-6 text-green-500" />,
       description: "Fresh arrangements that capture the beauty of each season",
       features: ["Spring tulips", "Summer sunflowers", "Fall chrysanthemums", "Winter evergreens"],
