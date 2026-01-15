@@ -99,7 +99,7 @@ serve(async (req) => {
       // First check if order exists
       const { data: existingOrder, error: fetchError } = await supabase
         .from("orders")
-        .select("id, payment_status, status")
+        .select("id, payment_status, status, created_at")
         .eq("stripe_session_id", session.id)
         .maybeSingle();
 
