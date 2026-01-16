@@ -475,6 +475,20 @@ serve(async (req) => {
       const subscription = event.data.object as Stripe.Subscription;
       logStep("Processing subscription deleted", { subscriptionId: subscription.id });
       await handleSubscriptionUpdate(subscription, supabase, 'cancelled');
+    } else if (event.type === "invoice.paid") {
+      const invoice = event.data.object as Stripe.Invoice;
+      logStep("Processing invoice paid", { invoiceId: invoice.id, subscriptionId: invoice.subscription });
+      
+      // Only process subscription invoices (not one-time payments)
+      // Skip the first invoice (billing_reason: 'subscription_create') as it's handled by checkout.session.completed
+      if (invoice.subscription && invoice.billing_reason === 'subscription_cycle') {
+        await handleRecurringPayment(invoice, supabase, stripe);
+      } else {
+        logStep("Skipping invoice - not a recurring subscription cycle", { 
+          hasSubscription: !!invoice.subscription, 
+          billingReason: invoice.billing_reason 
+        });
+      }
     } else {
       logStep("Unhandled event type", { type: event.type });
     }
@@ -578,4 +592,244 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription, supab
   } catch (error) {
     logStep("ERROR in handleSubscriptionUpdate", { error });
   }
+}
+
+// Helper function to handle recurring subscription payments (invoice.paid for subscription_cycle)
+async function handleRecurringPayment(invoice: Stripe.Invoice, supabase: any, stripe: Stripe) {
+  try {
+    const subscriptionId = invoice.subscription as string;
+    logStep("Processing recurring payment", { subscriptionId, invoiceId: invoice.id });
+
+    // Look up the user by stripe_subscription_id
+    const { data: subscription, error: subError } = await supabase
+      .from("user_subscriptions")
+      .select("user_id, subscription_type")
+      .eq("stripe_subscription_id", subscriptionId)
+      .maybeSingle();
+
+    if (subError || !subscription) {
+      logStep("ERROR: Could not find subscription record", { subscriptionId, error: subError });
+      return;
+    }
+
+    const userId = subscription.user_id;
+    logStep("Found user for subscription", { userId, subscriptionId });
+
+    // Get the most recent paid order for this user to copy delivery preferences
+    const { data: lastOrder, error: orderError } = await supabase
+      .from("orders")
+      .select("*")
+      .eq("user_id", userId)
+      .eq("order_type", "subscription")
+      .eq("payment_status", "paid")
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (orderError) {
+      logStep("WARNING: Error fetching last order", { error: orderError });
+    }
+
+    if (!lastOrder) {
+      logStep("WARNING: No previous order found for subscriber", { userId });
+      return;
+    }
+
+    logStep("Found previous order for reference", { 
+      lastOrderId: lastOrder.id, 
+      boxSize: lastOrder.box_size,
+      deliveryDay: lastOrder.delivery_day_preference 
+    });
+
+    // Calculate current week (Monday to Sunday)
+    const now = new Date();
+    const currentWeekStart = new Date(now);
+    // Set to Monday of current week
+    currentWeekStart.setDate(now.getDate() - ((now.getDay() + 6) % 7));
+    currentWeekStart.setHours(0, 0, 0, 0);
+    
+    const currentWeekEnd = new Date(currentWeekStart);
+    currentWeekEnd.setDate(currentWeekStart.getDate() + 6);
+
+    const weekStartStr = currentWeekStart.toISOString().split('T')[0];
+    const weekEndStr = currentWeekEnd.toISOString().split('T')[0];
+
+    logStep("Calculated week dates", { weekStart: weekStartStr, weekEnd: weekEndStr });
+
+    // Check if an order already exists for this user + week + subscription
+    const { data: existingOrder, error: checkError } = await supabase
+      .from("orders")
+      .select("id")
+      .eq("user_id", userId)
+      .eq("week_start_date", weekStartStr)
+      .eq("order_type", "subscription")
+      .maybeSingle();
+
+    if (checkError) {
+      logStep("ERROR: Failed to check for existing order", { error: checkError });
+    }
+
+    if (existingOrder) {
+      logStep("Order already exists for this week, skipping", { existingOrderId: existingOrder.id, weekStart: weekStartStr });
+      return;
+    }
+
+    // Calculate delivery date based on delivery_day_preference
+    const deliveryDayPreference = lastOrder.delivery_day_preference || 'Saturday';
+    const deliveryDate = calculateDeliveryDate(currentWeekStart, deliveryDayPreference);
+    
+    logStep("Calculated delivery date", { deliveryDayPreference, deliveryDate });
+
+    // Find or create weekly bag for current week
+    const { data: existingBag, error: bagFetchError } = await supabase
+      .from("weekly_bags")
+      .select("id, box_size, box_price")
+      .eq("user_id", userId)
+      .eq("week_start_date", weekStartStr)
+      .maybeSingle();
+
+    let weeklyBagId = existingBag?.id;
+    let boxSize = existingBag?.box_size || lastOrder.box_size;
+    let boxPrice = existingBag?.box_price || lastOrder.box_price;
+
+    if (bagFetchError) {
+      logStep("ERROR: Failed to fetch weekly bag", { error: bagFetchError });
+    }
+
+    // Create weekly bag if it doesn't exist
+    if (!weeklyBagId) {
+      const { data: cutoffTime } = await supabase
+        .rpc('get_next_cutoff_time', { input_date: weekStartStr });
+
+      const { data: boxData } = await supabase
+        .from('box_sizes')
+        .select('base_price')
+        .eq('name', lastOrder.box_size)
+        .single();
+
+      const { data: newBag, error: createBagError } = await supabase
+        .from("weekly_bags")
+        .insert({
+          user_id: userId,
+          week_start_date: weekStartStr,
+          week_end_date: weekEndStr,
+          cutoff_time: cutoffTime || new Date(),
+          box_size: lastOrder.box_size,
+          box_price: boxData?.base_price || lastOrder.box_price || 0,
+          user_protein_selections: lastOrder.user_protein_selections,
+          user_full_farm_bag_protein: lastOrder.user_full_farm_bag_protein,
+          user_full_farm_bag_carb: lastOrder.user_full_farm_bag_carb,
+          is_confirmed: true
+        })
+        .select("id, box_size, box_price")
+        .single();
+
+      if (createBagError) {
+        logStep("ERROR: Failed to create weekly bag", { error: createBagError });
+        return;
+      }
+
+      weeklyBagId = newBag.id;
+      boxSize = newBag.box_size;
+      boxPrice = newBag.box_price;
+      logStep("Created new weekly bag", { weeklyBagId, boxSize });
+
+      // Populate bag from template
+      const { error: populateError } = await supabase
+        .rpc('populate_weekly_bag_from_template', {
+          bag_id: weeklyBagId,
+          box_size_name: boxSize,
+          week_start: weekStartStr
+        });
+
+      if (populateError) {
+        logStep("WARNING: Failed to populate weekly bag", { error: populateError });
+      } else {
+        logStep("Populated weekly bag from template", { weeklyBagId });
+      }
+    }
+
+    // Calculate total amount (box price + delivery fee)
+    const deliveryFee = lastOrder.delivery_fee || 9.00;
+    const addonsTotal = lastOrder.addons_total || 0;
+    const totalAmount = (boxPrice || 0) + deliveryFee + addonsTotal;
+
+    // Create new order record for this week
+    const { data: newOrder, error: createOrderError } = await supabase
+      .from("orders")
+      .insert({
+        user_id: userId,
+        weekly_bag_id: weeklyBagId,
+        order_type: "subscription",
+        box_size: boxSize,
+        box_price: boxPrice,
+        delivery_fee: deliveryFee,
+        addons_total: addonsTotal,
+        total_amount: totalAmount,
+        payment_status: "paid",
+        status: "confirmed",
+        week_start_date: weekStartStr,
+        week_end_date: weekEndStr,
+        delivery_date: deliveryDate,
+        delivery_day_preference: deliveryDayPreference,
+        delivery_time_preference: lastOrder.delivery_time_preference,
+        customer_name: lastOrder.customer_name,
+        customer_email: lastOrder.customer_email,
+        customer_phone: lastOrder.customer_phone,
+        shipping_address_street: lastOrder.shipping_address_street,
+        shipping_address_apartment: lastOrder.shipping_address_apartment,
+        shipping_address_city: lastOrder.shipping_address_city,
+        shipping_address_state: lastOrder.shipping_address_state,
+        shipping_address_zip: lastOrder.shipping_address_zip,
+        delivery_notes: lastOrder.delivery_notes,
+        stripe_invoice_id: invoice.id,
+        user_protein_selections: lastOrder.user_protein_selections,
+        user_full_farm_bag_protein: lastOrder.user_full_farm_bag_protein,
+        user_full_farm_bag_carb: lastOrder.user_full_farm_bag_carb
+      })
+      .select("id, order_confirmation_number")
+      .single();
+
+    if (createOrderError) {
+      logStep("ERROR: Failed to create recurring order", { error: createOrderError });
+      return;
+    }
+
+    logStep("Successfully created recurring order", { 
+      orderId: newOrder.id, 
+      confirmationNumber: newOrder.order_confirmation_number,
+      weekStart: weekStartStr,
+      deliveryDate 
+    });
+
+  } catch (error) {
+    logStep("ERROR in handleRecurringPayment", { error });
+  }
+}
+
+// Helper function to calculate delivery date based on preference and week start
+function calculateDeliveryDate(weekStart: Date, deliveryDayPreference: string): string {
+  const dayMap: { [key: string]: number } = {
+    'Sunday': 0,
+    'Monday': 1,
+    'Tuesday': 2,
+    'Wednesday': 3,
+    'Thursday': 4,
+    'Friday': 5,
+    'Saturday': 6
+  };
+
+  const targetDay = dayMap[deliveryDayPreference] ?? 6; // Default to Saturday
+  const deliveryDate = new Date(weekStart);
+  
+  // weekStart is Monday (day 1), so calculate offset to target day
+  // If target is Sunday (0), we need to go to the end of the week (+6 days from Monday)
+  const mondayDay = 1;
+  let daysToAdd = targetDay - mondayDay;
+  if (daysToAdd < 0) {
+    daysToAdd += 7; // Wrap to next week for Sunday
+  }
+  
+  deliveryDate.setDate(weekStart.getDate() + daysToAdd);
+  return deliveryDate.toISOString().split('T')[0];
 }
