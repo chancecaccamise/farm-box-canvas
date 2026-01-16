@@ -137,13 +137,39 @@ serve(async (req) => {
 
           logStep("Calculated delivery date", { original: lastOrder.delivery_day_preference, new: deliveryDayPreference, week: weekStartStr });
 
-          // Get or create weekly bag for this week
+          // Get weekly bag with selections for this week
           const { data: weeklyBag } = await supabase
             .from("weekly_bags")
-            .select("id, box_size, box_price, total_amount")
+            .select("id, box_size, box_price, total_amount, user_full_farm_bag_protein, user_full_farm_bag_carb, user_protein_selections, user_carb_selections")
             .eq("user_id", subscription.user_id)
             .eq("week_start_date", weekStartStr)
             .maybeSingle();
+
+          // Determine selections - use current week's bag, or fallback to last week's bag
+          let proteinSelection = weeklyBag?.user_full_farm_bag_protein;
+          let carbSelection = weeklyBag?.user_full_farm_bag_carb;
+          let proteinSelections = weeklyBag?.user_protein_selections;
+          let carbSelections = weeklyBag?.user_carb_selections;
+
+          // If no selections in this week's bag, get from last week's bag
+          if (!proteinSelection && !proteinSelections) {
+            const { data: lastWeekBag } = await supabase
+              .from("weekly_bags")
+              .select("user_full_farm_bag_protein, user_full_farm_bag_carb, user_protein_selections, user_carb_selections")
+              .eq("user_id", subscription.user_id)
+              .lt("week_start_date", weekStartStr)
+              .order("week_start_date", { ascending: false })
+              .limit(1)
+              .maybeSingle();
+
+            if (lastWeekBag) {
+              logStep("Using last week's selections as fallback", { userId: subscription.user_id });
+              proteinSelection = lastWeekBag.user_full_farm_bag_protein;
+              carbSelection = lastWeekBag.user_full_farm_bag_carb;
+              proteinSelections = lastWeekBag.user_protein_selections;
+              carbSelections = lastWeekBag.user_carb_selections;
+            }
+          }
 
           // Use weekly bag data if available, otherwise use last order data
           const boxSize = weeklyBag?.box_size || lastOrder.box_size || subscription.subscription_type;
@@ -176,6 +202,11 @@ serve(async (req) => {
             delivery_fee: lastOrder.delivery_fee,
             box_price: lastOrder.box_price,
             addons_total: 0, // Reset addons for new week
+            // Customer selections (from current week bag, or fallback to last week)
+            user_full_farm_bag_protein: proteinSelection,
+            user_full_farm_bag_carb: carbSelection,
+            user_protein_selections: proteinSelections,
+            user_carb_selections: carbSelections,
           };
 
           const { data: newOrder, error: insertError } = await supabase
