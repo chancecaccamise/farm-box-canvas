@@ -379,6 +379,26 @@ export const EnhancedOrderManagement = () => {
     return parts.join(', ') || 'Address not provided';
   };
 
+  // Parse delivery preference string (e.g., "Saturday, Jan 18") into a Date
+  const parseDeliveryPreferenceDate = (preference: string | null): Date | null => {
+    if (!preference) return null;
+    
+    // Extract "Jan 18" from "Saturday, Jan 18"
+    const parts = preference.split(', ');
+    if (parts.length < 2) return null;
+    
+    const dateStr = parts[1]; // "Jan 18"
+    const currentYear = new Date().getFullYear();
+    
+    // Parse "Jan 18" into a proper date
+    const parsed = new Date(`${dateStr}, ${currentYear}`);
+    
+    // Handle invalid dates
+    if (isNaN(parsed.getTime())) return null;
+    
+    return parsed;
+  };
+
   const getFilteredOrders = () => {
     return orders.filter(order => {
       const matchesSearch = 
@@ -389,10 +409,10 @@ export const EnhancedOrderManagement = () => {
       const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
       const matchesOrderType = orderTypeFilter === 'all' || order.order_type === orderTypeFilter;
       
-      // Date filtering
-      const orderDate = new Date(order.order_date);
-      const matchesStartDate = !startDate || orderDate >= new Date(startDate);
-      const matchesEndDate = !endDate || orderDate <= new Date(endDate + 'T23:59:59');
+      // Date filtering by delivery_day_preference
+      const deliveryDate = parseDeliveryPreferenceDate(order.delivery_day_preference);
+      const matchesStartDate = !startDate || (deliveryDate && deliveryDate >= new Date(startDate));
+      const matchesEndDate = !endDate || (deliveryDate && deliveryDate <= new Date(endDate + 'T23:59:59'));
       
       return matchesSearch && matchesStatus && matchesOrderType && matchesStartDate && matchesEndDate;
     });
