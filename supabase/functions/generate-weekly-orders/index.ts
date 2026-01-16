@@ -173,7 +173,27 @@ serve(async (req) => {
 
           // Use weekly bag data if available, otherwise use last order data
           const boxSize = weeklyBag?.box_size || lastOrder.box_size || subscription.subscription_type;
-          const totalAmount = weeklyBag?.total_amount || lastOrder.total_amount;
+          
+          // Get box price - use weekly bag's price, or last order's box_price, or default based on box size
+          const getDefaultBoxPrice = (size: string): number => {
+            const prices: Record<string, number> = {
+              'veggie-bag': 25,
+              'full_farm_bag': 50,
+              'protein-pack': 40,
+              'small': 25,
+              'medium': 35,
+              'large': 45
+            };
+            return prices[size] || 50;
+          };
+          
+          const boxPrice = weeklyBag?.box_price || lastOrder.box_price || getDefaultBoxPrice(boxSize);
+          const deliveryFee = lastOrder.delivery_fee || 0;
+          
+          // Calculate total as ONLY box_price + delivery_fee (no add-ons for subscription orders)
+          const totalAmount = boxPrice + deliveryFee;
+
+          logStep("Calculated pricing", { boxPrice, deliveryFee, totalAmount, week: weekStartStr });
 
           // Create the new order with CORRECT column names matching the orders table
           const newOrderData = {
@@ -181,6 +201,7 @@ serve(async (req) => {
             order_type: "subscription",
             box_size: boxSize,
             total_amount: totalAmount,
+            box_price: boxPrice,
             status: "pending",
             payment_status: "pending",
             week_start_date: weekStartStr,
