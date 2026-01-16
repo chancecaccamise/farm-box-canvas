@@ -162,7 +162,7 @@ export const EnhancedOrderManagement = () => {
       if (weeklyBagIds.length > 0) {
         const { data: weeklyBags } = await supabase
           .from('weekly_bags')
-          .select('id, user_full_farm_bag_protein, user_full_farm_bag_carb, user_protein_selections')
+          .select('id, user_full_farm_bag_protein, user_full_farm_bag_carb, user_protein_selections, user_carb_selections')
           .in('id', weeklyBagIds);
 
         // Merge latest selections from weekly_bags into orders
@@ -176,8 +176,48 @@ export const EnhancedOrderManagement = () => {
               order.user_full_farm_bag_protein = wb.user_full_farm_bag_protein;
               order.user_full_farm_bag_carb = wb.user_full_farm_bag_carb;
               order.user_protein_selections = wb.user_protein_selections;
+              order.user_carb_selections = wb.user_carb_selections;
             }
           });
+        }
+      }
+
+      // For orders still missing selections (no weekly_bag_id), fetch from previous orders
+      const ordersNeedingFallback = enhancedOrders.filter(order => 
+        (order.box_size === 'full_farm_bag' || order.box_size === 'protein-pack') &&
+        !order.user_full_farm_bag_protein && 
+        !order.user_protein_selections?.length
+      );
+
+      if (ordersNeedingFallback.length > 0) {
+        // Get unique user IDs that need fallback
+        const userIdsNeedingFallback = [...new Set(ordersNeedingFallback.map(o => o.user_id))];
+        
+        // Fetch the most recent order with selections for each user
+        for (const userId of userIdsNeedingFallback) {
+          const { data: prevOrder } = await supabase
+            .from('orders')
+            .select('user_full_farm_bag_protein, user_full_farm_bag_carb, user_protein_selections, user_carb_selections')
+            .eq('user_id', userId)
+            .or('user_full_farm_bag_protein.not.is.null,user_protein_selections.not.is.null')
+            .order('order_date', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+
+          if (prevOrder) {
+            // Apply fallback selections to all orders for this user that need it
+            enhancedOrders.forEach(order => {
+              if (order.user_id === userId && 
+                  (order.box_size === 'full_farm_bag' || order.box_size === 'protein-pack') &&
+                  !order.user_full_farm_bag_protein && 
+                  !order.user_protein_selections?.length) {
+                order.user_full_farm_bag_protein = prevOrder.user_full_farm_bag_protein;
+                order.user_full_farm_bag_carb = prevOrder.user_full_farm_bag_carb;
+                order.user_protein_selections = prevOrder.user_protein_selections;
+                order.user_carb_selections = prevOrder.user_carb_selections;
+              }
+            });
+          }
         }
       }
       
