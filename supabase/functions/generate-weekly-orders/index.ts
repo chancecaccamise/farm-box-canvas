@@ -220,9 +220,8 @@ serve(async (req) => {
             delivery_instructions: lastOrder.delivery_instructions,
             delivery_day_preference: deliveryDayPreference,
             delivery_time_preference: lastOrder.delivery_time_preference,
-            delivery_fee: lastOrder.delivery_fee,
-            box_price: lastOrder.box_price,
-            addons_total: 0, // Reset addons for new week
+            delivery_fee: deliveryFee,
+            addons_total: 0, // Reset addons for new week - subscriptions don't include add-ons
             // Customer selections (from current week bag, or fallback to last week)
             user_full_farm_bag_protein: proteinSelection,
             user_full_farm_bag_carb: carbSelection,
