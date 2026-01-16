@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Download, Search, Package, Users, Trash2, X, Calendar, RefreshCw, Loader2 } from 'lucide-react';
+import { Download, Search, Package, Users, Trash2, X, Calendar } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { OrderInsights } from './OrderInsights';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -80,36 +80,7 @@ export const EnhancedOrderManagement = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [orderToDelete, setOrderToDelete] = useState<string | null>(null);
   const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
-  const [generatingOrders, setGeneratingOrders] = useState(false);
   const { toast } = useToast();
-
-  const generateWeeklyOrders = async (backfillWeeks: number = 0) => {
-    setGeneratingOrders(true);
-    try {
-      const response = await supabase.functions.invoke('generate-weekly-orders', {
-        body: { backfillWeeks }
-      });
-
-      if (response.error) throw response.error;
-
-      const data = response.data;
-      toast({
-        title: "Weekly Orders Generated",
-        description: `Created: ${data.results.created}, Skipped: ${data.results.skipped}, Errors: ${data.results.errors}`
-      });
-      
-      fetchOrders();
-    } catch (error) {
-      console.error('Error generating weekly orders:', error);
-      toast({
-        title: "Error",
-        description: "Failed to generate weekly orders",
-        variant: "destructive"
-      });
-    } finally {
-      setGeneratingOrders(false);
-    }
-  };
 
   useEffect(() => {
     fetchOrders();
@@ -544,18 +515,6 @@ export const EnhancedOrderManagement = () => {
         <h2 className="text-2xl font-bold">Enhanced Order Management</h2>
         <div className="flex gap-2">
           <OrderInsights />
-          <Button 
-            onClick={() => generateWeeklyOrders(6)} 
-            disabled={generatingOrders}
-            variant="outline"
-          >
-            {generatingOrders ? (
-              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <RefreshCw className="h-4 w-4 mr-2" />
-            )}
-            Generate Weekly Orders
-          </Button>
           <Button onClick={exportOrderData}>
             <Download className="h-4 w-4 mr-2" />
             Export Orders
