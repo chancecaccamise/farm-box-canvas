@@ -174,15 +174,20 @@ export function UpdateSelectionsDialog({
 
       if (updateError) throw updateError;
 
-      // Sync selections to the linked orders table for admin dashboard
-      const { error: orderError } = await supabase
-        .from('orders')
-        .update(orderUpdateData)
-        .eq('weekly_bag_id', weeklyBagId);
+      // Sync selections to this user's order for THIS WEEK ONLY
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (user) {
+        const { error: orderError } = await supabase
+          .from('orders')
+          .update(orderUpdateData)
+          .eq('user_id', user.id)
+          .eq('week_start_date', weekStartDate);
 
-      if (orderError) {
-        console.error('Error syncing to order:', orderError);
-        // Don't throw - weekly_bags is updated, order sync is secondary
+        if (orderError) {
+          console.error('Error syncing to order:', orderError);
+          // Don't throw - weekly_bags is updated, order sync is secondary
+        }
       }
 
       // Call RPC to repopulate bag from template with new selections
