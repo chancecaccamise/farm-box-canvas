@@ -28,19 +28,28 @@ serve(async (req) => {
 
     logStep("Starting weekly order generation", { backfillWeeks });
 
-    // Helper function to get Monday of a given week
-    const getMondayOfWeek = (date: Date): Date => {
+    // Helper function to get Monday of the UPCOMING week for order generation
+    // When run on Sunday, we want NEXT Monday (the upcoming week's orders)
+    // When run on any other day, we want THIS week's Monday
+    const getUpcomingWeekMonday = (date: Date): Date => {
       const d = new Date(date);
       const dayOfWeek = d.getUTCDay();
-      const daysSinceMonday = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-      d.setUTCDate(d.getUTCDate() - daysSinceMonday);
+      
+      if (dayOfWeek === 0) {
+        // Sunday: get NEXT Monday (add 1 day)
+        d.setUTCDate(d.getUTCDate() + 1);
+      } else {
+        // Any other day: get THIS week's Monday
+        const daysSinceMonday = dayOfWeek - 1;
+        d.setUTCDate(d.getUTCDate() - daysSinceMonday);
+      }
       d.setUTCHours(0, 0, 0, 0);
       return d;
     };
 
-    // Calculate CURRENT week dates (Monday to Sunday)
+    // Calculate the target week for order generation
     const now = new Date();
-    const currentWeekStart = getMondayOfWeek(now);
+    const currentWeekStart = getUpcomingWeekMonday(now);
     
     // Generate list of weeks to process (current week + backfill weeks)
     const weeksToProcess: { weekStart: Date; weekEnd: Date }[] = [];
