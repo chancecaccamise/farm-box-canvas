@@ -112,6 +112,26 @@ serve(async (req) => {
           const weekStartStr = weekStart.toISOString().split('T')[0];
           const weekEndStr = weekEnd.toISOString().split('T')[0];
 
+          // Skip weeks before this subscription was created
+          const subscriptionCreatedAt = new Date(subscription.created_at);
+          const subscriptionStartWeekMonday = getUpcomingWeekMonday(subscriptionCreatedAt);
+          
+          if (weekStart < subscriptionStartWeekMonday) {
+            logStep("Skipping week before subscription start", { 
+              userId: subscription.user_id, 
+              week: weekStartStr, 
+              subscriptionCreated: subscription.created_at 
+            });
+            results.skipped++;
+            results.details.push({ 
+              userId: subscription.user_id, 
+              status: "skipped", 
+              reason: "before subscription start", 
+              week: weekStartStr 
+            });
+            continue;
+          }
+
           // Check if order already exists for this user and week
           const { data: existingOrder } = await supabase
             .from("orders")
