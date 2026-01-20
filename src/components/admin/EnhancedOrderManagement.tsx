@@ -677,6 +677,8 @@ export const EnhancedOrderManagement = () => {
         return 'default';
       case 'out_for_delivery':
         return 'default';
+      case 'abandoned':
+        return 'outline';
       default:
         return 'outline';
     }
@@ -689,6 +691,8 @@ export const EnhancedOrderManagement = () => {
       case 'failed':
         return 'destructive';
       case 'refunded':
+        return 'outline';
+      case 'expired':
         return 'outline';
       default:
         return 'secondary';
@@ -770,6 +774,7 @@ export const EnhancedOrderManagement = () => {
               <SelectItem value="pending">Pending</SelectItem>
               <SelectItem value="confirmed">Confirmed</SelectItem>
               <SelectItem value="completed">Completed</SelectItem>
+              <SelectItem value="abandoned">Abandoned</SelectItem>
               <SelectItem value="cancelled">Cancelled</SelectItem>
             </SelectContent>
           </Select>
@@ -844,6 +849,14 @@ export const EnhancedOrderManagement = () => {
           >
             <DollarSign className="h-4 w-4 mr-2" />
             Mark Paid
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => handleBulkUpdateStatus('abandoned')}
+          >
+            <X className="h-4 w-4 mr-2" />
+            Mark Abandoned
           </Button>
           <Button 
             variant="destructive" 
@@ -988,6 +1001,7 @@ export const EnhancedOrderManagement = () => {
                         <SelectItem value="pending">Pending</SelectItem>
                         <SelectItem value="confirmed">Confirmed</SelectItem>
                         <SelectItem value="completed">Completed</SelectItem>
+                        <SelectItem value="abandoned">Abandoned</SelectItem>
                         <SelectItem value="cancelled">Cancelled</SelectItem>
                       </SelectContent>
                     </Select>
@@ -1007,6 +1021,7 @@ export const EnhancedOrderManagement = () => {
                         <SelectItem value="paid">Paid</SelectItem>
                         <SelectItem value="failed">Failed</SelectItem>
                         <SelectItem value="refunded">Refunded</SelectItem>
+                        <SelectItem value="expired">Expired</SelectItem>
                       </SelectContent>
                     </Select>
                   </TableCell>
