@@ -1,4 +1,14 @@
 {
+  "redirects": [
+    { "source": "/farm-bag", "destination": "/how-farm-bags-work", "permanent": true },
+    { "source": "/our-products", "destination": "/", "permanent": true },
+    { "source": "/business-hours", "destination": "/contact-us", "permanent": true },
+    { "source": "/products", "destination": "/", "permanent": true },
+    { "source": "/about", "destination": "/our-mission", "permanent": true },
+    { "source": "/about-us", "destination": "/our-mission", "permanent": true },
+    { "source": "/hours", "destination": "/contact-us", "permanent": true },
+    { "source": "/contact", "destination": "/contact-us", "permanent": true }
+  ],
   "rewrites": [
     {
       "source": "/(.*)",
