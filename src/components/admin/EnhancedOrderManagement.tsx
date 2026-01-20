@@ -272,27 +272,41 @@ export const EnhancedOrderManagement = () => {
   const getCustomerSelections = (order: EnhancedOrder): string => {
     const selections = [];
     
-    if (order.user_full_farm_bag_protein) {
-      const proteinName = productNames[order.user_full_farm_bag_protein] || order.user_full_farm_bag_protein;
-      selections.push(`Protein: ${proteinName}`);
+    // Full Farm Bag: Show single protein and carb selections
+    if (order.box_size === 'full_farm_bag') {
+      if (order.user_full_farm_bag_protein) {
+        const proteinName = productNames[order.user_full_farm_bag_protein] || order.user_full_farm_bag_protein;
+        selections.push(`Protein: ${proteinName}`);
+      }
+      
+      if (order.user_full_farm_bag_carb) {
+        const carbName = productNames[order.user_full_farm_bag_carb] || order.user_full_farm_bag_carb;
+        selections.push(`Carb: ${carbName}`);
+      }
     }
     
-    if (order.user_full_farm_bag_carb) {
-      const carbName = productNames[order.user_full_farm_bag_carb] || order.user_full_farm_bag_carb;
-      selections.push(`Carb: ${carbName}`);
-    }
-    
-    if (order.user_protein_selections && order.user_protein_selections.length > 0) {
-      const proteinNames = order.user_protein_selections.map(id => productNames[id] || id);
-      selections.push(`Proteins: ${proteinNames.join(', ')}`);
-    }
-    
-    if (order.user_carb_selections && order.user_carb_selections.length > 0) {
-      const carbNames = order.user_carb_selections.map(id => productNames[id] || id);
-      selections.push(`Carbs: ${carbNames.join(', ')}`);
+    // Protein Pack: Show 5 protein selections only (no carbs)
+    if (order.box_size === 'protein-pack') {
+      if (order.user_protein_selections && order.user_protein_selections.length > 0) {
+        const proteinNames = order.user_protein_selections.map(id => productNames[id] || id);
+        selections.push(`Proteins: ${proteinNames.join(', ')}`);
+      }
     }
 
-    // If no selections found, indicate the issue
+    // For older orders or other box types, show any available selections as fallback
+    if (selections.length === 0) {
+      if (order.user_protein_selections && order.user_protein_selections.length > 0) {
+        const proteinNames = order.user_protein_selections.map(id => productNames[id] || id);
+        selections.push(`Proteins: ${proteinNames.join(', ')}`);
+      }
+      
+      if (order.user_carb_selections && order.user_carb_selections.length > 0) {
+        const carbNames = order.user_carb_selections.map(id => productNames[id] || id);
+        selections.push(`Carbs: ${carbNames.join(', ')}`);
+      }
+    }
+
+    // Special handling for full_farm_bag with missing selections
     if (selections.length === 0 && order.box_size === 'full_farm_bag') {
       return 'Full Farm Bag (selections not saved)';
     }
