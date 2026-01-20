@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Download, Search, Package, Users, Trash2, X, Calendar } from 'lucide-react';
+import { Download, Search, Package, Users, Trash2, X, Calendar, Check, DollarSign } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { OrderInsights } from './OrderInsights';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -559,6 +559,112 @@ export const EnhancedOrderManagement = () => {
     }
   };
 
+  const handleUpdateOrderStatus = async (orderId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .eq('id', orderId);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Status Updated",
+        description: `Order status changed to ${newStatus}`
+      });
+      
+      fetchOrders();
+    } catch (error) {
+      console.error('Error updating status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update order status",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleUpdatePaymentStatus = async (orderId: string, newPaymentStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ payment_status: newPaymentStatus, updated_at: new Date().toISOString() })
+        .eq('id', orderId);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Payment Status Updated",
+        description: `Payment status changed to ${newPaymentStatus}`
+      });
+      
+      fetchOrders();
+    } catch (error) {
+      console.error('Error updating payment status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update payment status",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleBulkUpdateStatus = async (newStatus: string) => {
+    try {
+      const orderIds = Array.from(selectedOrders);
+      
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .in('id', orderIds);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Status Updated",
+        description: `${orderIds.length} orders marked as ${newStatus}`
+      });
+      
+      setSelectedOrders(new Set());
+      fetchOrders();
+    } catch (error) {
+      console.error('Error bulk updating status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update order statuses",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleBulkUpdatePayment = async (newPaymentStatus: string) => {
+    try {
+      const orderIds = Array.from(selectedOrders);
+      
+      const { error } = await supabase
+        .from('orders')
+        .update({ payment_status: newPaymentStatus, updated_at: new Date().toISOString() })
+        .in('id', orderIds);
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Payment Status Updated",
+        description: `${orderIds.length} orders marked as ${newPaymentStatus}`
+      });
+      
+      setSelectedOrders(new Set());
+      fetchOrders();
+    } catch (error) {
+      console.error('Error bulk updating payment status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update payment statuses",
+        variant: "destructive"
+      });
+    }
+  };
+
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
       case 'completed':
@@ -573,6 +679,19 @@ export const EnhancedOrderManagement = () => {
         return 'default';
       default:
         return 'outline';
+    }
+  };
+
+  const getPaymentBadgeVariant = (paymentStatus: string | null) => {
+    switch (paymentStatus) {
+      case 'paid':
+        return 'default';
+      case 'failed':
+        return 'destructive';
+      case 'refunded':
+        return 'outline';
+      default:
+        return 'secondary';
     }
   };
 
@@ -708,8 +827,24 @@ export const EnhancedOrderManagement = () => {
 
       {/* Bulk Actions */}
       {selectedOrders.size > 0 && (
-        <div className="flex items-center gap-4 p-4 bg-muted rounded-lg">
+        <div className="flex items-center gap-4 p-4 bg-muted rounded-lg flex-wrap">
           <span className="text-sm font-medium">{selectedOrders.size} order(s) selected</span>
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => handleBulkUpdateStatus('confirmed')}
+          >
+            <Check className="h-4 w-4 mr-2" />
+            Mark Confirmed
+          </Button>
+          <Button 
+            size="sm"
+            className="bg-green-600 hover:bg-green-700 text-white"
+            onClick={() => handleBulkUpdatePayment('paid')}
+          >
+            <DollarSign className="h-4 w-4 mr-2" />
+            Mark Paid
+          </Button>
           <Button 
             variant="destructive" 
             size="sm"
@@ -840,16 +975,40 @@ export const EnhancedOrderManagement = () => {
                     </div>
                   </TableCell>
                   <TableCell>
-                    <Badge variant={getStatusBadgeVariant(order.status)}>
-                      {order.status}
-                    </Badge>
+                    <Select 
+                      value={order.status} 
+                      onValueChange={(value) => handleUpdateOrderStatus(order.id, value)}
+                    >
+                      <SelectTrigger className="w-[120px] h-8">
+                        <Badge variant={getStatusBadgeVariant(order.status)} className="pointer-events-none">
+                          {order.status}
+                        </Badge>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="confirmed">Confirmed</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </TableCell>
                   <TableCell>
-                    <Badge 
-                      variant={order.payment_status === 'paid' ? 'default' : 'secondary'}
+                    <Select 
+                      value={order.payment_status || 'pending'} 
+                      onValueChange={(value) => handleUpdatePaymentStatus(order.id, value)}
                     >
-                      {order.payment_status || 'unknown'}
-                    </Badge>
+                      <SelectTrigger className="w-[100px] h-8">
+                        <Badge variant={getPaymentBadgeVariant(order.payment_status)} className="pointer-events-none">
+                          {order.payment_status || 'pending'}
+                        </Badge>
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="paid">Paid</SelectItem>
+                        <SelectItem value="failed">Failed</SelectItem>
+                        <SelectItem value="refunded">Refunded</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </TableCell>
                   <TableCell>
                     <Button
