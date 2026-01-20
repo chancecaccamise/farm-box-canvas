@@ -100,11 +100,60 @@ serve(async (req) => {
           .limit(1)
           .maybeSingle();
 
+        // If no previous order, fetch fallback data from delivery_addresses and profiles
+        let orderSourceData = lastOrder;
+        
         if (!lastOrder) {
-          logStep("No previous order found, skipping", { userId: subscription.user_id });
-          results.skipped++;
-          results.details.push({ userId: subscription.user_id, status: "skipped", reason: "no previous order" });
-          continue;
+          logStep("No previous order found, fetching fallback data", { userId: subscription.user_id });
+          
+          // Get delivery address
+          const { data: deliveryAddress } = await supabase
+            .from("delivery_addresses")
+            .select("*")
+            .eq("user_id", subscription.user_id)
+            .eq("is_primary", true)
+            .maybeSingle();
+          
+          if (!deliveryAddress) {
+            logStep("No delivery address found, skipping", { userId: subscription.user_id });
+            results.skipped++;
+            results.details.push({ userId: subscription.user_id, status: "skipped", reason: "no delivery address" });
+            continue;
+          }
+          
+          // Get profile
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("first_name, last_name, phone")
+            .eq("user_id", subscription.user_id)
+            .maybeSingle();
+          
+          // Get user email from auth
+          const { data: userData } = await supabase.auth.admin.getUserById(subscription.user_id);
+          const userEmail = userData?.user?.email || null;
+          
+          // Create synthetic order source data from delivery address and profile
+          orderSourceData = {
+            customer_name: `${profile?.first_name || ''} ${profile?.last_name || ''}`.trim() || null,
+            customer_email: userEmail,
+            customer_phone: profile?.phone || null,
+            shipping_address_street: deliveryAddress.street_address,
+            shipping_address_apartment: deliveryAddress.apartment,
+            shipping_address_city: deliveryAddress.city,
+            shipping_address_state: deliveryAddress.state,
+            shipping_address_zip: deliveryAddress.zip_code,
+            delivery_instructions: deliveryAddress.delivery_instructions,
+            delivery_day_preference: "Saturday", // Default to Saturday
+            delivery_time_preference: null,
+            delivery_fee: 9, // Default delivery fee
+            box_size: subscription.subscription_type,
+            box_price: null, // Will be calculated below
+          };
+          
+          logStep("Using fallback data from delivery_addresses and profiles", { 
+            userId: subscription.user_id,
+            address: deliveryAddress.city
+          });
         }
 
         // Process each week
@@ -148,7 +197,7 @@ serve(async (req) => {
           }
 
           // Calculate the new delivery date based on the day preference
-          let deliveryDayPreference = lastOrder.delivery_day_preference || "Saturday";
+          let deliveryDayPreference = orderSourceData.delivery_day_preference || "Saturday";
           const dayName = deliveryDayPreference.split(",")[0].trim();
           
           const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -164,7 +213,7 @@ serve(async (req) => {
             deliveryDayPreference = `${dayName}, ${monthNames[deliveryDate.getUTCMonth()]} ${deliveryDate.getUTCDate()}`;
           }
 
-          logStep("Calculated delivery date", { original: lastOrder.delivery_day_preference, new: deliveryDayPreference, week: weekStartStr });
+          logStep("Calculated delivery date", { original: orderSourceData.delivery_day_preference, new: deliveryDayPreference, week: weekStartStr });
 
           // Get weekly bag with selections for this week
           const { data: weeklyBag } = await supabase
@@ -200,10 +249,10 @@ serve(async (req) => {
             }
           }
 
-          // Use weekly bag data if available, otherwise use last order data
-          const boxSize = weeklyBag?.box_size || lastOrder.box_size || subscription.subscription_type;
+          // Use weekly bag data if available, otherwise use orderSourceData
+          const boxSize = weeklyBag?.box_size || orderSourceData.box_size || subscription.subscription_type;
           
-          // Get box price - use weekly bag's price, or last order's box_price, or default based on box size
+          // Get box price - use weekly bag's price, or orderSourceData's box_price, or default based on box size
           const getDefaultBoxPrice = (size: string): number => {
             const prices: Record<string, number> = {
               'veggie-bag': 25,
@@ -216,8 +265,8 @@ serve(async (req) => {
             return prices[size] || 50;
           };
           
-          const boxPrice = weeklyBag?.box_price || lastOrder.box_price || getDefaultBoxPrice(boxSize);
-          const deliveryFee = lastOrder.delivery_fee || 0;
+          const boxPrice = weeklyBag?.box_price || orderSourceData.box_price || getDefaultBoxPrice(boxSize);
+          const deliveryFee = orderSourceData.delivery_fee || 9;
           
           // Calculate total as ONLY box_price + delivery_fee (no add-ons for subscription orders)
           const totalAmount = boxPrice + deliveryFee;
@@ -238,17 +287,17 @@ serve(async (req) => {
             weekly_bag_id: weeklyBag?.id || null,
             has_active_subscription: true,
             // Copy delivery info using correct column names
-            customer_name: lastOrder.customer_name,
-            customer_email: lastOrder.customer_email,
-            customer_phone: lastOrder.customer_phone,
-            shipping_address_street: lastOrder.shipping_address_street,
-            shipping_address_apartment: lastOrder.shipping_address_apartment,
-            shipping_address_city: lastOrder.shipping_address_city,
-            shipping_address_state: lastOrder.shipping_address_state,
-            shipping_address_zip: lastOrder.shipping_address_zip,
-            delivery_instructions: lastOrder.delivery_instructions,
+            customer_name: orderSourceData.customer_name,
+            customer_email: orderSourceData.customer_email,
+            customer_phone: orderSourceData.customer_phone,
+            shipping_address_street: orderSourceData.shipping_address_street,
+            shipping_address_apartment: orderSourceData.shipping_address_apartment,
+            shipping_address_city: orderSourceData.shipping_address_city,
+            shipping_address_state: orderSourceData.shipping_address_state,
+            shipping_address_zip: orderSourceData.shipping_address_zip,
+            delivery_instructions: orderSourceData.delivery_instructions,
             delivery_day_preference: deliveryDayPreference,
-            delivery_time_preference: lastOrder.delivery_time_preference,
+            delivery_time_preference: orderSourceData.delivery_time_preference,
             delivery_fee: deliveryFee,
             addons_total: 0, // Reset addons for new week - subscriptions don't include add-ons
             // Customer selections (from current week bag, or fallback to last week)
