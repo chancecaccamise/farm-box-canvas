@@ -705,7 +705,6 @@ function MyBag() {
             {/* Update Selections Button - Only for subscribers with customizable boxes, before cutoff */}
             {hasActiveSubscription && 
              !isPastCutoff && 
-             !currentWeekBag?.is_confirmed && 
              currentWeekBag && 
              (currentWeekBag.box_size === 'full_farm_bag' || currentWeekBag.box_size === 'protein-pack') && (
               <Button 
