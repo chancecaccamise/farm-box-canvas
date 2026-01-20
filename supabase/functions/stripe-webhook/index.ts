@@ -489,6 +489,42 @@ serve(async (req) => {
           billingReason: invoice.billing_reason 
         });
       }
+    } else if (event.type === "checkout.session.expired") {
+      const session = event.data.object as Stripe.Checkout.Session;
+      logStep("Processing expired checkout session", { sessionId: session.id });
+      
+      // Find the order with this session ID and mark as abandoned
+      const { data: order, error: fetchError } = await supabase
+        .from("orders")
+        .select("id, status, payment_status")
+        .eq("stripe_session_id", session.id)
+        .maybeSingle();
+      
+      if (fetchError) {
+        logStep("ERROR: Failed to fetch order for expired session", { error: fetchError });
+      } else if (order) {
+        // Only update if still pending (don't overwrite if somehow paid)
+        if (order.payment_status === 'pending') {
+          const { error: updateError } = await supabase
+            .from("orders")
+            .update({
+              status: 'abandoned',
+              payment_status: 'expired',
+              updated_at: new Date().toISOString()
+            })
+            .eq("id", order.id);
+          
+          if (updateError) {
+            logStep("ERROR: Failed to mark order as abandoned", { error: updateError });
+          } else {
+            logStep("Order marked as abandoned", { orderId: order.id, sessionId: session.id });
+          }
+        } else {
+          logStep("Order already processed, skipping", { orderId: order.id, currentStatus: order.payment_status });
+        }
+      } else {
+        logStep("No order found for expired session", { sessionId: session.id });
+      }
     } else {
       logStep("Unhandled event type", { type: event.type });
     }
