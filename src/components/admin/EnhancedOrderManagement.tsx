@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Download, Search, Package, Users, Trash2, X, Calendar, Check, DollarSign } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { OrderInsights } from './OrderInsights';
+import { AdminSubscriberOrderRecovery } from './AdminSubscriberOrderRecovery';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
   AlertDialog,
@@ -707,7 +708,8 @@ export const EnhancedOrderManagement = () => {
 
   return (
     <div className="space-y-6">
-      {/* Header with insights and export */}
+      {/* Subscriber Order Recovery - shows alert for subscribers missing orders */}
+      <AdminSubscriberOrderRecovery />
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold">Enhanced Order Management</h2>
         <div className="flex gap-2">
