@@ -15,6 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { CheckoutStatusCard } from './CheckoutStatusCard';
 
 type DeliveryMethodSetting = {
   id: string;
@@ -165,6 +166,8 @@ export const AdminDeliveryDays = () => {
 
   return (
     <>
+      <CheckoutStatusCard />
+      
       <Card>
         <CardHeader>
           <CardTitle>Delivery Method & Day Management</CardTitle>

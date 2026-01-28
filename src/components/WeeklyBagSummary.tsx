@@ -4,7 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { ShoppingCart, Lock, Calendar, Tag, Truck, Clock, CheckCircle } from "lucide-react";
+import { ShoppingCart, Lock, Calendar, Tag, Truck, Clock, CheckCircle, PauseCircle } from "lucide-react";
+import { useCheckoutStatus } from "@/hooks/useCheckoutStatus";
 
 interface WeeklyBagSummaryProps {
   weeklyBag: {
@@ -42,6 +43,7 @@ export function WeeklyBagSummary({
 }: WeeklyBagSummaryProps) {
   const [promoCode, setPromoCode] = useState("");
   const [promoApplied, setPromoApplied] = useState(false);
+  const { isCheckoutPaused, pauseMessage } = useCheckoutStatus();
 
   const boxPrice = weeklyBag?.box_price || 0;
   const addonsTotal = weeklyBag?.addons_total || 0;
@@ -304,7 +306,18 @@ export function WeeklyBagSummary({
           )}
 
           {/* Checkout Button */}
-          {weeklyBag?.is_confirmed ? (
+          {isCheckoutPaused ? (
+            <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg text-center">
+              <div className="flex items-center justify-center gap-2 text-amber-700 mb-2">
+                <PauseCircle className="h-5 w-5" />
+                <span className="font-medium">We're Taking a Break</span>
+              </div>
+              <p className="text-sm text-amber-800 mb-3">{pauseMessage}</p>
+              <Button className="w-full" disabled variant="outline">
+                Checkout Unavailable
+              </Button>
+            </div>
+          ) : weeklyBag?.is_confirmed ? (
             <Button className="w-full" disabled variant="default">
               <CheckCircle className="h-4 w-4 mr-2" />
               Bag Confirmed

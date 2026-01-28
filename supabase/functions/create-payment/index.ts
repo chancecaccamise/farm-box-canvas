@@ -72,6 +72,38 @@ serve(async (req) => {
   try {
     logStep("Function started");
 
+    // Use service role key for database operations (needed early for checkout pause check)
+    const supabaseServiceClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } }
+    );
+
+    // Check if checkout is paused
+    const { data: siteSettings, error: settingsError } = await supabaseServiceClient
+      .from('site_settings')
+      .select('checkout_paused, checkout_paused_message')
+      .limit(1)
+      .maybeSingle();
+
+    if (settingsError) {
+      logStep("Warning: Could not fetch site settings", { error: settingsError.message });
+    }
+
+    if (siteSettings?.checkout_paused) {
+      logStep("Checkout is paused - rejecting request");
+      return new Response(
+        JSON.stringify({ 
+          error: "Checkout is currently paused",
+          message: siteSettings.checkout_paused_message || "We're taking a short break! Check back soon."
+        }),
+        { 
+          status: 503,
+          headers: { ...corsHeaders, "Content-Type": "application/json" }
+        }
+      );
+    }
+
     // Get all Stripe Price IDs for the new box types
     const priceVeggieBagWeekly = Deno.env.get("STRIPE_PRICE_ID_VEGGIE_BAG_WEEKLY");
     const priceFullFarmBagWeekly = Deno.env.get("STRIPE_PRICE_ID_FULL_FARM_BAG_WEEKLY");
@@ -90,13 +122,6 @@ serve(async (req) => {
     if (!stripeKey) throw new Error("STRIPE_SECRET_KEY is not set");
     
     logStep("Stripe key loaded");
-
-    // Use service role key for database operations
-    const supabaseServiceClient = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
-      { auth: { persistSession: false } }
-    );
 
     // Use anon key for user authentication
     const supabaseClient = createClient(

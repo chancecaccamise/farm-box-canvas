@@ -4,6 +4,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useOrderCutoff } from "@/hooks/useOrderCutoff";
+import { useCheckoutStatus } from "@/hooks/useCheckoutStatus";
 import { WeeklyBagSummary } from "@/components/WeeklyBagSummary";
 import { BagItemCard } from "@/components/BagItemCard";
 import { ReadOnlyBagItem } from "@/components/ReadOnlyBagItem";
@@ -11,6 +12,7 @@ import { AddOnsGrid } from "@/components/AddOnsGrid";
 import { StartFarmBoxJourney } from "@/components/StartFarmBoxJourney";
 import { UnconfirmBagDialog } from "@/components/UnconfirmBagDialog";
 import { UpdateSelectionsDialog } from "@/components/UpdateSelectionsDialog";
+import { CheckoutPausedBanner } from "@/components/CheckoutPausedBanner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
@@ -52,7 +54,7 @@ function MyBag() {
   const { user } = useAuth();
   const { toast } = useToast();
   const { isPastCutoff } = useOrderCutoff();
-  
+  const { isCheckoutPaused, pauseMessage } = useCheckoutStatus();
   const [currentWeekBag, setCurrentWeekBag] = useState<WeeklyBag | null>(null);
   const [bagItems, setBagItems] = useState<WeeklyBagItem[]>([]);
   const [loading, setLoading] = useState(true);

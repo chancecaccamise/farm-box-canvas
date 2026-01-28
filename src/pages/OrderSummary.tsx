@@ -10,7 +10,9 @@ import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { useCheckout } from "@/contexts/CheckoutContext";
 import { useOrderCutoff } from "@/hooks/useOrderCutoff";
+import { useCheckoutStatus } from "@/hooks/useCheckoutStatus";
 import { CutoffBanner } from "@/components/CutoffBanner";
+import { CheckoutPausedBanner } from "@/components/CheckoutPausedBanner";
 
 const OrderSummary = () => {
   const navigate = useNavigate();
@@ -24,6 +26,7 @@ const OrderSummary = () => {
   const [selectedCarb, setSelectedCarb] = useState<any>(null);
   const { checkoutState } = useCheckout();
   const { isPastCutoff, nextWeekStart } = useOrderCutoff();
+  const { isCheckoutPaused, pauseMessage } = useCheckoutStatus();
 
   const getBoxDisplayName = (boxName: string) => {
     const nameMap: Record<string, string> = {
@@ -627,29 +630,38 @@ const OrderSummary = () => {
                   </div>
                 </div>
 
-                <Button 
-                  onClick={handleCheckout}
-                  variant="hero"
-                  size="lg"
-                  className="w-full"
-                  disabled={isCheckingOut || totalAmount <= 0}
-                >
-                  {isCheckingOut 
-                    ? "Creating Checkout..." 
-                    : hasActiveSubscription 
-                      ? `Checkout Add-ons - $${totalAmount.toFixed(2)}`
-                      : `Checkout - $${totalAmount.toFixed(2)}`
-                  }
-                </Button>
+                {isCheckoutPaused ? (
+                  <CheckoutPausedBanner 
+                    message={pauseMessage}
+                    buttonText="Checkout Currently Unavailable"
+                  />
+                ) : (
+                  <>
+                    <Button 
+                      onClick={handleCheckout}
+                      variant="hero"
+                      size="lg"
+                      className="w-full"
+                      disabled={isCheckingOut || totalAmount <= 0}
+                    >
+                      {isCheckingOut 
+                        ? "Creating Checkout..." 
+                        : hasActiveSubscription 
+                          ? `Checkout Add-ons - $${totalAmount.toFixed(2)}`
+                          : `Checkout - $${totalAmount.toFixed(2)}`
+                      }
+                    </Button>
 
-                <div className="text-center">
-                  <p className="text-xs text-muted-foreground">
-                    {hasActiveSubscription 
-                      ? "You'll be redirected to secure checkout to purchase your add-ons."
-                      : "You'll be redirected to secure checkout to complete your order."
-                    }
-                  </p>
-                </div>
+                    <div className="text-center">
+                      <p className="text-xs text-muted-foreground">
+                        {hasActiveSubscription 
+                          ? "You'll be redirected to secure checkout to purchase your add-ons."
+                          : "You'll be redirected to secure checkout to complete your order."
+                        }
+                      </p>
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           </div>
