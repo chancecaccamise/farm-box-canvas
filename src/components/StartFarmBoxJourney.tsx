@@ -1,9 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowRight, Leaf, Truck, Heart } from "lucide-react";
+import { ArrowRight, Leaf, Truck, Heart, PauseCircle } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useCheckoutStatus } from "@/hooks/useCheckoutStatus";
 
 export function StartFarmBoxJourney() {
+  const { isCheckoutPaused, pauseMessage } = useCheckoutStatus();
+
   return (
     <div className="max-w-4xl mx-auto space-y-8">
       {/* Header */}
@@ -72,22 +75,39 @@ export function StartFarmBoxJourney() {
             <h2 className="text-2xl font-bold text-gray-900">
               Ready to Get Started?
             </h2>
-            <p className="text-gray-600 max-w-md mx-auto">
-              Choose your box size and customize your weekly selection.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button asChild size="lg" className="bg-green-600 hover:bg-green-700">
-                <Link to="/box-selection">
-                  Choose Your Box Size
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Link>
-              </Button>
-              <Button variant="outline" asChild size="lg">
-                <Link to="/how-farm-bags-work">
-                  Learn How It Works
-                </Link>
-              </Button>
-            </div>
+            {isCheckoutPaused ? (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-6 max-w-md mx-auto">
+                <div className="flex items-center justify-center gap-2 text-amber-700 mb-3">
+                  <PauseCircle className="w-6 h-6" />
+                  <span className="font-semibold text-lg">We're Taking a Short Break</span>
+                </div>
+                <p className="text-amber-800 mb-4">
+                  {pauseMessage}
+                </p>
+                <Button disabled className="w-full bg-amber-200 text-amber-800 cursor-not-allowed">
+                  Checkout Currently Unavailable
+                </Button>
+              </div>
+            ) : (
+              <>
+                <p className="text-gray-600 max-w-md mx-auto">
+                  Choose your box size and customize your weekly selection.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button asChild size="lg" className="bg-green-600 hover:bg-green-700">
+                    <Link to="/box-selection">
+                      Choose Your Box Size
+                      <ArrowRight className="w-4 h-4 ml-2" />
+                    </Link>
+                  </Button>
+                  <Button variant="outline" asChild size="lg">
+                    <Link to="/how-farm-bags-work">
+                      Learn How It Works
+                    </Link>
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </CardContent>
       </Card>

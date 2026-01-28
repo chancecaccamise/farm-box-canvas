@@ -1033,6 +1033,30 @@ export type Database = {
         }
         Relationships: []
       }
+      site_settings: {
+        Row: {
+          checkout_paused: boolean
+          checkout_paused_message: string | null
+          id: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          checkout_paused?: boolean
+          checkout_paused_message?: string | null
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          checkout_paused?: boolean
+          checkout_paused_message?: string | null
+          id?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       stop_assignments: {
         Row: {
           created_at: string | null
