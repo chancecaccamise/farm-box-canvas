@@ -127,8 +127,19 @@ function MyBag() {
       setHasActiveSubscription(subscriptionsData && subscriptionsData.length > 0);
 
       // Check if user has already paid for this week
-      const currentWeekStart = new Date();
-      currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay() + 1); // Monday
+      // Get current time in EST and determine week start
+      const now = new Date();
+      const estNow = new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" }));
+      const dayOfWeek = estNow.getDay(); // 0 = Sunday
+      const currentWeekStart = new Date(estNow);
+      
+      // Sunday = use next Monday; other days = use this week's Monday
+      if (dayOfWeek === 0) {
+        currentWeekStart.setDate(estNow.getDate() + 1);
+      } else {
+        currentWeekStart.setDate(estNow.getDate() - dayOfWeek + 1);
+      }
+      currentWeekStart.setHours(0, 0, 0, 0);
       const currentWeekStartString = currentWeekStart.toISOString().split('T')[0];
 
       const { data: paidOrders, error: orderError } = await supabase

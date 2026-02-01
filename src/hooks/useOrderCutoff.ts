@@ -47,9 +47,10 @@ export function useOrderCutoff(): CutoffStatus {
       cutoffDate.setHours(12, 0, 0, 0);
       
       // Check if past cutoff - lockout window is Friday noon to Saturday 11:59 PM EST
-      // Users can edit again starting Sunday 12:00 AM EST
+      // Users can edit again starting Sunday 12:00 AM EST (they'll see next week's bag)
       const isFridayAfterNoon = currentDay === 5 && nowInEST.getHours() >= 12;
       const isSaturday = currentDay === 6;
+      // Sunday (0) is NOT locked - users see next week's bag which is editable
       const isPast = isFridayAfterNoon || isSaturday;
       
       // If past Friday noon, the cutoff was this Friday

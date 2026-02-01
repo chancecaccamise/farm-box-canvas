@@ -1,75 +1,19 @@
 
 # Plan: Fix Sunday Bag Editing for February Deliveries
 
-## Summary
+## ✅ COMPLETED
 
-Update the week calculation logic so that on Sundays, users see and edit the **upcoming week's bag** (for their Saturday delivery), not the previous week's locked bag.
+All changes have been implemented:
 
-**Immediate Impact:** Stacey Wells and all other subscribers will be able to edit their bags for the February 7th delivery starting today (Sunday, February 1st).
+### Database Changes
+- Updated `get_or_create_current_week_bag` function with Sunday detection
+- Updated `get_or_create_current_week_bag_with_size` function with Sunday detection
+- Both now use EST timezone and shift to next week's Monday when called on Sunday
 
----
-
-## Changes Overview
-
-### 1. Database Function: `get_or_create_current_week_bag_with_size`
-
-Update to detect Sunday (in EST) and return the next week's bag:
-
-```sql
--- Current (broken on Sundays):
-current_week_start := DATE_TRUNC('week', CURRENT_DATE);
-
--- Fixed:
-today_in_est := (CURRENT_TIMESTAMP AT TIME ZONE 'America/New_York')::DATE;
-day_of_week := EXTRACT(DOW FROM today_in_est);
-
-IF day_of_week = 0 THEN  -- Sunday
-  current_week_start := DATE_TRUNC('week', today_in_est) + INTERVAL '7 days';
-ELSE
-  current_week_start := DATE_TRUNC('week', today_in_est);
-END IF;
-```
-
-### 2. Database Function: `get_or_create_current_week_bag`
-
-Apply the same Sunday detection logic to this simpler variant function.
-
-### 3. Frontend: `MyBag.tsx` (lines 130-132)
-
-Fix JavaScript week calculation to match database logic:
-
-```typescript
-// Current (broken):
-currentWeekStart.setDate(now.getDate() - now.getDay() + 1);
-
-// Fixed:
-const dayOfWeek = now.getDay();
-if (dayOfWeek === 0) {
-  // Sunday: Use next Monday
-  currentWeekStart.setDate(now.getDate() + 1);
-} else {
-  currentWeekStart.setDate(now.getDate() - dayOfWeek + 1);
-}
-```
-
-### 4. Frontend: `BagHistory.tsx` (lines 50-51)
-
-Apply same Sunday fix so history queries use correct week boundary.
-
-### 5. Frontend: `useOrderCutoff.ts`
-
-Update the lockout logic to properly handle Sunday as the start of the new edit window (not part of lockout).
-
----
-
-## Files to Modify
-
-| File | Change |
-|------|--------|
-| New SQL migration | Update both `get_or_create_current_week_bag` and `get_or_create_current_week_bag_with_size` functions |
-| `src/pages/MyBag.tsx` | Fix week start calculation for Sunday |
-| `src/components/BagHistory.tsx` | Fix week start calculation for Sunday |
-| `src/hooks/useOrderCutoff.ts` | Ensure Sunday is correctly identified as unlocked |
+### Frontend Changes
+- `src/pages/MyBag.tsx` (lines 129-143) - Fixed week start calculation
+- `src/components/BagHistory.tsx` (lines 48-61) - Fixed week start calculation  
+- `src/hooks/useOrderCutoff.ts` (lines 49-54) - Clarified Sunday is unlocked
 
 ---
 
@@ -88,7 +32,7 @@ Update the lockout logic to properly handle Sunday as the start of the new edit 
 
 ## Verification
 
-After implementation:
-1. Stacey Wells can visit My Bag and edit her selections for her Feb 7th delivery
-2. All subscribers see the correct week's bag
-3. Cutoff banner shows "Friday, February 6 at 12:00 PM EST"
+Stacey Wells and all subscribers can now:
+1. Visit My Bag on Sunday and see the upcoming week's bag (Feb 2-8)
+2. Edit their selections for their Saturday Feb 7th delivery
+3. See cutoff banner showing "Friday, February 6 at 12:00 PM EST"
