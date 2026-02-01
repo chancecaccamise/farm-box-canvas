@@ -47,8 +47,19 @@ export function BagHistory({ onReorderBag, isCurrentWeekLocked }: BagHistoryProp
 
   const fetchBagHistory = async () => {
     try {
-      const currentWeekStart = new Date();
-      currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay() + 1); // Monday
+      // Get current time in EST and determine week start
+      const now = new Date();
+      const estNow = new Date(now.toLocaleString("en-US", { timeZone: "America/New_York" }));
+      const dayOfWeek = estNow.getDay(); // 0 = Sunday
+      const currentWeekStart = new Date(estNow);
+      
+      // Sunday = use next Monday; other days = use this week's Monday
+      if (dayOfWeek === 0) {
+        currentWeekStart.setDate(estNow.getDate() + 1);
+      } else {
+        currentWeekStart.setDate(estNow.getDate() - dayOfWeek + 1);
+      }
+      currentWeekStart.setHours(0, 0, 0, 0);
 
       const { data, error } = await supabase
         .from("weekly_bags")
